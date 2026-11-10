@@ -40,3 +40,15 @@ His idea ("some kids prefer art, some are more logical, some prefer discussion")
 Evidence base for this shape: readiness-tiered tasks (§1), choice of 3 (§3), multimodal input for all (§2, §4), L1 support kept for the weakest group only where they need it to act (the lesson skill's rule).
 
 Limit, said plainly: no study here tested exactly this design with Hebrew-speaking 5th graders; it is assembled from the general findings above.
+
+## 7. Showing the levels without stigma
+Kids notice where they are put, and a visible "low" label lowers how they see themselves:
+- **Children notice:** the Irish *Children's School Lives* study (about 4,000 primary pupils, 2023) found children "acutely aware" of how smart they are compared with others, and preferring mixed groups that avoid negative labels. https://www.irishtimes.com/ireland/education/2023/06/20/primary-schoolchildren-acutely-aware-of-their-level-of-smartness-compared-to-others-study
+- **The label sticks:** the in-class ability group a child was in at age 7 predicts whether he later thinks he is good at maths, even with his actual skill held equal (Campbell, LSE CASE brief, 2021). https://researchonline.lse.ac.uk/id/eprint/121473
+- **It widens the gap:** over 9,000 pupils followed two years; top-set confidence rose, bottom-set confidence fell (Francis et al., UCL / Queen's Belfast / Lancaster, 2020). https://newsroom.taylorandfrancisgroup.com/classes-set-by-ability-are-hitting-childrens-self-confidence-study-finds/
+- **Colour-coded difficulty hurts too:** a small school study found colour-coded tiered tasks lowered the confidence of kids on the "lower" colour and recommends flexible scaffolds instead; colour codes also fail the roughly 1 in 12 boys with colour-vision deficiency. https://www.disdubai.ae/wp-content/uploads/sites/4/2025/08/P59-Amy-Beck-Safa-Community.pdf ; https://www.teachertoolkit.co.uk/?p=93979
+- **What practitioners converge on:** neutral names, the same enthusiasm for every group, never "the easy group", and tiers that are fluid so a kid can move up. https://www.cultofpedagogy.com/edutips/edutip6/
+
+**What we do:** three **trails** with place names, River, Forest and Mountain, never "easy / medium / hard" anywhere a kid can see. Colour is never the only cue (each trail has its own picture and name, so red/green colour-blind kids are fine). Each trail ends with **"Finished? Try the next trail!"**, so the levels read as a path everyone walks, not a sorting. Each kid gets only his own trail's link, and the teacher praises effort, not the trail.
+
+Limit: the colour-and-name evidence is practitioner and small-study level; the self-concept findings come from maths grouping, applied here by analogy.

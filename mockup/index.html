@@ -127,20 +127,63 @@ svg{display:block}
 ol.q{font-size:18px;line-height:1.5;max-width:1100px}
 ol.q li{margin-bottom:12px}
 ol.q .mine{color:var(--green-d);font-weight:700}
+
+/* Trails: his own trail is lifted and labelled; the others stay full colour so nothing looks "lesser". */
+.you{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:999px;padding:2px 12px;font-size:14px;font-weight:800;white-space:nowrap}
+.B .card{position:relative}
+.A .pin .go{color:var(--fg);text-align:center}
+.B .card .go{background:#fff;color:var(--d)}
+.A .pin.mine{transform:scale(1.08);box-shadow:0 0 0 6px #ffffffaa,0 8px 0 #2b234033,0 12px 24px #2b234055}
+.B .card.mine{outline:6px solid #fff;outline-offset:-2px;transform:translateY(-6px)}
+.B .card{color:var(--fg)}
+.C .quest.mine{border-color:var(--yellow);background:#ffffff26}
+.A .bar .words,.B .words{display:flex;flex-wrap:wrap;gap:6px}
+.A .bar .words span{background:#ffffffe6;border-radius:12px;padding:3px 10px;font-size:15px;font-weight:700}
+.A .p1{left:5%;top:52%}.A .p2{left:38%;top:14%}.A .p3{right:5%;top:30%}
+.labels{display:flex;gap:40px;flex-wrap:wrap}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chips span{display:inline-flex;align-items:center;gap:8px;color:#fff;border-radius:999px;padding:6px 16px;font-size:20px;font-weight:800}
+.In{height:100%;display:flex;flex-direction:column;gap:18px;padding:22px 28px;background:linear-gradient(180deg,#fff4c7 0,#fff7e8 70%)}
+.In .ihead{display:flex;align-items:center;gap:14px}
+.In .ihead b{display:block;font-size:30px}
+.In .ihead .he{font-size:16px;color:var(--muted)}
+.In .dots{margin-left:auto;display:flex;gap:8px}
+.In .dots i{width:18px;height:18px;border-radius:50%;background:#fff;border:3px solid var(--d)}
+.In .dots i.on{background:var(--c)}
+.In .acts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;flex:1}
+.In .act{background:#fff;border:4px solid var(--c);border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 8px 0 var(--d)}
+.In .act b{font-size:26px}
+.In .act .he{font-size:16px;color:var(--muted)}
+.In .fin{background:#fff;border-radius:20px;padding:12px 18px;font-size:22px;font-weight:800;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.In .fin .nx{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:#ff4d5e;color:#fff;border-radius:999px;padding:4px 16px 4px 4px;font-size:18px}
+@container (max-width:600px){
+ .A .bar .words{display:none}
+ .A .pin.mine{transform:none}
+ .A .pin,.A .p1,.A .p2,.A .p3{position:relative;left:auto;right:auto;top:auto}
+ .A .pins{justify-content:flex-end;padding-bottom:28px}
+ .you{left:auto;right:12px;transform:none}
+ .In{padding:16px}
+ .In .acts{grid-template-columns:1fr;gap:12px}
+ .In .act{flex-direction:row;justify-content:flex-start;padding:8px 14px;gap:12px;box-shadow:0 5px 0 var(--d)}
+ .In .act svg{width:48px;height:48px}
+ .In .act b{font-size:22px}
+ .In .fin{font-size:18px}
+ .In .fin .nx{margin-left:0}
+}
 </style>
 </head>
 <body>
 <header class="top">
  <h1>Nature Words: what a kid sees when he opens his level link</h1>
- <p class="lead">One page, three looks. Each kid gets only his own level's link from Google Classroom, so the page never shows "Level 1/2/3": he just sees his mission and three activities to choose from (draw, solve, say). Shown here: a level-2 kid. Left is a laptop (1366×768 at 70%), right is a 390px phone width. The buttons react on hover/press.</p>
+ <p class="lead">One page, three looks. The three levels are three trails, River, Forest and Mountain; no kid ever sees "easy", "medium" or "hard". Each kid gets only his own trail's link from Google Classroom. Shown here: a kid on the Forest trail. Left is a laptop (1366×768 at 70%), right is a 390px phone width. The buttons react on hover/press.</p>
 </header>
 
 <section class="gc">
  <h2 style="margin:0 0 10px">Step 0, the same for every option: the card he sees in Google Classroom</h2>
  <div class="gccard">
-  <div class="t"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M4 4h16v12H5.2L4 17.2z"/></svg></div><div class="ti">🌍 Nature Quest: open me!</div></div>
+  <div class="t"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M4 4h16v12H5.2L4 17.2z"/></svg></div><div class="ti">🌍 Nature Trails: open me!</div></div>
   <div class="body">Press the picture below to start. Headphones on 🎧<br><span class="he">לחצו על התמונה כדי להתחיל. שימו אוזניות</span>
-   <div class="link"><div class="th"></div><div class="tx"><b>Nature Quest</b><div>vaknin.github.io</div></div></div>
+   <div class="link"><div class="th"></div><div class="tx"><b>Nature Trails</b><div>vaknin.github.io</div></div></div>
    <div style="margin-top:12px;overflow:hidden"><span class="turn">Mark as done</span></div>
   </div>
  </div>
@@ -150,25 +193,15 @@ ol.q .mine{color:var(--green-d);font-weight:700}
 <template id="tA">
 <div class="A">
  <svg class="scene" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-  <rect width="960" height="560" fill="#bfe9ff"/>
-  <circle cx="820" cy="90" r="46" fill="#ffd23f"/>
-  <path d="M120 360 L330 110 L520 360Z" fill="#8a7bd8"/><path d="M290 160 L330 110 L372 162 L350 150 L330 170 L310 150Z" fill="#fff"/>
-  <path d="M430 360 L600 170 L780 360Z" fill="#6f61c4"/>
+  <rect width="960" height="560" fill="#bfe9ff"/><circle cx="820" cy="90" r="46" fill="#ffd23f"/>
+  <path d="M520 360 L720 90 L940 360Z" fill="#8a7bd8"/><path d="M690 130 L720 90 L752 132 L734 122 L720 140 L704 122Z" fill="#fff"/>
   <rect y="330" width="960" height="230" fill="#7fd36b"/>
   <path d="M0 470 C200 430 300 520 520 470 S820 420 960 470 V560 H0Z" fill="#3fa9f5"/>
-  <path d="M600 330 C640 380 560 420 620 470" stroke="#3fa9f5" stroke-width="34" fill="none" stroke-linecap="round"/>
-  <g fill="#178a56"><path d="M40 360 l30 -70 l30 70z"/><path d="M80 370 l34 -84 l34 84z"/><path d="M850 360 l30 -70 l30 70z"/><path d="M890 372 l26 -64 l26 64z"/></g>
-  <g stroke="#22b573" stroke-width="4" stroke-linecap="round"><path d="M300 420 l-6 -16 M310 420 l0 -18 M320 420 l6 -16"/><path d="M760 430 l-6 -16 M770 430 l0 -18 M780 430 l6 -16"/></g>
+  <g fill="#178a56"><path d="M330 360 l30 -90 l30 90z"/><path d="M380 372 l34 -104 l34 104z"/><path d="M440 360 l26 -80 l26 80z"/></g>
+  <path d="M170 560 C150 480 230 430 330 470 S520 430 580 360 S700 330 760 300" stroke="#fff" stroke-width="8" stroke-dasharray="4 18" stroke-linecap="round" fill="none" opacity=".9"/>
  </svg>
- <div class="bar">
-  <div class="hello">Hi! Pick one mission 👇<small class="he">בחרו משימה אחת</small></div>
-  <div class="steps"><span>1 Listen ✓</span><span class="on">2 Choose</span><span>3 Done</span></div>
- </div>
- <div class="pins">
-  <div class="pin btn p1" style="--c:#ff5fa2"><svg width="70" height="70" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#ffe1ee" stroke="#ff5fa2" stroke-width="4"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><b>Draw it</b><span class="he">לצייר ולצבוע</span><div class="go">Start ▶</div></div>
-  <div class="pin btn p2" style="--c:#7357ff"><svg width="70" height="70" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#e6e0ff" stroke="#7357ff" stroke-width="4" stroke-linejoin="round"/></svg><b>Solve it</b><span class="he">לפתור חידה</span><div class="go">Start ▶</div></div>
-  <div class="pin btn p3" style="--c:#2f80ed"><svg width="70" height="70" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#dbe9ff" stroke="#2f80ed" stroke-width="4" stroke-linejoin="round"/><circle cx="18" cy="28" r="3.5" fill="#2f80ed"/><circle cx="28" cy="28" r="3.5" fill="#2f80ed"/><circle cx="38" cy="28" r="3.5" fill="#2f80ed"/></svg><b>Say it</b><span class="he">לדבר עם חבר</span><div class="go">Start ▶</div></div>
- </div>
+ <div class="bar"><div class="hello">Hi! Your trail is ready 👇<small class="he">המסלול שלכם מחכה</small></div><div class="words"><span>air</span><span>dry</span><span>forest</span><span>grass</span><span>mountain</span><span>nature</span><span>river</span><span>sea</span></div></div>
+ <div class="pins"><div class="pin btn p1" style="--c:#22b573;--d:#178a56;--fg:#fff"><svg width="70" height="70" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#e3f8ec"/><path d="M8 24c8-6 16 6 24 0s16 6 24 0M8 36c8-6 16 6 24 0s16 6 24 0M8 48c8-6 16 6 24 0s16 6 24 0" stroke="#2f80ed" stroke-width="5" fill="none" stroke-linecap="round"/></svg><b>River trail</b><span class="he">מסלול הנהר</span><div class="go">Later ▶</div></div><div class="pin btn p2 mine" style="--c:#ffc21a;--d:#c48f00;--fg:#3d2c00"><span class="you">You start here</span><svg width="70" height="70" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff4c7"/><path d="M20 12 L8 36h24z M20 24 L6 48h28z" fill="#178a56"/><path d="M44 16 L32 40h24z M44 28 L30 52h28z" fill="#22b573"/><rect x="18" y="46" width="4" height="8" fill="#8a5a2b"/><rect x="42" y="50" width="4" height="6" fill="#8a5a2b"/></svg><b>Forest trail</b><span class="he">מסלול היער</span><div class="go">Start ▶</div></div><div class="pin btn p3" style="--c:#ff4d5e;--d:#c42838;--fg:#fff"><svg width="70" height="70" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#ffe3e6"/><path d="M4 54 L26 14 L48 54z" fill="#8a7bd8"/><path d="M30 54 L44 28 L60 54z" fill="#6f61c4"/><path d="M19 27 L26 14 L33 27 L29 24 L26 28 L22 24z" fill="#fff"/></svg><b>Mountain trail</b><span class="he">מסלול ההר</span><div class="go">Later ▶</div></div></div>
 </div>
 </template>
 
@@ -176,14 +209,10 @@ ol.q .mine{color:var(--green-d);font-weight:700}
 <div class="B">
  <div class="head">
   <svg class="owl" width="90" height="90" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#a8743f"/><ellipse cx="32" cy="44" rx="13" ry="14" fill="#f3d9b1"/><circle cx="23" cy="28" r="9" fill="#fff"/><circle cx="41" cy="28" r="9" fill="#fff"/><circle cx="24" cy="29" r="4" fill="#2b2340"/><circle cx="40" cy="29" r="4" fill="#2b2340"/><path d="M29 35 l3 5 l3 -5z" fill="#ffb02e"/><path d="M12 16 l8 6 M52 16 l-8 6" stroke="#a8743f" stroke-width="6" stroke-linecap="round"/></svg>
-  <div class="bubble">Hi! Choose your mission 👇<span class="he">בחרו את המשימה שלכם</span></div>
+  <div class="bubble">Hi! Your trail is ready 👇<span class="he">המסלול שלכם מחכה</span></div>
  </div>
- <div class="words"><span>🌬 air</span><span>🏜 dry</span><span>🌲 forest</span><span>🌱 grass</span><span>⛰ mountain</span><span>🍃 nature</span><span>🏞 river</span><span>🌊 sea</span></div>
- <div class="cards">
-  <div class="card btn" style="--c:#ff5fa2;--d:#c43a78"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#fff"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><div><b>Draw it</b><div class="en">Colour the nature map</div><div class="he">לצבוע את המפה</div></div><span class="go">Start ▶</span></div>
-  <div class="card btn" style="--c:#7357ff;--d:#4f37c9"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#fff"/></svg><div><b>Solve it</b><div class="en">Build the words</div><div class="he">לבנות את המילים</div></div><span class="go">Start ▶</span></div>
-  <div class="card btn" style="--c:#22b573;--d:#178a56"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#fff"/><circle cx="18" cy="28" r="3.5" fill="#22b573"/><circle cx="28" cy="28" r="3.5" fill="#22b573"/><circle cx="38" cy="28" r="3.5" fill="#22b573"/></svg><div><b>Say it</b><div class="en">Talk with a friend</div><div class="he">לדבר עם חבר</div></div><span class="go">Start ▶</span></div>
- </div>
+ <div class="words"><span>air</span><span>dry</span><span>forest</span><span>grass</span><span>mountain</span><span>nature</span><span>river</span><span>sea</span></div>
+ <div class="cards"><div class="card btn" style="--c:#22b573;--d:#178a56;--fg:#fff"><svg width="96" height="96" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#e3f8ec"/><path d="M8 24c8-6 16 6 24 0s16 6 24 0M8 36c8-6 16 6 24 0s16 6 24 0M8 48c8-6 16 6 24 0s16 6 24 0" stroke="#2f80ed" stroke-width="5" fill="none" stroke-linecap="round"/></svg><div><b>River trail</b><div class="he">מסלול הנהר</div></div><span class="go">Next</span></div><div class="card btn mine" style="--c:#ffc21a;--d:#c48f00;--fg:#3d2c00"><span class="you">You start here</span><svg width="96" height="96" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff4c7"/><path d="M20 12 L8 36h24z M20 24 L6 48h28z" fill="#178a56"/><path d="M44 16 L32 40h24z M44 28 L30 52h28z" fill="#22b573"/><rect x="18" y="46" width="4" height="8" fill="#8a5a2b"/><rect x="42" y="50" width="4" height="6" fill="#8a5a2b"/></svg><div><b>Forest trail</b><div class="he">מסלול היער</div></div><span class="go">Start ▶</span></div><div class="card btn" style="--c:#ff4d5e;--d:#c42838;--fg:#fff"><svg width="96" height="96" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#ffe3e6"/><path d="M4 54 L26 14 L48 54z" fill="#8a7bd8"/><path d="M30 54 L44 28 L60 54z" fill="#6f61c4"/><path d="M19 27 L26 14 L33 27 L29 24 L26 28 L22 24z" fill="#fff"/></svg><div><b>Mountain trail</b><div class="he">מסלול ההר</div></div><span class="go">Next</span></div></div>
 </div>
 </template>
 
@@ -191,39 +220,60 @@ ol.q .mine{color:var(--green-d);font-weight:700}
 <div class="C">
  <div class="guide">
   <svg width="70" height="70" viewBox="0 0 64 64" style="flex:none"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#a8743f"/><ellipse cx="32" cy="44" rx="13" ry="14" fill="#f3d9b1"/><circle cx="23" cy="28" r="9" fill="#fff"/><circle cx="41" cy="28" r="9" fill="#fff"/><circle cx="24" cy="29" r="4" fill="#2b2340"/><circle cx="40" cy="29" r="4" fill="#2b2340"/><path d="M29 35 l3 5 l3 -5z" fill="#ffb02e"/></svg>
-  <div class="msg">Great listening! ⭐ Now pick a quest.<span class="he">עכשיו בחרו משימה</span></div>
+  <div class="msg">Great listening! ⭐ Start your trail.<span class="he">התחילו את המסלול שלכם</span></div>
   <div class="xp">Your stars<div class="xpbar"><i></i></div></div>
  </div>
- <div class="board">
-  <h3>Quest board</h3>
-  <div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#ffe1ee"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><div><b>Draw it</b><span class="en">Colour the nature map · <span class="he">לצבוע</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#ff5fa2">Play</span></div>
-  <div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#e6e0ff"/></svg><div><b>Solve it</b><span class="en">Build the words · <span class="he">לבנות</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#7357ff">Play</span></div>
-  <div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#dbe9ff"/></svg><div><b>Say it</b><span class="en">Talk with a friend · <span class="he">לדבר</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#22b573">Play</span></div>
- </div>
+ <div class="board"><h3>Trail board</h3><div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#e3f8ec"/><path d="M8 24c8-6 16 6 24 0s16 6 24 0M8 36c8-6 16 6 24 0s16 6 24 0M8 48c8-6 16 6 24 0s16 6 24 0" stroke="#2f80ed" stroke-width="5" fill="none" stroke-linecap="round"/></svg><div><b>River trail</b><span class="en">3 missions · <span class="he">מסלול הנהר</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#22b573;color:#fff">Next</span></div><div class="quest btn mine"><svg width="60" height="60" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff4c7"/><path d="M20 12 L8 36h24z M20 24 L6 48h28z" fill="#178a56"/><path d="M44 16 L32 40h24z M44 28 L30 52h28z" fill="#22b573"/><rect x="18" y="46" width="4" height="8" fill="#8a5a2b"/><rect x="42" y="50" width="4" height="6" fill="#8a5a2b"/></svg><div><b>Forest trail</b><span class="en">3 missions · <span class="he">מסלול היער</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#ffc21a;color:#3d2c00">Start</span></div><div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#ffe3e6"/><path d="M4 54 L26 14 L48 54z" fill="#8a7bd8"/><path d="M30 54 L44 28 L60 54z" fill="#6f61c4"/><path d="M19 27 L26 14 L33 27 L29 24 L26 28 L22 24z" fill="#fff"/></svg><div><b>Mountain trail</b><span class="en">3 missions · <span class="he">מסלול ההר</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#ff4d5e;color:#fff">Next</span></div></div>
 </div>
 </template>
 
+<template id="tIn">
+<div class="In" style="--c:#ffc21a;--d:#c48f00">
+ <div class="ihead"><svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff4c7"/><path d="M20 12 L8 36h24z M20 24 L6 48h28z" fill="#178a56"/><path d="M44 16 L32 40h24z M44 28 L30 52h28z" fill="#22b573"/><rect x="18" y="46" width="4" height="8" fill="#8a5a2b"/><rect x="42" y="50" width="4" height="6" fill="#8a5a2b"/></svg><div><b>Forest trail</b><span class="he">מסלול היער</span></div><div class="dots"><i class="on"></i><i></i><i></i></div></div>
+ <div class="acts">
+  <div class="act btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#ffe1ee" stroke="#ff5fa2" stroke-width="4"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><b>Draw it</b><span class="he">לצייר ולצבוע</span></div>
+  <div class="act btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#e6e0ff" stroke="#7357ff" stroke-width="4" stroke-linejoin="round"/></svg><b>Solve it</b><span class="he">לפתור חידה</span></div>
+  <div class="act btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#dbe9ff" stroke="#2f80ed" stroke-width="4" stroke-linejoin="round"/></svg><b>Say it</b><span class="he">לדבר עם חבר</span></div>
+ </div>
+ <div class="fin">🎉 Finished? Try the next trail! <span class="nx"><svg width="40" height="40" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#ffe3e6"/><path d="M4 54 L26 14 L48 54z" fill="#8a7bd8"/><path d="M30 54 L44 28 L60 54z" fill="#6f61c4"/><path d="M19 27 L26 14 L33 27 L29 24 L26 28 L22 24z" fill="#fff"/></svg> Mountain trail ▶</span></div>
+</div>
+</template>
+
+<section class="gc" data-labels>
+ <h2 style="margin:0 0 6px">How the three levels are named</h2>
+ <div class="labels">
+  <div><p class="lbl">Your idea</p><div class="chips"><span style="background:#22b573">🟢 Easy</span><span style="background:#ffc21a;color:#3d2c00">🟡 Medium</span><span style="background:#ff4d5e">🔴 Hard</span></div></div>
+  <div><p class="lbl">My pick <span class="pick">my pick</span></p><div class="chips"><span style="background:#22b573;color:#fff"><svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#e3f8ec"/><path d="M8 24c8-6 16 6 24 0s16 6 24 0M8 36c8-6 16 6 24 0s16 6 24 0M8 48c8-6 16 6 24 0s16 6 24 0" stroke="#2f80ed" stroke-width="5" fill="none" stroke-linecap="round"/></svg> River trail</span><span style="background:#ffc21a;color:#3d2c00"><svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#fff4c7"/><path d="M20 12 L8 36h24z M20 24 L6 48h28z" fill="#178a56"/><path d="M44 16 L32 40h24z M44 28 L30 52h28z" fill="#22b573"/><rect x="18" y="46" width="4" height="8" fill="#8a5a2b"/><rect x="42" y="50" width="4" height="6" fill="#8a5a2b"/></svg> Forest trail</span><span style="background:#ff4d5e;color:#fff"><svg width="28" height="28" viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="#ffe3e6"/><path d="M4 54 L26 14 L48 54z" fill="#8a7bd8"/><path d="M30 54 L44 28 L60 54z" fill="#6f61c4"/><path d="M19 27 L26 14 L33 27 L29 24 L26 28 L22 24z" fill="#fff"/></svg> Mountain trail</span></div></div>
+ </div>
+ <p class="why" style="margin-top:12px">Why: research shows kids notice a "low" label and it lowers how they see themselves; place names keep your three colours but say nothing about who is weaker, and every trail ends with "Finished? Try the next trail!" so it reads as one path everyone walks. Colour is never the only cue (each trail has its own picture), so colour-blind kids are fine.</p>
+</section>
+
 <section class="opt" data-option="A">
  <h2>A · Nature map <span class="pick">my pick</span></h2>
- <p class="why">The lesson's own words are the menu: a mountain, river, sea and forest scene, with three big pins to press. Most fun, and the picture keeps the eight words in front of him while he chooses. On a phone the pins stack into a list over the scene.</p>
+ <p class="why">The three trails sit where they belong on one nature scene: River by the water, Forest in the trees, Mountain on the peak. His own trail glows with "You start here"; the next ones wait. Most fun, and the scene keeps the eight words in front of him. On a phone the pins stack into a list.</p>
  <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tA"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tA"></div></div></div>
 </section>
 <section class="opt" data-option="B">
  <h2>B · Big cards</h2>
- <p class="why">Clearest of the three: an owl guide says what to do, the eight words sit in a strip as a reminder, and three huge coloured cards are the only things to press. Calmer, less of a game.</p>
+ <p class="why">Clearest of the three: an owl guide, the eight words in a strip, three huge trail cards with his own one lifted. Calmer, less of a game.</p>
  <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tB"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tB"></div></div></div>
 </section>
 <section class="opt" data-option="C">
- <h2>C · Quest board</h2>
- <p class="why">A game menu on a dark night sky: the owl talks in a chat bubble, each quest earns up to 3 stars, a star bar fills up. Most "game-like", but more on screen and the dark look breaks with letter-b's bright style.</p>
+ <h2>C · Trail board</h2>
+ <p class="why">A game menu on a night sky: the owl talks in a chat bubble, each trail earns up to 3 stars. Most game-like, but busier, and the dark look breaks with letter-b's bright style.</p>
  <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tC"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tC"></div></div></div>
+</section>
+<section class="opt">
+ <h2>Inside a trail (same for every look)</h2>
+ <p class="why">His link (#level-1, #level-2 or #level-3) opens his own trail directly. He picks one of three missions; the trail ends with "Finished? Try the next trail!" pointing on to the next one.</p>
+ <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tIn"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tIn"></div></div></div>
 </section>
 
 <section class="gc">
  <h2 style="margin:0 0 8px">Questions, each with my pick (answer only where you disagree)</h2>
  <ol class="q">
   <li><b>Look:</b> A, B or C? <span class="mine">My pick: A</span>: most fun for 5th graders and the scene itself teaches the words; B's three-card clarity is built into it (one label, one Start button per pin).</li>
-  <li><b>Do kids see their level?</b> <span class="mine">My pick: no.</span> Same title "Nature Quest" for all; the level is only in the link and in your Classroom view. Animal names (turtle/fox/eagle) tend to read as a ranking.</li>
+  <li><b>How levels are named:</b> <span class="mine">My pick: no.</span> The levels are three trails (River, Forest, Mountain), never easy/medium/hard; each kid gets his own trail's link, and every trail ends with "Finished? Try the next trail!".</li>
   <li><b>Who goes to which level?</b> <span class="mine">My pick: you sort them from what you and the class teacher know (about a third each)</span>; no placement test, it eats lesson time.</li>
   <li><b>Choice inside a level:</b> the research says matching kids to "learning styles" (art kid, logic kid, talk kid) doesn't improve learning; what works is levels by readiness plus a small free choice. <span class="mine">My pick: every kid picks 1 of 3 (draw / solve / say) inside his level.</span></li>
   <li><b>Hebrew help:</b> <span class="mine">My pick: level 1 always sees a short Hebrew line, level 2 one tap away, level 3 none.</span></li>
