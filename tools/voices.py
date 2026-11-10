@@ -49,8 +49,12 @@ def slug(text):
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")[:60]
 
 
+# Words Whisper writes as their homophone when heard alone ("sea" comes back as "see"): the same sound, so not a retake.
+HOMOPHONES = {"see": "sea"}
+
+
 def norm(text):
-    return re.sub(r"[^a-z0-9 ]+", "", text.lower().replace("-", " ")).split()
+    return [HOMOPHONES.get(w, w) for w in re.sub(r"[^a-z0-9 ]+", "", text.lower().replace("-", " ")).split()]
 
 
 _m, _prompts, _w = None, {}, None

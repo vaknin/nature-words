@@ -11,7 +11,6 @@ const BASE = (process.argv[2] || 'https://vaknin.github.io/nature-words/').repla
 const SHOTS = path.join(here, 'shots');
 rmSync(SHOTS, { recursive: true, force: true }); mkdirSync(SHOTS, { recursive: true });
 const CHROME = process.env.CHROME || '/usr/bin/chromium';
-// His two check sizes: the school laptop's 1366x768 and a 390px-wide phone.
 // His word: laptop only. 1366x768 is the common school laptop; 1280x720 the smallest laptop screen in use.
 const SIZES = { laptop: { width: 1366, height: 768 }, small: { width: 1280, height: 720 } };
 // His limits for this lesson: at most 6 stages, 40-45 minutes in all.
@@ -40,7 +39,7 @@ const layout = page => page.evaluate(() => {
 
 async function run(name, vp) {
   console.log(`\n== ${name} ${vp.width}x${vp.height}`);
-  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
+  const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--autoplay-policy=no-user-gesture-required'] });
   const page = await browser.newPage();
   await page.setViewport(vp);
   const errors = [];
@@ -54,7 +53,10 @@ async function run(name, vp) {
     ok(l.wide <= 1, `${name} ${what}: page ${l.wide}px wider than the screen`);
     for (const o of l.off) fail(`${name} ${what}: "${o}" off screen`);
   };
-  const open = async hash => { console.log('  open', hash); await page.goto(BASE + hash, { waitUntil: 'load' }); await page.evaluate(() => window.dispatchEvent(new HashChangeEvent('hashchange'))); await sleep(120); };
+  // A reload empties window.MISSING, so collect it before every navigation (a test that read it only at the end missed every clip).
+  const missingAll = new Set();
+  const harvest = async () => { for (const t of await page.evaluate(() => window.MISSING || []).catch(() => [])) missingAll.add(t); };
+  const open = async hash => { await harvest(); console.log('  open', hash); await page.goto(BASE + hash, { waitUntil: 'load' }); await page.evaluate(() => window.dispatchEvent(new HashChangeEvent('hashchange'))); await sleep(120); };
   const click = async sel => { const h = await page.$(sel); ok(h, `missing ${sel}`); if (h) { await h.click(); await sleep(40); } };
 
   // ---- the one Classroom link: start, quiz, "Your trail is ...!"
@@ -65,14 +67,14 @@ async function run(name, vp) {
   await check('quiz'); await shot('quiz');
   // Laptop answers every quiz question right (must land on Mountain); the small laptop misses each first (River).
   const allRight = name === 'laptop';
-  for (let guard = 0; guard < 20 && !(await page.$('[data-result]')); guard++) {
+  for (let guard = 0; guard < 30 && !(await page.$('[data-result]')); guard++) {
     const ans = await page.$eval('.stage', e => e.dataset.answer || '');
     if (!allRight) { await page.$$eval('.choice', (c, a) => { const x = c.find(x => x.dataset.w !== a); x && x.click(); }, ans); await sleep(700); continue; }
     await click(`.choice[data-w="${ans}"]`); await sleep(1300);
   }
   const res = await page.$eval('[data-result]', e => +e.dataset.result).catch(() => 0);
   ok(res === (allRight ? 3 : 1), `quiz ${allRight ? 'all right' : 'all wrong'} gave trail ${res}`);
-  ok(/Your trail is (River|Forest|Mountain)! Well done!/.test(await page.$eval('[data-result]', e => e.textContent).catch(() => '')), 'quiz result line');
+  ok(/Start at (River|Forest|Mountain)! .* Well done!/.test(await page.$eval('[data-result]', e => e.textContent).catch(() => '')), 'quiz result line');
   await check('result'); await shot('result');
 
   // ---- teacher stages
@@ -106,6 +108,7 @@ async function run(name, vp) {
     ok(await page.$eval('.trail', e => +e.dataset.trail).catch(() => 0) === lv, `#level-${lv} opens its own trail`);
     ok(await page.$eval('.trail', e => e.innerText.trim().length).catch(() => 0) > 40, `#level-${lv} is empty`);
     await check(`level ${lv}`); await shot(`level-${lv}`);
+    if (lv === 1) ok(await page.$('[data-chip][disabled]'), 'the race chip is not locked before the Last check');
     let lastGame = '', offers = 0;
     // 200 moves: 3 games x 8 rounds, a long word's 8 letters each, with room; a trail that never ends fails.
     for (let guard = 0; guard < 400 && !(await page.evaluate(() => app.dataset.ended)); guard++) {
@@ -114,6 +117,7 @@ async function run(name, vp) {
       if (g && g !== lastGame) { lastGame = g; await check(`level ${lv} ${g}`); await shot(`level-${lv}-${g}`); }
       const ans = await page.$eval('.stage', e => e.dataset.answer || '').catch(() => '');
       const type = await page.$eval('.stage', e => e.dataset.type || '').catch(() => '');
+      if (type === 'say') { await click('[data-n]'); await sleep(250); continue; }
       if (type === 'build') {
         const slot = await page.$$eval('.slot', s => s.findIndex(x => !x.textContent));
         if (slot < 0) { await sleep(400); continue; }
@@ -123,19 +127,44 @@ async function run(name, vp) {
       else await sleep(300);
     }
     ok(await page.evaluate(() => app.dataset.ended), `level ${lv}: never reached the end`);
+    ok(await page.$('[data-done]'), `level ${lv}: no end screen with "Mark as done"`);
+    ok(/Mark as done/.test(await page.$eval('[data-done]', e => e.textContent).catch(() => '')), `level ${lv}: end screen does not say "Mark as done"`);
     // Kids who get every first try right are offered the next trail up (not on the last trail).
     if (lv < 3) ok(offers > 0, `level ${lv}: no "try a new trail" offer after a run of right answers`);
     await check(`level ${lv} end`); await shot(`level-${lv}-end`);
     if (lv < 3) ok(await page.$('[data-next]'), `level ${lv}: no "next trail" button`);
+    // The race card: trophy, record, GO; a race runs its fixed time and ends with the score.
+    ok(await page.$('[data-racecard] .trophy') && await page.$('[data-record]'), `level ${lv}: race card without trophy or record`);
+    if (lv === 1) {
+      await click('[data-race]'); await sleep(200); await shot('race');
+      // 3 s countdown + 30 s race; one press per question, so press only the right word.
+      for (let guard = 0; guard < 300 && !(await page.$('[data-raceend]')); guard++) {
+        const ans = await page.$eval('.stage', e => e.dataset.type === 'race' ? e.dataset.answer : '').catch(() => '');
+        if (ans && await page.$(`.choice[data-w="${ans}"]:not(.ok)`)) { await click(`.choice[data-w="${ans}"]`); if (guard === 3) await shot('race'); }
+        await sleep(150);
+      }
+      ok(await page.$('[data-raceend]'), 'the race never ended');
+      const rec = await page.evaluate(() => JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => k.startsWith('nature-trails'))) || '{}').best || 0);
+      ok(rec > 0, 'a race with right answers set no best');
+      await shot('race-end');
+    }
+    const gold = await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => k.startsWith('nature-trails'))) || '{}').stars || {}).filter(x => x.length === 3).length);
+    ok(gold === 8, `level ${lv}: ${gold} of 8 gold cards after every game`);
+    ok(await page.$('[data-chip].open'), `level ${lv}: the race chip is still locked after the Last check`);
   }
 
+  // The plain link resumes where he was instead of a second quiz.
+  await open('');
+  ok(await page.$('[data-resume]'), 'the plain link does not offer to continue');
+
   // Every phrase spoken during the run must have a recorded clip.
-  const missing = await page.evaluate(() => [...new Set(window.MISSING)]);
+  await harvest(); const missing = [...missingAll];
   for (const t of missing) fail(`${name}: spoken with no clip: "${t}"`);
   for (const e of errors) fail(`${name}: console error: ${e}`);
   await browser.close();
 }
 
-for (const [name, vp] of Object.entries(SIZES)) await run(name, vp);
+// Both sizes at once: one after the other took over the check's 300 s limit (each run waits out a 30 s race).
+await Promise.all(Object.entries(SIZES).map(([name, vp]) => run(name, vp)));
 console.log(failures ? `\n${failures} failure(s)` : '\nall passed', `· shots in ${SHOTS}`);
 process.exit(failures ? 1 : 0);

@@ -86,5 +86,93 @@
   "seed": 1,
   "heard": "Nature",
   "ok": true
+ },
+ "girl:nature": {
+  "text": "nature",
+  "voice": "girl",
+  "file": "girl-nature.wav",
+  "seed": 1,
+  "heard": "Nature!",
+  "ok": true
+ },
+ "boy:river": {
+  "text": "river",
+  "voice": "boy",
+  "file": "boy-river.wav",
+  "seed": 1,
+  "heard": "River",
+  "ok": true
+ },
+ "girl:river": {
+  "text": "river",
+  "voice": "girl",
+  "file": "girl-river.wav",
+  "seed": 1,
+  "heard": "River!",
+  "ok": true
+ },
+ "boy:sea": {
+  "text": "sea",
+  "voice": "boy",
+  "file": "boy-sea.wav",
+  "seed": 4,
+  "heard": "See",
+  "ok": true
+ },
+ "girl:sea": {
+  "text": "sea",
+  "voice": "girl",
+  "file": "girl-sea.wav",
+  "seed": 4,
+  "heard": "See",
+  "ok": true
+ },
+ "boy:Listen. Say the word.": {
+  "text": "Listen. Say the word.",
+  "voice": "boy",
+  "file": "boy-listen-say-the-word.wav",
+  "seed": 1,
+  "heard": "Listen. Say the word.",
+  "ok": true
+ },
+ "girl:Listen. Press the picture.": {
+  "text": "Listen. Press the picture.",
+  "voice": "girl",
+  "file": "girl-listen-press-the-picture.wav",
+  "seed": 1,
+  "heard": "Listen, press the picture.",
+  "ok": true
+ },
+ "boy:Look. Press the word.": {
+  "text": "Look. Press the word.",
+  "voice": "boy",
+  "file": "boy-look-press-the-word.wav",
+  "seed": 1,
+  "heard": "Look, press the word.",
+  "ok": true
+ },
+ "girl:Build the word.": {
+  "text": "Build the word.",
+  "voice": "girl",
+  "file": "girl-build-the-word.wav",
+  "seed": 2,
+  "heard": "Build the word!",
+  "ok": true
+ },
+ "boy:Listen. Press the word.": {
+  "text": "Listen. Press the word.",
+  "voice": "boy",
+  "file": "boy-listen-press-the-word.wav",
+  "seed": 1,
+  "heard": "Listen, press the word.",
+  "ok": true
+ },
+ "girl:Well done!": {
+  "text": "Well done!",
+  "voice": "girl",
+  "file": "girl-well-done.wav",
+  "seed": 1,
+  "heard": "Well done!",
+  "ok": true
  }
 }
