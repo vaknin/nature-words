@@ -326,7 +326,7 @@ def main():
     fill_teacher(teach, [
         "**Stage 2: Meet the words (students standing).",
         "Projector: word cards in this order: nature, mountain, river, forest, sea, grass, air, dry; then all eight pictures without words.",
-        "Per word (about 35 seconds): “Look. Listen.” T presses Space: the recording plays and the word appears. "
+        "Per word (about 35 seconds): “Look. Listen.” T presses Space: the word is spoken and appears. "
         "T says it twice with its gesture. “Everybody!” three times: normal, whisper, loud. “What is it in Hebrew?”",
         "Gestures: nature, arms wide; mountain, hands meet in a peak; river, hand swims like a snake; forest, arms up like trees; "
         "sea, big waves; grass, wiggle fingers low; air, blow on your hand; dry, wipe your forehead.",
@@ -352,7 +352,7 @@ def main():
         "“Look. Three places: River, Forest and Mountain. All three have the same eight words. First, a quick quiz. "
         "Then the laptop gives you a place to start. It is a good start for YOU today. Your place can change later, and that is OK. "
         "Points and cards are the same in every place. Eyes on your own screen.”",
-        "Demo: “I listen. I press. No right or wrong in the quiz, just try. When you see the microphone, press Allow.”",
+        "Demo: “I listen. I press. No right or wrong in the quiz, just try.”",
         "On four fingers: “One: open your laptop. Two: Classroom, ‘Nature Words’. Three: press the link. Four: headphones on, press Start.”",
         "Check: “Who can say the four steps in Hebrew?” Then “Go!”",
         "Quiz: eight questions, each word once: hear a word and press its picture; see a picture and press its word; complete a short sentence. "
@@ -376,20 +376,20 @@ def main():
         "**Stage 4: Play and race (laptops, headphones; T walks around).",
         "Projector: the eight pictures with words and an 18-minute bar.",
         "Each student plays four games in their place (River, Forest or Mountain), eight rounds each: "
-        "1. Listen. Say the word (record and play back). 2. Listen. Press the picture/word. "
+        "1. Listen. Say the word out loud, then Next. 2. Listen. Press the picture/word. "
         "3. Look/Read. Press the word. 4. Build the word from letters. Then the Last check (a flag): four questions.",
         "At 11 minutes: “Look, a flag! Finish your word. Press the flag: four last questions.”",
         "At 13 minutes: “After the flag you can race: 30 seconds. Beat your best! Or go to the next place. You choose.”",
-        "While they work: River screens first, “Play me your word.” One specific praise per student, for effort. "
+        "While they work: River screens first, “Say your word out loud for me.” One specific praise per student, for effort. "
         "At an offer to change place: “Good choice” either way.",
         "Transition at 18: “Stop. Headphones off. Screens half down. Eyes on me.”",
         "Praise: “You tried again and you got it. That is how we learn.”",
     ], find_par(rat, "Students need").runs[0])
     fill_scan(scan, [
-        "say each word into the microphone and listen to themselves;",
+        "say each word out loud after hearing it;",
         "find the picture or word they hear, then the word that matches a picture or sentence;",
         "build each word from its letters;",
-        "answer the four Last-check questions, then race against their own best score.",
+        "answer the four Last-check questions, then race for a place on the class top-5 board.",
     ])
     highlight_options(inter, ["individual work"])
     add_rationale(rat, "Three levels with the same eight words let every student practise at the right challenge, "

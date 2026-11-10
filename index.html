@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>Nature Trails · English, 5th grade</title>
 <style>
 /* Fredoka (rounded, playful, has Latin and Hebrew) for headings and words; Rubik (clean, made for Hebrew and Latin)
@@ -23,10 +23,21 @@ html,body{margin:0;height:100%}
 body{font-family:var(--body);color:var(--ink);background:var(--bg);user-select:none;-webkit-user-select:none;overflow-x:hidden}
 button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:0;background:none;padding:0}
 svg{display:block}
+[hidden]{display:none!important}
+h1,h2,.mark,.sayline{text-wrap:balance}
 h1,h2,h3,.head{font-family:var(--head)}
 .he{direction:rtl;unicode-bidi:isolate;font-family:var(--body)}
 .btn{transition:transform .16s cubic-bezier(.3,1.4,.5,1),box-shadow .16s}
-.btn:hover{transform:translateY(-3px)}
+/* Touch first. A lift on hover only where there is a real mouse; on a finger every button answers on press (:active),
+   so the feedback comes the moment the finger lands, never only on hover. */
+@media (hover:hover) and (pointer:fine){.btn:hover{transform:translateY(-3px)}}
+button:not([disabled]):active{transform:translateY(2px) scale(.97)}
+/* No double-tap zoom, no pinch zoom, no long-press menu or text selection on the kid screens. 48px: the common
+   touch-target minimum (Material, WCAG 2.5.5); the smoke test fails any visible button under it. */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%}
+.land,.trail,.offer{touch-action:pan-y;-webkit-touch-callout:none}
+button{min-width:48px;min-height:48px;touch-action:manipulation}
+input{user-select:text;-webkit-user-select:text}
 .btn:active{transform:translateY(2px) scale(.98)}
 @keyframes popIn{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
@@ -41,12 +52,14 @@ h1,h2,h3,.head{font-family:var(--head)}
 .primary{font-family:var(--head);font-weight:600;font-size:26px;background:var(--c,var(--river));color:#fff;border-radius:999px;padding:14px 38px;box-shadow:0 6px 0 var(--d,var(--river-d))}
 .speaker{flex:none;width:56px;height:56px;border-radius:50%;background:var(--c,var(--river));display:grid;place-items:center;box-shadow:0 5px 0 var(--d,var(--river-d))}
 .speaker svg{width:28px;height:28px}
-.speaker.big{width:96px;height:96px}
-.speaker.big svg{width:46px;height:46px}
+/* The listen tile: its own class, never "big" (the picture box's class), whose white fill once hid the white icon. */
+.speaker.xl{width:112px;height:112px;box-shadow:0 7px 0 var(--d,var(--river-d)),0 0 0 10px var(--t,var(--river-t))}
+.speaker.xl svg{width:58px;height:58px}
 .card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow)}
 .say{display:flex;align-items:center;gap:16px;padding:14px 20px}
 .say .en{font-family:var(--head);font-weight:600;font-size:26px}
-.say .he{display:block;font-size:19px;color:var(--muted);margin-top:2px}
+.say>div{display:flex;flex-direction:column}
+.say .he{display:block;text-align:right;font-size:19px;color:var(--muted);margin-top:2px}
 
 /* ---------- start: the nature map and the trail quiz ---------- */
 .land{position:relative;flex:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;overflow:hidden;padding:24px}
@@ -57,12 +70,25 @@ h1,h2,h3,.head{font-family:var(--head)}
 .hero p{margin:6px 0 0;font-size:24px;color:var(--muted)}
 .hero .he{font-size:21px;color:var(--muted);margin-top:4px}
 .hero .primary{margin-top:18px}
+/* Full screen beside Start: the school laptops' browser bars eat about a sixth of a 720px screen, so every kid is
+   asked to go full screen first. Lighter than Start (white, outlined) so Start stays the one big colour button. */
+.gorow{display:flex;gap:14px;justify-content:center;align-items:center;flex-wrap:wrap}
+.fsbtn{display:inline-flex;align-items:center;gap:10px;margin-top:18px;font-family:var(--head);font-weight:600;font-size:22px;border-radius:999px;padding:12px 26px;background:#fff;box-shadow:inset 0 0 0 3px var(--line),0 5px 0 var(--line)}
+.fsbtn svg{width:26px;height:26px}
+.fshint{display:inline-flex;align-items:center;gap:12px;margin-top:14px;padding:8px 18px 8px 10px;border-radius:18px;background:var(--river-t);text-align:left}
+.fshint svg{width:54px;height:40px;flex:none}
+.fshint b{display:block;font-family:var(--head);font-weight:600;font-size:20px}
+.fshint .he{display:block;text-align:right;font-size:17px;color:var(--muted);margin:0}
+/* Once the page is full screen the button and its hint have done their job. */
+:fullscreen [data-fs-start],:fullscreen [data-fs-hint],.isfs [data-fs-start],.isfs [data-fs-hint]{display:none}
 .trailtags{display:flex;gap:12px}
 .tag{display:inline-flex;align-items:center;gap:8px;background:#ffffffe0;border-radius:999px;padding:6px 16px 6px 6px;font-family:var(--head);font-weight:600;font-size:20px}
 .tag svg{width:36px;height:36px}
 .quiz{width:min(960px,94vw);display:flex;flex-direction:column;gap:18px;padding:22px 28px;background:#ffffffee;border-radius:32px;box-shadow:var(--shadow)}
 .qtop{display:flex;align-items:center;gap:14px}
 .qtop h2{margin:0;font-size:30px;font-weight:600}
+.qtitle{display:flex;flex-direction:column}
+.qtitle .he{text-align:right;font-size:19px;color:var(--muted);margin-top:2px}
 .steps{margin-left:auto;display:flex;gap:8px}
 .steps i{width:16px;height:16px;border-radius:50%;background:var(--line)}
 .steps i.on{background:var(--sun)}
@@ -72,35 +98,47 @@ h1,h2,h3,.head{font-family:var(--head)}
 .result p{margin:0;font-size:22px;color:var(--muted)}
 
 /* ---------- a trail ---------- */
-.trail{flex:1;min-height:100vh;display:flex;flex-direction:column;gap:16px;padding:18px 32px 24px;background:linear-gradient(180deg,var(--t) 0,var(--bg) 60%)}
-.thead{display:flex;align-items:center;gap:14px}
-.thead .pic{width:58px;height:58px}
-.thead b{display:block;font-family:var(--head);font-weight:600;font-size:30px}
+.trail{flex:1;min-height:100vh;display:flex;flex-direction:column;gap:14px;padding:14px 32px 16px;background:linear-gradient(180deg,var(--t) 0,var(--bg) 60%)}
+.thead{display:flex;align-items:center;gap:14px;min-height:56px}
+.thead .pic{width:52px;height:52px}
+.thead>b{display:block;font-family:var(--head);font-weight:600;font-size:30px}
 .thead .he{font-size:16px;color:var(--muted)}
-.path{margin-left:auto;display:flex;align-items:center;gap:6px}
+.path{margin-left:auto;margin-right:6px;display:flex;align-items:center;gap:6px}
 .path i{width:34px;height:10px;border-radius:99px;background:#fff;box-shadow:inset 0 0 0 2px var(--line)}
 .path i.done{background:var(--c);box-shadow:none}
 .path i.cur{background:var(--sun);box-shadow:none}
 .stars{font-family:var(--head);font-weight:600;font-size:22px;background:#fff;border-radius:999px;padding:6px 16px;box-shadow:var(--shadow)}
 .stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px}
-.big{width:250px;height:250px;background:#fff;border-radius:32px;padding:14px;box-shadow:var(--shadow)}
+.big{width:min(250px,30vh);height:min(250px,30vh);background:#fff;border-radius:32px;padding:14px;box-shadow:var(--shadow)}
 .big svg{width:100%;height:100%}
-.choices{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;max-width:1000px}
+/* 1180px: six words or six pictures stay on one row at 1280px, so a second row never runs into the word cards. */
+.choices{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;max-width:1180px}
 .choice{background:#fff;border-radius:22px;box-shadow:0 0 0 3px var(--line),0 6px 0 var(--line);font-family:var(--head);font-weight:600;font-size:30px;padding:14px 26px;min-width:150px;display:flex;align-items:center;justify-content:center;gap:10px}
 .choice.pic{padding:10px}
-.choice.pic svg{width:150px;height:150px}
-.choice .mini{width:40px;height:40px;border-radius:50%;background:var(--t);display:grid;place-items:center}
-.choice .mini svg{width:22px;height:22px}
+.choice.pic svg{width:min(150px,20vh);height:min(150px,20vh)}
+/* Six pictures: smaller, so all six fit one row (6 x 150px + gaps is wider than a 1280px screen's stage). */
+.choices.six .choice.pic svg{width:min(128px,18vh);height:min(128px,18vh)}
+.choices.six .choice{min-width:132px;padding-left:18px;padding-right:18px}
+/* A word's own speaker sits beside its word as a button of its own (inside the word a finger hit it by mistake). */
+.opt{display:inline-flex;align-items:center;gap:10px}
+.opt .mini{width:52px;height:52px;border-radius:50%;background:var(--t);display:grid;place-items:center;box-shadow:0 4px 0 var(--line)}
+.opt .mini svg{width:26px;height:26px}
+/* Build: tiles can be tapped or dragged to the slots; the drag area takes every touch (no scroll, no zoom). */
+.tiles,.tile{touch-action:none}
+.slot.next{box-shadow:inset 0 0 0 3px var(--c);background:var(--t)}
+.slots.over .slot.next{box-shadow:inset 0 0 0 4px var(--sun)}
+.dragtile{position:fixed;z-index:40;pointer-events:none;width:58px;height:66px;border-radius:16px;display:grid;place-items:center;font-family:var(--head);font-size:40px;font-weight:600;background:var(--c);color:#fff;box-shadow:0 14px 30px #1f2a3d55;transform:scale(1.12) rotate(-4deg)}
 .choice.ok{box-shadow:0 0 0 4px var(--ok),0 6px 0 var(--ok)}
 .slots,.tiles{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.slot,.tile{width:62px;height:74px;border-radius:16px;display:grid;place-items:center;font-family:var(--head);font-size:42px;font-weight:600}
+.slot,.tile{width:58px;height:66px;border-radius:16px;display:grid;place-items:center;font-family:var(--head);font-size:40px;font-weight:600}
+.buildrow{display:flex;align-items:center;gap:18px}
 .slot{background:#fff;box-shadow:inset 0 0 0 3px var(--line)}
 .slot.f{box-shadow:inset 0 0 0 3px var(--ok);color:var(--ok)}
 .slot.given{color:var(--muted)}
 .tile{background:var(--c);color:#fff;box-shadow:0 5px 0 var(--d)}
 .tile[disabled]{visibility:hidden}
 .gap{font-family:var(--head);font-weight:600;font-size:38px;text-align:center;background:#fff;border-radius:24px;padding:18px 30px;box-shadow:var(--shadow)}
-.gap u{display:inline-block;min-width:3.5em;text-decoration:none;border-bottom:5px solid var(--c)}
+.gap u{display:inline-block;min-width:3.5em;text-decoration:none;border-bottom:5px solid var(--c,var(--river))}
 .cheer{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
 .cheer h2{margin:0;font-size:50px}
 .next-trail{display:inline-flex;align-items:center;gap:10px}
@@ -108,22 +146,26 @@ h1,h2,h3,.head{font-family:var(--head)}
 .offer{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:#1f2a3d66}
 .offer .card{padding:28px 40px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px;max-width:620px}
 .offer h2{margin:0;font-size:38px}
-.offer .row{display:flex;gap:14px}
+.offer .row,.cheer .row{display:flex;gap:14px;align-items:center}
 .ghost{font-family:var(--head);font-weight:600;font-size:22px;border-radius:999px;padding:12px 28px;background:#fff;box-shadow:inset 0 0 0 3px var(--line)}
 
 /* ---------- points, combo, cards, race ---------- */
-.hud{display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:6px 12px;box-shadow:var(--shadow)}
-.hud .lvl{background:var(--ink);color:#fff;border-radius:999px;padding:2px 10px;font-size:16px;font-weight:600}
-.hud .xp{width:90px;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+/* 44px: the height of every header pill and chip, one line so the header reads as a single clean row. */
+/* One points pill: a star and the points, "Level N" once he has one, and a thin line along its bottom filling
+   toward the next level. The combo pill shows only from x2. */
+.hud{position:relative;overflow:hidden;display:flex;align-items:center;gap:8px;height:44px;background:#fff;border-radius:999px;padding:0 16px 0 10px;box-shadow:var(--shadow)}
+.hud .st{width:28px;height:28px}
+.hud .pts{font-size:24px;font-weight:600;min-width:2ch}
+.hud .lvl{font-size:15px;font-weight:600;color:var(--d,var(--river-d));background:var(--t,var(--river-t));border-radius:999px;padding:3px 10px;margin-left:2px}
+.hud .xp{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--line)}
 .hud .xp i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),#ff8a3d);transition:width .4s}
-.hud .pts{font-size:22px;font-weight:600;min-width:2.5em;text-align:right}
-.hud .combo{font-size:18px;font-weight:600;color:var(--muted);opacity:.5}
-.hud .combo.on{opacity:1;color:#e8590c;animation:popIn .3s}
+.hud .combo{font-size:17px;font-weight:600;color:#fff;background:#ff8a3d;border-radius:999px;padding:3px 10px;animation:popIn .3s}
 .path i.race{width:auto;height:auto;background:none;box-shadow:none;font-style:normal;font-size:18px;opacity:.5}
 .path i.race.cur{opacity:1}
 .cards{display:flex;gap:8px;justify-content:center}
-.wc{width:74px;background:#fff;border-radius:14px;padding:4px;text-align:center;box-shadow:inset 0 0 0 2px var(--line);font-family:var(--head);font-size:14px}
-.wc svg{width:52px;height:52px;margin:auto;filter:grayscale(1);opacity:.25}
+/* Word cards 44px pictures: still readable at a glance, and the strip stays under 90px so it fits a 720px screen. */
+.wc{width:72px;background:#fff;border-radius:14px;padding:4px;text-align:center;box-shadow:inset 0 0 0 2px var(--line);font-family:var(--head);font-size:14px}
+.wc svg{width:44px;height:44px;margin:auto;filter:grayscale(1);opacity:.25}
 .wc.got{box-shadow:0 0 0 3px var(--sun),0 4px 12px #ffc83d55}
 .wc.got svg{filter:none;opacity:1}
 .float{position:absolute;font-size:40px;font-weight:700;color:#e8590c;pointer-events:none;animation:floatUp .9s ease-out forwards}
@@ -136,7 +178,7 @@ h1,h2,h3,.head{font-family:var(--head)}
 .burst{width:56px;height:56px;border-radius:50%;background:radial-gradient(circle,#fff 0 18%,var(--sun) 19% 45%,transparent 46%),conic-gradient(from 0deg,var(--sun) 0 10deg,transparent 10deg 30deg,var(--sun) 30deg 40deg,transparent 40deg 60deg,var(--sun) 60deg 70deg,transparent 70deg 90deg,var(--sun) 90deg 100deg,transparent 100deg 120deg,var(--sun) 120deg 130deg,transparent 130deg 150deg,var(--sun) 150deg 160deg,transparent 160deg 180deg,var(--sun) 180deg 190deg,transparent 190deg 210deg,var(--sun) 210deg 220deg,transparent 220deg 240deg,var(--sun) 240deg 250deg,transparent 250deg 270deg,var(--sun) 270deg 280deg,transparent 280deg 300deg,var(--sun) 300deg 310deg,transparent 310deg 330deg,var(--sun) 330deg 340deg,transparent 340deg);animation:spin 1.2s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .endrow{display:flex;gap:24px;align-items:stretch;justify-content:center}
-.racecard{width:380px;border-radius:28px;padding:22px;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:8px;
+.racecard{width:400px;border-radius:28px;padding:22px;text-align:center;color:#fff;display:flex;flex-direction:column;align-items:center;gap:8px;
  background:radial-gradient(circle at 30% 0,#ffdf7a 0,transparent 45%),linear-gradient(160deg,#ff8a3d,#e8590c 55%,#b8380a);box-shadow:0 18px 40px #e8590c55}
 .racecard h2{margin:0;font-size:30px}
 .racecard .he{color:#fff;opacity:.9}
@@ -147,7 +189,7 @@ h1,h2,h3,.head{font-family:var(--head)}
 .rc-rec small{display:block;font-size:14px;text-transform:uppercase;letter-spacing:.08em}
 .rc-rec b{font-family:var(--head);font-size:44px;line-height:1}
 .race-go{background:#fff;color:#e8590c;box-shadow:0 6px 0 #b8380a}
-.racebar{display:flex;align-items:center;gap:14px;background:#fff;border-radius:999px;padding:8px 18px;box-shadow:var(--shadow)}
+.racebar{display:flex;align-items:center;gap:14px;background:#fff;border-radius:999px;padding:8px 18px;box-shadow:var(--shadow);font-size:20px}
 .racebar .trophy{font-size:28px}
 .clock{flex:1;height:16px;border-radius:99px;background:var(--line);overflow:hidden}
 .clock i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff8a3d,var(--sun))}
@@ -159,15 +201,31 @@ h1,h2,h3,.head{font-family:var(--head)}
 .sayline{font-family:var(--head);font-size:56px;font-weight:600;line-height:1.1}
 .sayline.sent{font-size:36px;font-weight:500;text-align:center;max-width:900px}
 .sayline b{color:var(--c)}
-.heword{font-size:26px;color:var(--muted)}
+/* The word and its Hebrew are one block: the Hebrew sits in a soft pill of the trail colour right under it. */
+.sayblock{display:flex;flex-direction:column;align-items:center;gap:10px}
+.heword{display:inline-flex;align-items:center;gap:10px;font-size:24px;font-weight:500;color:var(--d,var(--river-d));background:var(--t,var(--river-t));box-shadow:inset 0 0 0 2px #ffffffaa;border-radius:999px;padding:4px 20px}
+.heword .en{font-family:var(--head);font-weight:600;direction:ltr}
+/* Listen, say it out loud, Next: one row of the same height. Nothing is recorded: the kid just says it. */
 .rec{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
-.rec .primary.on{background:#e8590c;box-shadow:0 6px 0 #b8380a;animation:popIn .6s infinite alternate}
+.rec .primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:58px;padding:0 30px;font-size:24px}
+.outloud{display:inline-flex;align-items:center;gap:10px;height:58px;padding:0 22px 0 14px;border-radius:999px;background:var(--sun);box-shadow:0 5px 0 #d9a21a;animation:popIn .45s}
+.outloud .mouth{font-size:30px;line-height:1}
+.outloud b{font-family:var(--head);font-weight:600;font-size:22px;display:block;line-height:1.1}
+.outloud .he{display:block;font-size:15px;color:#6b4e00;text-align:right}
 .ghost[disabled]{opacity:.4}
-.flag{font-family:var(--head);font-weight:600;font-size:20px;background:var(--sun);border-radius:999px;padding:8px 18px;box-shadow:0 5px 0 #d9a21a;animation:popIn .5s}
-.mark{font-size:26px;margin:0}
-.cheer[data-done]{padding:26px 36px;max-width:520px}
+.flag{font-family:var(--head);font-weight:600;font-size:20px;background:var(--sun);border-radius:999px;padding:0 20px;height:48px;margin-right:8px;box-shadow:0 5px 0 #d9a21a;animation:popIn .5s}
+.mark{margin:0}
+.cheer[data-done]{padding:26px 36px;width:440px;justify-content:center}
+.cheer[data-done] h2{font-size:42px}
+/* The race's end card holds its own buttons: padding on every side and a row that wraps, so Back never spills out. */
+.cheer[data-raceend]{padding:22px 36px 26px;max-width:min(560px,92vw)}
+.cheer[data-raceend] .row{flex-wrap:wrap;justify-content:center}
+.mark{font-size:24px;line-height:1.25}
 .tplace{display:inline-flex;align-items:center;gap:10px}
 .tp{width:48px;height:48px;display:inline-block}
+.tp svg{width:100%;height:100%}
+/* The place pictures sit inside agenda pills: they take none of the pill's own padding and shadow. */
+.agenda .tp{padding:0;background:none;box-shadow:none;border-radius:0}
 .steps4 span{font-size:.85em}
 .timer{width:min(1100px,92vw);display:flex;align-items:center;gap:16px}
 .track{position:relative;flex:1;height:22px;border-radius:99px;background:var(--line)}
@@ -184,9 +242,14 @@ h1,h2,h3,.head{font-family:var(--head)}
 .wgrid span{display:block;min-height:1.2em}
 
 /* ---------- rewards and race, Fable's follow-up ---------- */
-.chip{font-weight:600;font-size:16px;border-radius:999px;padding:6px 12px;background:#fff;box-shadow:inset 0 0 0 2px var(--line);color:var(--muted)}
+/* The race chip: locked, a quiet round trophy with a small lock (Hebrew tooltip says when it opens); open, the orange RACE! button. */
+.chip{position:relative;display:grid;place-items:center;font-weight:600;font-size:18px;border-radius:999px;height:48px;min-width:48px;padding:0 14px;background:#fff;box-shadow:var(--shadow);color:var(--muted);margin-left:8px}
+.chip[disabled]{padding:0;width:48px;cursor:default;pointer-events:none}
+.chip[disabled] .tr{font-size:22px;filter:grayscale(1);opacity:.55}
+.chip[disabled] .lk{position:absolute;right:-4px;bottom:-4px;width:22px;height:22px;border-radius:50%;background:var(--ink);display:grid;place-items:center}
+.chip[disabled] .lk svg{width:12px;height:12px}
 .chip.open{background:linear-gradient(160deg,#ff8a3d,#e8590c);color:#fff;box-shadow:0 4px 0 #b8380a;cursor:pointer}
-.hud .combo.fire{color:#fff;background:#e8590c;border-radius:999px;padding:2px 10px;opacity:1}
+.hud .combo.fire{background:#e8590c}
 .wc i{display:block;font-style:normal;font-size:12px;color:var(--sun);letter-spacing:1px}
 .wc.gold svg{filter:none;opacity:1}
 .wc.gold{background:linear-gradient(160deg,#fff6d6,#ffe08a);box-shadow:0 0 0 3px var(--sun),0 4px 14px #ffc83d88}
@@ -196,6 +259,32 @@ h1,h2,h3,.head{font-family:var(--head)}
 .rc-win{margin:0;font-size:22px}
 .stage.comeback::before{content:"↺";position:absolute;top:-6px;right:8px;font-size:28px;color:var(--muted)}
 
+/* ---------- race end and the board ---------- */
+.cheer.raceend{flex-direction:row;align-items:stretch;gap:28px;text-align:left;padding:22px 28px;max-width:min(900px,94vw)}
+.re-left{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;width:330px}
+.re-left h2{font-size:40px;line-height:1.05}
+.re-left .big-t{font-size:56px;line-height:1}
+.board{width:340px;display:flex;flex-direction:column;gap:8px;background:var(--bg);border-radius:20px;padding:14px 16px}
+.bhead b{display:block;font-size:22px}
+.bhead .he{display:block;text-align:right;font-size:15px;color:var(--muted)}
+.board ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.board li{display:flex;align-items:center;gap:10px;height:40px;padding:0 14px;background:#fff;border-radius:12px;font-size:20px;font-weight:500}
+.board li .rk{width:28px;text-align:center;font-family:var(--head);font-weight:600;color:var(--muted)}
+.board li .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.board li .sc{font-size:22px}
+.board li.me{background:var(--sun);box-shadow:0 4px 0 #d9a21a;animation:popIn .5s cubic-bezier(.3,1.6,.5,1)}
+.board li.none{justify-content:center;color:var(--muted)}
+.board .off{margin:0;font-size:14px;color:var(--muted)}
+.board .off .he{display:block;text-align:right}
+.nameform{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
+.nameform label b{display:block;font-family:var(--head);font-weight:600;font-size:22px}
+.nameform label .he{display:block;font-size:16px;color:var(--muted)}
+.nameform input{width:100%;height:64px;border:0;border-radius:18px;padding:0 18px;font:600 32px var(--head);color:var(--ink);text-align:center;background:#fff;box-shadow:inset 0 0 0 3px var(--c,var(--river))}
+.nameform input:focus{outline:none;box-shadow:inset 0 0 0 4px var(--sun)}
+.nameform .row{display:flex;gap:12px;align-items:center}
+.re-left .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.tbar .ib.wide{width:auto;padding:0 16px;gap:8px;display:inline-flex;font-family:var(--head);font-weight:600;font-size:17px;color:var(--muted)}
+
 /* ---------- teacher (projector) ---------- */
 .tbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;box-shadow:0 1px 0 var(--line)}
 .tbar .num{display:grid;place-items:center;min-width:44px;height:44px;border-radius:999px;background:var(--river);color:#fff;font-family:var(--head);font-weight:600;font-size:24px}
@@ -203,10 +292,11 @@ h1,h2,h3,.head{font-family:var(--head)}
 .tbar .min{font-weight:600;color:var(--muted)}
 .tbar .ib{width:52px;height:52px;border-radius:16px;background:var(--bg);display:grid;place-items:center;box-shadow:inset 0 0 0 2px var(--line)}
 .tbar .ib svg{width:24px;height:24px}
-.prog{display:flex;gap:6px;padding:8px 16px 0}
-.prog button{flex:1;height:10px;border-radius:99px;background:var(--line)}
-.prog button.done{background:#9cc2f5}
-.prog button.cur{background:var(--river)}
+.prog{display:flex;gap:8px;padding:20px 16px 0}
+.prog button{flex:1;position:relative;min-width:0;height:48px;margin:-19px 0}
+.prog button::after{content:"";position:absolute;left:0;right:0;top:19px;height:10px;border-radius:99px;background:var(--line)}
+.prog button.done::after{background:#9cc2f5}
+.prog button.cur::after{background:var(--river)}
 .tscreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;min-height:calc(100vh - 100px)}
 .title{font-family:var(--head);font-size:clamp(48px,9vmin,110px);font-weight:700;margin:0;text-align:center;line-height:1.05}
 .sub{font-size:clamp(22px,4vmin,44px);font-weight:500;margin:0;text-align:center;color:var(--muted)}
@@ -272,26 +362,26 @@ const LESSON = {
     { id: 3, name: "Mountain", emoji: "⛰️", heName: "הר",  pic: "mountain", c: "var(--rock)",   d: "var(--rock-d)",   t: "var(--rock-t)" }
   ],
   // Four games in the same order on every trail (repetition → recognition → reproduction), harder on each trail.
-  //  say: hear it, say it to the laptop, hear yourself.   listen: hear a word, press its picture or written word.
+  //  say: hear it, say it out loud, press Next (never recorded).   listen: hear a word, press its picture or written word.
   //  picword: picture → word.   gap: sentence with a gap → word.   build: letter tiles.
   // options: how many to choose from; hear: a speaker on each word; heWord: the Hebrew word shown; given: letters filled in;
-  // extra: wrong letters added; recSec: recording length (3 s holds one word, 6 s one short sentence).
+  // extra: wrong letters added.
   games: {
     1: [
-      { type: "say",     heWord: true, recSec: 3, say: "Listen. Say the word.", he: "הקשיבו ואמרו את המילה." },
+      { type: "say",     heWord: true, say: "Listen. Say the word.", he: "הקשיבו ואמרו את המילה." },
       { type: "listen",  options: 3, show: "pic", say: "Listen. Press the picture.", he: "הקשיבו ולחצו על התמונה." },
       { type: "picword", options: 3, hear: true, say: "Look. Press the word.", he: "הסתכלו בתמונה ולחצו על המילה." },
       // River builds the short words first (air, sea, dry before mountain), Fable's idea 14.
       { type: "build",   given: 1, shortFirst: true, say: "Build the word.", he: "בנו את המילה." }
     ],
     2: [
-      { type: "say",     heWord: true, recSec: 3, say: "Listen. Say the word.", he: "הקשיבו ואמרו את המילה." },
+      { type: "say",     heWord: true, say: "Listen. Say the word.", he: "הקשיבו ואמרו את המילה." },
       { type: "listen",  options: 6, show: "pic", say: "Listen. Press the picture.", he: "הקשיבו ולחצו על התמונה." },
       { type: "picword", options: 4, say: "Look. Press the word.", he: "הסתכלו בתמונה ולחצו על המילה." },
       { type: "build",   given: 0, say: "Build the word.", he: "בנו את המילה." }
     ],
     3: [
-      { type: "say",     heWord: true, sentence: true, mute: true, recSec: 6, say: "Read. Say the sentence.", he: "אמרו את המשפט." },
+      { type: "say",     heWord: true, sentence: true, mute: true, say: "Read. Say the sentence.", he: "אמרו את המשפט." },
       { type: "listen",  options: 6, show: "word", say: "Listen. Press the word.", he: "הקשיבו ולחצו על המילה." },
       { type: "gap",     mute: true, say: "Read. Press the missing word.", he: "קראו ולחצו על המילה החסרה." },
       { type: "build",   given: 0, extra: 2, hideSound: true, say: "Build the word.", he: "בנו את המילה." }
@@ -344,10 +434,24 @@ const LESSON = {
     freezeMs: 1000, nextMs: 300,
     // +5 per right answer, no combo; +50 for a new best.
     perRight: 5, newBest: 50,
-    // The score to beat with no shared board: Aviv's own run sets it (Fable's fallback; many kids can beat a fixed score).
-    teacher: 12,
     // Three countdown beeps before GO, and a tick in the last five seconds.
     countdown: 3, tickFrom: 5
+  },
+  // The race boards (his word: race only, one shared top 5 per place, River, Forest and Mountain). Stored on ntfy.sh:
+  // free, no account or key, HTTPS with CORS (checked: health 200, a post read back by a poll). It keeps messages
+  // 12 hours, one school day, so the boards start empty each morning even without a reset.
+  board: {
+    url: "https://ntfy.sh/", topic: "nw-29c62d00ebb25cdd", since: "12h", size: 5,
+    // ntfy.sh gives each internet address 60 requests at once, then one per 5 s, and a class shares the school's one
+    // address: so a laptop reads the boards at most once per 2 minutes (30 laptops in a 5-minute race window: about
+    // 75 reads, inside the 60 + 60 the address has). Between reads it shows the last boards plus its own new scores.
+    freshMs: 120000,
+    // 4 s: a slow school network still answers; longer and the kid waits at a frozen end screen.
+    timeoutMs: 4000,
+    // First name only, 12 letters at most (his plan's cap; the longest name fits the board row at 1280 px).
+    nameMax: 12,
+    // A 30 s race at one press per 0.3 s cannot pass 100: a posted score above it is not a real race and is dropped.
+    maxScore: 100
   },
   // Kid-facing words (Fable's table): never "trail", never easy/hard; the Hebrew line sits under each instruction,
   // never inside a question or its answers. "Start at River", not "You are River": a start is not an identity.
@@ -363,11 +467,17 @@ const LESSON = {
     next: nx => `${nx.name} ${nx.emoji}`,
     race: "RACE!", raceWin: "Can you win?", heRace: s => `מרוץ! ${s} שניות. תצליחו לנצח?`,
     top: "Top score", best: "Your best", go: "GO!",
-    locked: "🏆 🔒 after 🏁", heLocked: "נפתח אחרי הדגל",
-    timeUp: n => `Time's up! You got ${n}.`, newBest: n => `New best! ${n}!`, heEnd: "נגמר הזמן! / שיא חדש!",
+    raceOf: t => `${t.name} race`, board: t => `${t.name} race · Top 5`, heBoard: t => `5 המובילים במרוץ ה${t.heName}`,
+    top5: "Top 5! Write your first name:", heTop5: "נכנסתם ל-5 הראשונים! כתבו את השם הפרטי:",
+    save: "Save ▶", skip: "Skip", badName: "Try another name", heBadName: "כתבו שם פרטי באותיות",
+    offline: "No internet: this laptop's board", heOffline: "אין אינטרנט: הלוח של המחשב הזה בלבד",
+    empty: "Be the first!", locked: "Race opens after the last check",
+    heLocked: "המרוץ נפתח אחרי הבדיקה האחרונה 🏁",
+    timeUp: n => `Time's up! You got ${n}.`, newBest: n => `New best! ${n}!`, heTimeUp: "נגמר הזמן!", heNewBest: "שיא חדש!",
     again: "Try again ▶", back: "Back", heAgain: "שוב · חזרה",
     tryAgain: "Try again!", heTryAgain: "נסו שוב",
-    hearMe: "Hear me", rec: "Record", next1: "Next",
+    fs: "Full screen", fsHint: "Press Full screen first!", heFsHint: "לחצו קודם על \"מסך מלא\"",
+    outLoud: "Say it out loud!", heOutLoud: "אמרו את זה בקול", next1: "Next",
     welcome: "Welcome to nature!"
   },
   settings: {
@@ -440,6 +550,10 @@ const ICON = {
   speaker: `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a8.5 8.5 0 0 1 0 13" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`,
   prev: `<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke="#1f2a3d" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   next: `<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="#1f2a3d" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  // A small screen growing to a big one: the Full screen hint for kids who cannot read the line.
+  fsgrow: `<svg viewBox="0 0 54 40" aria-hidden="true"><rect x="2" y="2" width="50" height="34" rx="5" fill="#fff" stroke="#2f80ed" stroke-width="3"/><rect x="18" y="13" width="18" height="12" rx="2" fill="#bfe9ff" stroke="#1f2a3d" stroke-width="2"/><path d="M15 10L8 6M8 6v5M8 6h5M39 10l7-4M46 6v5M46 6h-5M15 28l-7 4M8 32v-5M8 32h5M39 28l7 4M46 32v-5M46 32h-5" stroke="#1f2a3d" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  star: `<svg class="st" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.3l-5.8 3.1 1.1-6.5L2.6 9.3l6.5-.9z" fill="#ffc83d" stroke="#e8a20c" stroke-width="1.5" stroke-linejoin="round"/></svg>`,
+  lock: `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5" fill="#fff"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="#fff" stroke-width="2.6" fill="none"/></svg>`,
   fs: `<svg viewBox="0 0 24 24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" stroke="#1f2a3d" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 };
 const SCENE = `<svg class="scene" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -504,6 +618,8 @@ function ctick() {
   if (PARTS.length) requestAnimationFrame(ctick); else { CRUN = false; CX.clearRect(0, 0, CV.width, CV.height); }
 }
 const trailVars = t => `--c:${t.c};--d:${t.d};--t:${t.t}`;
+// The picture of a word, tagged with the word it shows (the smoke test checks each picture against its question).
+const picBox = (w, cls = "pop") => `<div class="big ${cls}" data-pic="${w}">${ART[w]}</div>`;
 const speakerBtn = (text, cls = "") => `<button class="speaker btn ${cls}" data-say="${text}" aria-label="Listen">${ICON.speaker}</button>`;
 document.addEventListener("click", e => { const b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say); });
 const sayBar = (en, he) => `<div class="card say">${speakerBtn(en)}<div><span class="en">${en}</span>${he ? `<span class="he" dir="rtl" lang="he">${he}</span>` : ""}</div></div>`;
@@ -520,45 +636,62 @@ function round(box, g, w, done) {
   box.dataset.answer = w; box.dataset.type = g.type;
   if (g.type === "picword") {
     const opts = shuffle([w, ...others(g.options)]);
-    box.innerHTML = `<div class="big pop">${ART[w]}</div><div class="choices">${opts.map(o => `<button class="choice btn" data-w="${o}">${g.hear ? `<span class="mini" data-say="${o}">${ICON.speaker.replace(/#fff/g, "#1f2a3d")}</span>` : ""}${o}</button>`).join("")}</div>`;
+    box.innerHTML = `${picBox(w)}<div class="choices">${opts.map(o => g.hear ? `<span class="opt"><button class="mini btn" data-say="${o}" aria-label="Listen: ${o}">${ICON.speaker.replace(/#fff/g, "#1f2a3d")}</button><button class="choice btn" data-w="${o}">${o}</button></span>` : `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
   } else if (g.type === "gap") {
     const [s, bad] = LESSON.sentences[w], opts = shuffle([w, ...bad]);
     box.innerHTML = `<div class="gap pop">${s.replace("___", "<u>&nbsp;</u>")}</div><div class="choices">${opts.map(o => `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
   } else if (g.type === "listen") {
     const opts = shuffle([w, ...others(g.options)]);
-    box.innerHTML = `${speakerBtn(w, "big pop")}<div class="choices">${opts.map(o => g.show === "pic" ? `<button class="choice pic btn" data-w="${o}" aria-label="picture">${ART[o]}</button>` : `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
+    box.innerHTML = `${speakerBtn(w, "xl pop")}<div class="choices ${opts.length > 5 ? "six" : ""}">${opts.map(o => g.show === "pic" ? `<button class="choice pic btn" data-w="${o}" aria-label="picture">${ART[o]}</button>` : `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
     speak(w);
   } else if (g.type === "build") {
     const given = g.given || 0;
     const pool = shuffle([...w.slice(given), ...shuffle("aeiorstlnm".split("").filter(c => !w.includes(c))).slice(0, g.extra || 0)]);
     let pos = given;
-    box.innerHTML = `<div class="big pop">${ART[w]}</div>${g.hideSound ? "" : speakerBtn(w)}<div class="slots">${[...w].map((c, i) => `<span class="slot ${i < given ? "f given" : ""}">${i < given ? c : ""}</span>`).join("")}</div><div class="tiles">${pool.map(c => `<button class="tile btn">${c}</button>`).join("")}</div>`;
-    $$(".tile", box).forEach(b => b.onclick = () => {
+    box.innerHTML = `${picBox(w)}<div class="buildrow">${g.hideSound ? "" : speakerBtn(w)}<div class="slots">${[...w].map((c, i) => `<span class="slot ${i < given ? "f given" : ""}">${i < given ? c : ""}</span>`).join("")}</div></div><div class="tiles">${pool.map(c => `<button class="tile btn">${c}</button>`).join("")}</div>`;
+    const slotsEl = $(".slots", box), mark = () => $$(".slot", box).forEach((x, i) => x.classList.toggle("next", i === pos));
+    mark();
+    const tryTile = b => {
+      if (b.disabled) return;
       if (b.textContent !== w[pos]) return wrong(b);
-      const s = $$(".slot", box)[pos]; s.textContent = w[pos]; s.classList.add("f"); b.disabled = true; pos++;
+      const s = $$(".slot", box)[pos]; s.textContent = w[pos]; s.classList.add("f"); b.disabled = true; pos++; mark();
       if (pos === w.length) { $$(".tile", box).forEach(x => x.disabled = true); speak(w); done(!miss); }
+    };
+    $$(".tile", box).forEach(b => {
+      // A tap places the letter; a drag (pointer events, so finger, pen and mouse alike) drops it on the slots.
+      b.onclick = () => { if (performance.now() - (b._dropAt || 0) > 400) tryTile(b); };
+      b.onpointerdown = e => {
+        if (b.disabled || !e.isPrimary) return;
+        const x0 = e.clientX, y0 = e.clientY; let ghost = null;
+        try { b.setPointerCapture(e.pointerId); } catch (_) {}
+        // 40px around the slots: a drop near them counts, a finger never has to hit a 58px box exactly.
+        const over = m => { const r = slotsEl.getBoundingClientRect(); return m.clientX > r.left - 40 && m.clientX < r.right + 40 && m.clientY > r.top - 40 && m.clientY < r.bottom + 40; };
+        b.onpointermove = m => {
+          // 10px: past a finger's jitter on a tap, so a tap never turns into a drag.
+          if (!ghost && Math.hypot(m.clientX - x0, m.clientY - y0) < 10) return;
+          if (!ghost) { ghost = document.createElement("div"); ghost.className = "dragtile"; ghost.textContent = b.textContent; ghost.setAttribute("style", $(".trail", app)?.getAttribute("style") || ""); document.body.appendChild(ghost); b.style.opacity = ".3"; }
+          ghost.style.left = (m.clientX - 29) + "px"; ghost.style.top = (m.clientY - 40) + "px";
+          slotsEl.classList.toggle("over", over(m));
+        };
+        b.onpointerup = b.onpointercancel = u => {
+          b.onpointermove = b.onpointerup = b.onpointercancel = null;
+          if (!ghost) return;
+          ghost.remove(); b.style.opacity = ""; slotsEl.classList.remove("over"); b._dropAt = performance.now();
+          if (u.type === "pointerup" && over(u)) tryTile(b);
+        };
+      };
     });
     return;
   } else if (g.type === "say") {
-    // Hear it, say it to the laptop, hear yourself and then the clip. Nothing is saved or sent.
+    // Hear it, say it out loud, press Next. Nothing is recorded, ever (his word): the page asks for no device.
     const line = g.sentence ? LESSON.sentences[w][0].replace("___", `<b>${w}</b>`) : `<b>${w}</b>`;
-    const he = g.heWord ? `<div class="he heword" dir="rtl" lang="he">${W.find(x => x.id === w).he}</div>` : "";
-    const mic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
-    box.innerHTML = `<div class="big pop">${ART[w]}</div><div class="sayline ${g.sentence ? "sent" : ""}">${line}</div>${he}
-      <div class="rec">${speakerBtn(w)}${mic ? `<button class="primary btn" data-r>🎤 ${T.rec}</button><button class="ghost btn" data-h disabled>👂 ${T.hearMe}</button>` : ""}<button class="primary btn" data-n>${T.next1} ▶</button></div>`;
+    // The Hebrew word in a pill right under the English; under a sentence it names the English word it translates.
+    const heW = `<span class="he" dir="rtl" lang="he">${W.find(x => x.id === w).he}</span>`;
+    const he = g.heWord ? `<div class="heword" dir="ltr">${g.sentence ? `<span class="en">${w}</span>=` : ""}${heW}</div>` : "";
+    box.innerHTML = `${picBox(w)}<div class="sayblock"><div class="sayline ${g.sentence ? "sent" : ""}">${line}</div>${he}</div>
+      <div class="rec">${speakerBtn(w)}<div class="outloud" data-outloud><span class="mouth" aria-hidden="true">🗣️</span><span><b>${T.outLoud}</b><span class="he" dir="rtl" lang="he">${T.heOutLoud}</span></span></div><button class="primary btn" data-n>${T.next1} ▶</button></div>`;
     if (!g.sentence) speak(w);
-    let mine = null;
     $("[data-n]", box).onclick = () => done(true);
-    const r = $("[data-r]", box), h = $("[data-h]", box);
-    if (h) h.onclick = () => { if (!mine) return; const a = new Audio(mine); a.onended = () => speak(w); a.play().catch(() => speak(w)); };
-    if (r) r.onclick = async () => {
-      try {
-        const st = await navigator.mediaDevices.getUserMedia({ audio: true }), ch = [], rec = new MediaRecorder(st);
-        rec.ondataavailable = d => ch.push(d.data);
-        rec.onstop = () => { st.getTracks().forEach(x => x.stop()); r.classList.remove("on"); mine = URL.createObjectURL(new Blob(ch)); h.disabled = false; h.click(); };
-        rec.start(); r.classList.add("on"); setTimeout(() => rec.state === "recording" && rec.stop(), g.recSec * 1000);
-      } catch (err) { r.hidden = true; h.hidden = true; }   // microphone blocked: keep "Next", hide recording
-    };
     return;
   }
   $$(".choice", box).forEach(b => b.onclick = e => {
@@ -590,9 +723,10 @@ const levelStart = lv => lv <= 1 ? 0 : P.firstLevel + (lv - 2) * P.perLevel;
 function hud() {
   const s = store.get(), pts = s.points || 0, lv = levelOf(pts), span = levelStart(lv + 1) - levelStart(lv), into = pts - levelStart(lv);
   const m = mult(), raceOpen = s.checked !== undefined;
-  return `<div class="hud"><span class="lvl head">LV ${lv}</span><span class="xp"><i style="width:${100 * into / span}%"></i></span><span class="pts head" data-pts>${pts}</span>
-    <span class="combo head ${m > 1 ? "on" : ""} ${m >= 3 ? "fire" : ""}" data-combo>🔥 x${m}${m >= 3 ? " ON FIRE" : ""}</span></div>
-    <button class="chip head ${raceOpen ? "open" : ""}" data-chip ${raceOpen ? "" : "disabled"} title="${T.heLocked}">${raceOpen ? "🏆 " + T.race : T.locked}</button>`;
+  // Level 1 is where everyone starts, so the word "Level" shows only from Level 2, once he has earned one.
+  return `<div class="hud" title="${pts} points">${ICON.star}<span class="pts head" data-pts>${pts}</span>${lv > 1 ? `<span class="lvl head">Level ${lv}</span>` : ""}<span class="xp"><i style="width:${100 * into / span}%"></i></span>
+    ${m > 1 ? `<span class="combo head ${m >= 3 ? "fire" : ""}" data-combo>🔥 x${m}${m >= 3 ? " ON FIRE" : ""}</span>` : ""}</div>
+    <button class="chip head ${raceOpen ? "open" : ""}" data-chip ${raceOpen ? `title="${T.race}"` : `disabled title="${T.heLocked}" aria-label="${T.heLocked}"`}>${raceOpen ? "🏆 " + T.race : `<span class="tr">🏆</span><span class="lk">${ICON.lock}</span>`}</button>`;
 }
 function cardsStrip() {
   const st = store.get().stars || {};
@@ -629,15 +763,25 @@ function missed() { combo = 0; refreshHud(); }
 function floatText(t) { const st = $(".stage", app); if (!st) return; const e = document.createElement("div"); e.className = "float head"; e.textContent = t; st.appendChild(e); setTimeout(() => e.remove(), 900); }
 function toast(html, sound, party) { const e = document.createElement("div"); e.className = "toast pop"; e.innerHTML = html; document.body.appendChild(e); sound && sound(); party && confetti(140); setTimeout(() => e.remove(), P.toastMs); }
 function levelUp(lv) { toast(`<span class="burst"></span><span><small>Level up!</small><b>Level ${lv}!</b></span>`, SFX.level, true); }
+// The locked chip lets taps through to the page; a tap on its spot says when the race opens (was a hover-only tooltip).
+document.addEventListener("click", e => {
+  const c = $("[data-chip][disabled]", app); if (!c) return;
+  const r = c.getBoundingClientRect();
+  if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom)
+    toast(`<span class="trophy" style="font-size:44px">🏆</span><span><small>🔒 ${T.locked}</small><b class="he" dir="rtl" lang="he" style="font-size:22px">${T.heLocked}</b></span>`, SFX.no);
+});
 function bindChip() { const c = $("[data-chip]", app); if (c && !c.disabled) c.onclick = () => { const t = trailOf(store.get().trail || 1); race(t); }; }
 
 function start() {
   const s = store.get(), t = s.trail && trailOf(s.trail);
   app.innerHTML = `<div class="land">${SCENE}
     <div class="hero rise"><h1>${LESSON.title}</h1><p>air · dry · forest · grass · mountain · nature · river · sea</p>
-      ${t ? `<button class="primary btn" data-resume style="${trailVars(t)}">${t.emoji} ${T.resume} ▶</button><div class="he" dir="rtl" lang="he">${T.heResume}</div>`
-          : `<button class="primary btn" data-go>${T.start} ▶</button><div class="he" dir="rtl" lang="he">${T.heStart}</div>`}</div>
+      <div class="gorow"><button class="fsbtn btn" data-fs-start>${ICON.fs} ${T.fs}</button>
+      ${t ? `<button class="primary btn" data-resume style="${trailVars(t)}">${t.emoji} ${T.resume} ▶</button></div><div class="he" dir="rtl" lang="he">${T.heResume}</div>`
+          : `<button class="primary btn" data-go>${T.start} ▶</button></div><div class="he" dir="rtl" lang="he">${T.heStart}</div>`}
+      <div class="fshint" data-fs-hint>${ICON.fsgrow}<div><b>${T.fsHint}</b><span class="he" dir="rtl" lang="he">${T.heFsHint}</span></div></div></div>
     <div class="trailtags rise">${LESSON.trails.map(x => `<span class="tag">${ART[x.pic]}${x.name}</span>`).join("")}</div></div>`;
+  $("[data-fs-start]", app).onclick = toggleFS;
   if (t) $("[data-resume]", app).onclick = () => { location.hash = "level-" + t.id; };
   else $("[data-go]", app).onclick = quiz;
 }
@@ -645,8 +789,8 @@ function quiz() {
   const Q = LESSON.quiz; let k = 0;
   const right = { warm: 0, word: 0, sent: 0 };
   app.innerHTML = `<div class="land">${SCENE}<div class="quiz rise" data-quiz>
-    <div class="qtop"><h2>${T.quiz}</h2><div class="steps">${Q.questions.map(() => "<i></i>").join("")}</div></div>
-    ${heLine(T.heQuiz)}<div class="stage"></div></div></div>`;
+    <div class="qtop"><div class="qtitle"><h2>${T.quiz}</h2>${heLine(T.heQuiz)}</div><div class="steps">${Q.questions.map(() => "<i></i>").join("")}</div></div>
+    <div class="stage"></div></div></div>`;
   const box = $(".stage", app);
   const ask = () => {
     if (k >= Q.questions.length) return result(right.word >= Q.wordsFor && right.sent >= Q.sentsFor ? 3 : right.word >= Q.wordsFor ? 2 : 1);
@@ -748,15 +892,82 @@ function lastCheck(t) {
   ask();
 }
 const best = () => store.get().best || 0;
-function raceCard() {
+/* ---------- race boards: one shared top 5 per place on ntfy.sh, this laptop's own board when it cannot reach it ---------- */
+const B = LESSON.board;
+// The smoke test points the boards at a test topic of its own (never the class one) before the page loads.
+const boardTopic = () => window.NW_BOARD_TOPIC || B.topic, boardUrl = () => (window.NW_BOARD_URL || B.url) + boardTopic();
+const LBK = () => "nature-board-" + boardTopic();
+const lb = { get: () => JSON.parse(localStorage.getItem(LBK()) || "{}"), set: o => localStorage.setItem(LBK(), JSON.stringify({ ...lb.get(), ...o })) };
+const esc = x => String(x).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
+// Words a kid may try as a name: long ones anywhere in the name, short ones only as the whole name.
+const BAD_IN = ["fuck", "shit", "bitch", "porn", "nigg", "שרמוט", "מניאק", "זונה"], BAD_IS = ["ass", "sex", "dick", "poop", "pee", "זין", "כוס", "חרא", "קקי", "פיפי", "טמבל", "מטומטם"];
+function cleanName(raw) {
+  const n = String(raw || "").replace(/[^A-Za-zא-ת\s'-]/g, "").trim().split(/\s+/)[0].slice(0, B.nameMax);
+  const low = n.toLowerCase();
+  if (!/[A-Za-zא-ת]/.test(n) || BAD_IN.some(w => low.includes(w)) || BAD_IS.includes(low)) return "";
+  return n;
+}
+let boardLive = null;   // true after a good read, false after a failed one, null before the first
+async function boardFetch(force) {
+  const c = lb.get().cache;
+  if (!force && c && Date.now() - c.at < B.freshMs) { boardLive = c.ok; return; }
+  try {
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), B.timeoutMs);
+    const r = await fetch(`${boardUrl()}/json?poll=1&since=${B.since}`, { signal: ctl.signal, cache: "no-store" });
+    clearTimeout(to);
+    if (!r.ok) throw new Error("board " + r.status);
+    const msgs = (await r.text()).split("\n").filter(Boolean).map(l => {
+      try { const e = JSON.parse(l); return e.event === "message" ? { ...JSON.parse(e.message), at: e.time } : null; } catch (_) { return null; }
+    }).filter(Boolean);
+    lb.set({ cache: { at: Date.now(), ok: true, msgs } }); boardLive = true;
+  } catch (e) {
+    // Offline or refused: keep the last boards, mark them as this laptop's, and wait freshMs before asking again.
+    lb.set({ cache: { at: Date.now(), ok: false, msgs: (c && c.msgs) || [] } }); boardLive = false;
+  }
+}
+// The top 5 of one place: the last boards read plus this laptop's own scores, nothing from before the newest reset,
+// each name once with its best score; ties go to whoever got there first.
+function top5(place) {
+  const st = lb.get(), msgs = [...((st.cache && st.cache.msgs) || []), ...(st.own || [])];
+  const reset = Math.max(0, ...msgs.filter(m => m && m.reset).map(m => +m.at || 0));
+  const by = new Map();
+  for (const m of msgs) {
+    if (!m || m.reset || +m.p !== place || (+m.at || 0) <= reset) continue;
+    const n = cleanName(m.n), sc = Math.floor(+m.s);
+    if (!n || !(sc > 0) || sc > B.maxScore) continue;
+    const k = n.toLowerCase(), o = by.get(k);
+    if (!o || sc > o.s || (sc === o.s && +m.t < o.t)) by.set(k, { n, s: sc, t: +m.t || 0 });
+  }
+  return [...by.values()].sort((x, y) => y.s - x.s || x.t - y.t).slice(0, B.size);
+}
+const makesTop = (place, sc) => { const b = top5(place); return sc > 0 && (b.length < B.size || sc > b[b.length - 1].s); };
+async function boardPost(entry) {
+  lb.set({ own: [...(lb.get().own || []), { ...entry, at: Date.now() / 1000 }], name: entry.n });
+  try {
+    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), B.timeoutMs);
+    const r = await fetch(boardUrl(), { method: "POST", body: JSON.stringify(entry), signal: ctl.signal });
+    clearTimeout(to); if (!r.ok) throw new Error("post " + r.status);
+    return true;
+  } catch (e) { boardLive = false; return false; }
+}
+function boardHtml(t, me) {
+  const rows = top5(t.id), rank = ["🥇", "🥈", "🥉", "4", "5"];
+  return `<div class="board" data-board="${t.id}"><div class="bhead"><b class="head">🏆 ${T.board(t)}</b>${heLine(T.heBoard(t))}</div>
+    <ol>${rows.length ? rows.map((r, i) => `<li class="${me && r.t === me.t && r.n === me.n ? "me" : ""}"><span class="rk">${rank[i]}</span><span class="nm" dir="auto">${esc(r.n)}</span><b class="sc head">${r.s}</b></li>`).join("")
+      : `<li class="none head">${T.empty}</li>`}</ol>
+    ${boardLive === false ? `<p class="off" data-offline>📴 ${T.offline}${heLine(T.heOffline)}</p>` : ""}</div>`;
+}
+function raceCard(t) {
+  const top = top5(t.id)[0];
   return `<div class="racecard pop" data-racecard>
       <div class="rc-icons"><span class="trophy">🏆</span><span class="watch">⏱️</span></div>
-      <h2 class="head">${T.race} ⏱ ${RC.seconds} s</h2><p class="head rc-win">${T.raceWin}</p>${heLine(T.heRace(RC.seconds))}
-      <div class="rc-nums"><div class="rc-rec"><small>${T.top}</small><b data-record>${Math.max(RC.teacher, best())}</b><small>${best() > RC.teacher ? "you" : "Teacher"}</small></div>
+      <h2 class="head">${T.raceOf(t)} · ${RC.seconds} s</h2><p class="head rc-win">${T.raceWin}</p>${heLine(T.heRace(RC.seconds))}
+      <div class="rc-nums"><div class="rc-rec"><small>${T.top}</small><b data-record>${top ? top.s : "–"}</b><small data-holder dir="auto">${top ? esc(top.n) : T.empty}</small></div>
       <div class="rc-rec"><small>${T.best}</small><b data-best>${best()}</b></div></div>
       <button class="primary btn race-go" data-race>${T.go}</button>
     </div>`;
 }
+function bindRaceCard(t) { const g = $("[data-race]", app); if (g) g.onclick = () => race(t); }
 // The end: the score and "Mark as done", the race card, and the next place.
 function trailEnd(t, right, of) {
   if (right === undefined) { right = store.get().checked || 0; of = LESSON.check[t.id].length; }
@@ -766,9 +977,11 @@ function trailEnd(t, right, of) {
     <div class="cheer card pop" data-done><h2>${T.done(right, of)}</h2>
       <p class="head mark">${T.markDone}</p>${heLine(T.heMarkDone)}
       ${nx ? `<button class="primary btn next-trail" data-next style="${trailVars(nx)}">${ART[nx.pic]} ${T.next(nx)} ▶</button>` : ""}
-    </div>${raceCard()}</div></div>`, LESSON.games[t.id].length);
-  app.dataset.ended = "1"; confetti(); speak(T.wellDone); bindChip();
-  $("[data-race]", app).onclick = () => race(t);
+    </div>${raceCard(t)}</div></div>`, LESSON.games[t.id].length);
+  app.dataset.ended = "1"; confetti(); speak(T.wellDone); bindChip(); bindRaceCard(t);
+  // The card shows the place's top score as soon as the boards answer.
+  // Only the numbers change, never the GO button under a finger.
+  boardFetch().then(() => { const r = $("[data-record]", app), top = top5(t.id)[0]; if (r && top) { r.textContent = top.s; r.nextElementSibling.textContent = top.n; } });
   if (nx) $("[data-next]", app).onclick = () => { store.set({ trail: nx.id, game: 0 }); location.hash = "level-" + nx.id; };
 }
 // The race: the same for every place. Picture -> 1 of 4 words; one press per question; a wrong press shows the answer
@@ -776,7 +989,8 @@ function trailEnd(t, right, of) {
 function race(t) {
   let score = 0, alive = false, deck = [], t0 = 0, lastTick = -1;
   delete app.dataset.ended; onMiss = () => {};
-  app.innerHTML = shell(t, `<div class="racebar"><span class="trophy">🏆</span><b class="head">${T.top} ${Math.max(RC.teacher, best())}</b>
+  const top = top5(t.id)[0];
+  app.innerHTML = shell(t, `<div class="racebar"><span class="trophy">🏆</span><b class="head">${top ? `${T.top} ${top.s} · <span dir="auto">${esc(top.n)}</span>` : T.empty}</b>
     <div class="clock"><i data-clock></i></div><span class="head rscore">⚡ <b data-score>0</b></span></div><div class="stage"></div>`, LESSON.games[t.id].length);
   $(".trail", app).dataset.game = "race";
   const box = $(".stage", app), clock = $("[data-clock]", app);
@@ -785,7 +999,7 @@ function race(t) {
     if (!alive) return;
     const w = nextWord(), opts = shuffle([w, ...shuffle(WIDS.filter(x => x !== w)).slice(0, RC.options - 1)]);
     box.dataset.answer = w; box.dataset.type = "race";
-    box.innerHTML = `<div class="big">${ART[w]}</div><div class="choices">${opts.map(o => `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
+    box.innerHTML = `${picBox(w, "")}<div class="choices">${opts.map(o => `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
     $$(".choice", box).forEach(b => b.onclick = () => {
       $$(".choice", box).forEach(x => x.onclick = null);
       if (b.dataset.w === w) { b.classList.add("ok"); score++; $("[data-score]", app).textContent = score; SFX.ok(score); addPoints(RC.perRight); setTimeout(ask, RC.nextMs); }
@@ -800,16 +1014,45 @@ function race(t) {
     if (left <= 0) return end();
     requestAnimationFrame(tick);
   };
-  const end = () => {
+  const end = async () => {
     alive = false; SFX.horn();
     const isBest = score > best();
-    if (isBest) store.set({ best: score });
-    box.innerHTML = `<div class="cheer card pop" data-raceend><span class="trophy big-t">🏆</span><h2>${isBest ? T.newBest(score) : T.timeUp(score)}</h2>${heLine(T.heEnd)}
-      <div class="row"><button class="primary btn" data-again>${T.again}</button><button class="ghost btn" data-back>${T.back}</button></div>${heLine(T.heAgain)}</div>`;
-    if (isBest) { addPoints(RC.newBest); confetti(200); }
-    app.dataset.ended = "1";
-    $("[data-again]", app).onclick = () => race(t);
-    $("[data-back]", app).onclick = () => trailEnd(t);
+    if (isBest) { store.set({ best: score }); addPoints(RC.newBest); confetti(200); }
+    // The end card: the score on the left; the place's top 5 on the right. A top-5 score first asks for a first
+    // name, then shows the board with his row lit up, then Try again.
+    box.innerHTML = `<div class="cheer card pop raceend" data-raceend><div class="re-left"><span class="trophy big-t">🏆</span>
+      <h2>${isBest ? T.newBest(score) : T.timeUp(score)}</h2>${heLine(isBest ? T.heNewBest : T.heTimeUp)}<div class="re-act"></div></div><div class="re-board"></div></div>`;
+    const act = $(".re-act", box), side = $(".re-board", box);
+    const buttons = () => {
+      act.innerHTML = `<div class="row"><button class="primary btn" data-again>${T.again}</button><button class="ghost btn" data-back>${T.back}</button></div>${heLine(T.heAgain)}`;
+      $("[data-again]", act).onclick = () => race(t);
+      $("[data-back]", act).onclick = () => trailEnd(t);
+      app.dataset.ended = "1";
+    };
+    side.innerHTML = boardHtml(t);
+    await boardFetch(true);
+    if (!box.isConnected || !$("[data-raceend]", box)) return;
+    side.innerHTML = boardHtml(t);
+    if (!makesTop(t.id, score)) return buttons();
+    act.innerHTML = `<form class="nameform" data-nameform><label for="nw-name"><b>${T.top5}</b>${heLine(T.heTop5)}</label>
+      <input id="nw-name" data-name maxlength="${B.nameMax}" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" value="${esc(lb.get().name || "")}">
+      <div class="row"><button class="primary btn" data-save type="submit">${T.save}</button><button class="ghost btn" data-skip type="button">${T.skip}</button></div></form>`;
+    const form = $("[data-nameform]", act), input = $("[data-name]", act);
+    setTimeout(() => input.focus({ preventScroll: true }), 50);
+    $("[data-skip]", act).onclick = buttons;
+    form.onsubmit = async e => {
+      e.preventDefault();
+      const n = cleanName(input.value);
+      if (!n) { SFX.no(); input.value = ""; input.placeholder = T.badName; form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake"); return; }
+      $("[data-save]", form).disabled = true;
+      const me = { n, s: score, p: t.id, t: Date.now() };
+      const sent = await boardPost(me);
+      // Read again so the board holds everyone's latest, his own row lit whether or not the post got through.
+      if (sent) await boardFetch(true);
+      if (!box.isConnected) return;
+      side.innerHTML = boardHtml(t, me); SFX.gold(); confetti(120);
+      buttons();
+    };
   };
   // Countdown: three beeps, then GO.
   let c = RC.countdown;
@@ -846,7 +1089,7 @@ const STAGE_GAMES = {
   },
   quiz(el) {
     el.innerHTML = `<h1 class="title">Quiz time!</h1><div class="agenda">${LESSON.trails.map(t => `<span class="tplace"><span class="tp">${ART[t.pic]}</span>${t.name}</span>`).join("")}</div>
-      <div class="agenda steps4"><span>1 · Open your laptop</span><span>2 · Classroom → Nature Words</span><span>3 · Press the link</span><span>4 · 🎧 Start</span></div>`;
+      <div class="agenda steps4"><span>1 · Open your laptop</span><span>2 · Classroom → Nature Words</span><span>3 · Press the link</span><span>4 · Full screen · 🎧 Start</span></div>`;
     return { static: true };
   },
   // The word wall while kids work, with the 16-minute bar moving left to right (Space starts and stops it).
@@ -897,17 +1140,30 @@ function teacher(i) {
   const st = LESSON.stages; cur = Math.max(0, Math.min(st.length - 1, i));
   stopSound(); if (ctrl.stop) ctrl.stop();
   app.innerHTML = `<div class="tbar"><span class="num">${cur + 1}</span><span class="name">${st[cur].name}</span><span class="min">${st[cur].min} min</span>
-    <button class="ib btn" data-prev aria-label="Previous">${ICON.prev}</button><button class="ib btn" data-next aria-label="Next">${ICON.next}</button><button class="ib btn" data-fs aria-label="Full screen">${ICON.fs}</button></div>
+    <button class="ib btn" data-prev aria-label="Previous">${ICON.prev}</button><button class="ib btn" data-next aria-label="Next">${ICON.next}</button><button class="ib btn" data-fs aria-label="Full screen">${ICON.fs}</button><button class="ib wide btn" data-reset title="Empty the three race boards for the whole class">↺ Reset boards</button></div>
     <div class="prog">${st.map((s, k) => `<button class="${k === cur ? "cur" : k < cur ? "done" : ""}" aria-label="Stage ${k + 1}"></button>`).join("")}</div>
     <div class="tscreen" data-stage="${cur + 1}" data-game="${st[cur].game}"></div><div class="keys"></div>`;
   ctrl = STAGE_GAMES[st[cur].game]($(".tscreen", app), st[cur]) || {};
   $(".keys", app).textContent = (ctrl.keys ? ctrl.keys + " · " : "") + `1-${st.length}: stage · ←/→ · F: full screen`;
+  $("[data-reset]", app).onclick = resetBoards;
   $("[data-prev]", app).onclick = prev; $("[data-next]", app).onclick = next; $("[data-fs]", app).onclick = toggleFS;
   $$(".prog button", app).forEach((b, k) => b.onclick = () => teacher(k));
   history.replaceState(null, "", "#teacher-" + (cur + 1));
 }
+// Reset boards posts a marker; every laptop ignores scores from before the newest marker.
+async function resetBoards() {
+  if (!confirm("Reset the River, Forest and Mountain race boards for the whole class?")) return;
+  const btn = $("[data-reset]", app); if (btn) btn.disabled = true;
+  let ok = false;
+  try { const r = await fetch(boardUrl(), { method: "POST", body: JSON.stringify({ reset: 1, t: Date.now() }) }); ok = r.ok; } catch (e) {}
+  lb.set({ own: [], cache: { at: 0, ok: false, msgs: [] } });
+  toast(`<span style="font-size:40px">${ok ? "✅" : "📴"}</span><span><small>Race boards</small><b>${ok ? "Reset for the class" : "No internet: not reset"}</b></span>`);
+  if (btn) btn.disabled = false;
+}
 function next() { if (ctrl.next && ctrl.next()) return; if (cur < LESSON.stages.length - 1) teacher(cur + 1); }
 function prev() { if (ctrl.prev && ctrl.prev()) return; if (cur > 0) teacher(cur - 1); }
+// The page knows it is full screen (the start page hides its Full screen button and hint).
+addEventListener("fullscreenchange", () => document.body.classList.toggle("isfs", !!document.fullscreenElement));
 const toggleFS = () => { if (document.fullscreenElement) document.exitFullscreen?.(); else document.documentElement.requestFullscreen?.().catch(() => {}); };
 addEventListener("keydown", e => {
   if (e.ctrlKey || e.metaKey || e.altKey) return;
