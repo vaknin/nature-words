@@ -116,8 +116,17 @@ def cmd_ref_girl():
 
 
 def plan():
-    """(text, voice): boy and girl take turns down the list, so each says half."""
-    return [(t, "boy" if i % 2 == 0 else "girl") for i, t in enumerate(lesson())]
+    """(text, voice) as PHRASES(LESSON) gives them: the words in both voices, the other lines boy and girl in turn.
+    `record words` limits a run to the words alone (one word per line of the list, no spaces)."""
+    want = [tuple(p) for p in lesson()]
+    if sys.argv[2:3] == ["words"]:
+        want = [p for p in want if " " not in p[0] and p[0].islower()]
+    return want
+
+
+def key(text, voice):
+    """The clip's name on the site: CLIPS["boy:air"]."""
+    return f"{voice}:{text}"
 
 
 def cmd_record():
@@ -126,7 +135,7 @@ def cmd_record():
     man = json.loads(man_f.read_text()) if man_f.exists() else {}
     bad = []
     for text, voice in plan():
-        if text in man and (RAW / man[text]["file"]).exists() and man[text]["voice"] == voice:
+        if key(text, voice) in man and (RAW / man[key(text, voice)]["file"]).exists():
             continue
         out = RAW / f"{voice}-{slug(text)}.wav"
         for seed in range(1, TRIES + 1):
@@ -137,7 +146,7 @@ def cmd_record():
             print(f"{voice} '{text}' seed {seed}: heard '{got}' {'ok' if ok else 'RETAKE'} ({time.time() - t:.0f} s)", flush=True)
             if ok:
                 break
-        man[text] = {"voice": voice, "file": out.name, "seed": seed, "heard": got, "ok": ok}
+        man[key(text, voice)] = {"text": text, "voice": voice, "file": out.name, "seed": seed, "heard": got, "ok": ok}
         man_f.write_text(json.dumps(man, indent=1) + "\n")
         if not ok:
             bad.append(text)
@@ -146,16 +155,16 @@ def cmd_record():
 
 def cmd_embed():
     man = json.loads((CLIPS / "clips.json").read_text())
-    want = [t for t, _ in plan()]
-    missing = [t for t in want if t not in man]
+    want = [key(t, v) for t, v in plan()]
+    missing = [k for k in want if k not in man]
     if missing:
         sys.exit(f"not recorded yet: {missing}")
     clips = {}
     with tempfile.TemporaryDirectory() as d:
-        for t in want:
+        for k in want:
             mp3 = Path(d) / "c.mp3"
-            to_mp3(RAW / man[t]["file"], mp3, TEMPO)
-            clips[t] = "data:audio/mpeg;base64," + base64.b64encode(mp3.read_bytes()).decode()
+            to_mp3(RAW / man[k]["file"], mp3, TEMPO)
+            clips[k] = "data:audio/mpeg;base64," + base64.b64encode(mp3.read_bytes()).decode()
     src = (ROOT / "index.html").read_text()
     a, b = src.index("/* CLIPS:BEGIN */"), src.index("/* CLIPS:END */")
     src = src[:a] + "/* CLIPS:BEGIN */\nconst CLIPS = " + json.dumps(clips, indent=0) + ";\n" + src[b:]

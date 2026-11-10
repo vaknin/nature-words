@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nature Trails · English, 5th grade</title>
+<style>
+/* Palette carried over from letter-b so the series looks like one family; trail colours are his green/yellow/red. */
+:root{--ink:#2b2340;--bg:#fff7e8;--card:#fff;--purple:#7357ff;--purple-d:#4f37c9;--pink:#ff5fa2;--yellow:#ffd23f;
+--green:#22b573;--green-d:#178a56;--blue:#2f80ed;--sky:#c9ecff;--muted:#6f6a86;--red:#ff4d5e;
+--font:"Fredoka","Nunito","Varela Round","Arial Rounded MT Bold","Trebuchet MS","Segoe UI",system-ui,sans-serif;
+--he:"Rubik","Assistant","Heebo","Segoe UI",Arial,sans-serif}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--bg);user-select:none;-webkit-user-select:none}
+button{font-family:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;border:0;background:none}
+svg{display:block}
+.he{direction:rtl;unicode-bidi:isolate;font-family:var(--he)}
+.btn{transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-4px) scale(1.02)}
+.btn:active{transform:translateY(2px) scale(.98)}
+@keyframes popIn{0%{transform:scale(.6);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pop{animation:popIn .35s cubic-bezier(.3,1.6,.5,1)}
+.shake{animation:shake .3s}
+#app{min-height:100%;display:flex;flex-direction:column}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+/* ---------- eight-word strip, on every screen ---------- */
+.words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.words button{display:inline-flex;align-items:center;gap:6px;background:#ffffffe6;border:3px solid #e6e0ff;border-radius:16px;padding:4px 12px 4px 6px;font-size:clamp(15px,2.2vmin,22px);font-weight:800}
+.words button svg{width:1.8em;height:1.8em}
+
+/* ---------- landing: the nature map ---------- */
+.land{position:relative;flex:1;display:flex;flex-direction:column;min-height:100vh;overflow:hidden}
+.land .scene{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.land .bar{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;padding:16px}
+.hello{background:#ffffffee;border-radius:24px;padding:10px 22px;font-size:clamp(22px,4vmin,40px);font-weight:900;text-align:center}
+.hello small{display:block;font-size:.5em;font-weight:700;color:var(--muted)}
+.pins{position:relative;z-index:1;flex:1}
+.pin{position:absolute;width:clamp(180px,20vw,260px);background:#fff;border-radius:26px;padding:14px;text-align:center;border:5px solid var(--c);box-shadow:0 8px 0 #2b234033,0 12px 24px #2b234033}
+.pin svg{width:44%;margin:auto}
+.pin b{display:block;font-size:clamp(20px,2.4vw,30px);margin-top:4px}
+.pin .he{font-size:17px;color:var(--muted)}
+.pin .go{display:block;margin-top:8px;background:var(--c);color:var(--fg);border-radius:999px;font-weight:900;font-size:20px;padding:6px 0}
+/* Pin spots sit on their own part of the scene: river by the water, forest in the trees, mountain on the peak. */
+.pin.t1{left:6%;bottom:12%}.pin.t2{left:calc(50% - clamp(90px,10vw,130px));top:12%}.pin.t3{right:6%;top:26%}
+.teach{position:fixed;right:12px;bottom:10px;z-index:3;background:#ffffffcc;border-radius:999px;padding:6px 14px;font-size:14px;font-weight:800;color:var(--muted)}
+/* 600px: below it three 260px pins can't sit side by side without covering each other, so they stack. */
+@media (max-width:600px){
+ .pins{display:flex;flex-direction:column;gap:14px;padding:12px 18px 60px;justify-content:flex-end}
+ .pin,.pin.t1,.pin.t2,.pin.t3{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:auto;display:grid;grid-template-columns:70px 1fr;column-gap:12px;text-align:left;align-items:center}
+ .pin svg{grid-row:span 3;width:64px}
+ .pin b{margin:0}
+}
+
+/* ---------- a trail (student page) ---------- */
+.trail{flex:1;display:flex;flex-direction:column;gap:16px;padding:18px clamp(14px,3vw,36px) 28px;background:linear-gradient(180deg,var(--tint) 0,var(--bg) 70%);min-height:100vh}
+.thead{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.thead svg{width:64px;height:64px}
+.thead b{display:block;font-size:clamp(26px,4vmin,40px)}
+.thead .he{color:var(--muted);font-size:17px}
+.dots{margin-left:auto;display:flex;gap:8px}
+.dots i{width:20px;height:20px;border-radius:50%;background:#fff;border:3px solid var(--d)}
+.dots i.on{background:var(--c)}
+.help{background:#fff;border-radius:18px;padding:10px 16px;font-size:clamp(18px,2.6vmin,26px);font-weight:800;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.help .he{display:block;font-size:.8em;color:var(--muted);font-weight:700}
+.play{flex:none;width:48px;height:48px;border-radius:50%;background:var(--c);display:grid;place-items:center;box-shadow:0 4px 0 var(--d)}
+.play svg{width:26px;height:26px}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.act{background:#fff;border:5px solid var(--c);border-radius:28px;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:6px;box-shadow:0 8px 0 var(--d);text-align:center}
+.act svg{width:72px;height:72px}
+.act b{font-size:clamp(22px,3vmin,30px)}
+.act .en{font-size:17px;color:var(--muted);font-weight:700}
+.act .he{font-size:16px;color:var(--muted)}
+.act .tx{display:flex;flex-direction:column;gap:4px}
+.act.done{opacity:.75}
+.act.done::after{content:"✓ done";color:var(--green-d);font-weight:900}
+.fin{background:#fff;border-radius:22px;padding:14px 20px;font-size:clamp(20px,3vmin,28px);font-weight:900;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.fin .nx{margin-left:auto;display:inline-flex;align-items:center;gap:8px;background:var(--nc);color:var(--nf);border-radius:999px;padding:6px 18px 6px 6px;font-size:20px;font-weight:900;box-shadow:0 5px 0 #2b234033}
+.fin .nx svg{width:40px;height:40px}
+@media (max-width:600px){
+ .acts{grid-template-columns:1fr;gap:12px}
+ .act{flex-direction:row;justify-content:flex-start;padding:10px 16px;text-align:left;gap:14px}
+ .act svg{width:52px;height:52px}
+ .fin .nx{margin-left:0}
+}
+
+/* ---------- a mission (activity inside a trail) ---------- */
+.mission{flex:1;display:flex;flex-direction:column;align-items:center;gap:16px}
+.mtop{align-self:stretch;display:flex;align-items:center;gap:12px}
+.back{background:#fff;border-radius:999px;padding:8px 16px;font-weight:900;font-size:18px;box-shadow:0 4px 0 #2b234022}
+.score{margin-left:auto;font-weight:900;font-size:20px}
+.big{width:min(46vmin,280px);height:min(46vmin,280px);background:#fff;border-radius:30px;padding:14px;box-shadow:0 8px 0 #eedfc3}
+.big svg{width:100%;height:100%}
+.choices{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.choice{background:#fff;border:4px solid #e6e0ff;border-radius:22px;padding:10px;box-shadow:0 6px 0 #e6e0ff;font-size:clamp(20px,3vmin,30px);font-weight:900;min-width:120px}
+.choice svg{width:min(22vmin,130px);height:min(22vmin,130px)}
+.choice.ok{border-color:var(--green);box-shadow:0 6px 0 var(--green-d)}
+.slots,.tiles{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.slot,.tile{width:clamp(44px,7vmin,64px);height:clamp(54px,8.5vmin,76px);border-radius:14px;display:grid;place-items:center;font-size:clamp(28px,5vmin,44px);font-weight:900}
+.slot{background:#fff;border:3px dashed #c9bfff}
+.slot.f{border-style:solid;border-color:var(--green)}
+.tile{background:var(--c);color:var(--fg);box-shadow:0 5px 0 var(--d)}
+.tile[disabled]{visibility:hidden}
+.gap{font-size:clamp(24px,4vmin,40px);font-weight:900;text-align:center;background:#fff;border-radius:22px;padding:14px 22px}
+.gap u{display:inline-block;min-width:4em;text-decoration:none;border-bottom:5px solid var(--c)}
+.paint{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+.paint .canvas{width:min(92vw,620px);background:#fff;border-radius:24px;padding:8px;box-shadow:0 8px 0 #eedfc3}
+.paint .canvas svg{width:100%;height:auto}
+.paint [data-part]{cursor:pointer;transition:fill .3s}
+.paint .pal{display:flex;flex-wrap:wrap;gap:8px;max-width:620px;justify-content:center}
+.paint .pal button{background:#fff;border:4px solid #e6e0ff;border-radius:16px;padding:6px 14px;font-weight:900;font-size:20px}
+.paint .pal button.on{border-color:var(--c);background:var(--tint)}
+.rec{display:flex;gap:14px;flex-wrap:wrap;justify-content:center}
+.rec button{background:var(--c);color:var(--fg);border-radius:999px;padding:12px 24px;font-size:22px;font-weight:900;box-shadow:0 6px 0 var(--d)}
+.rec button.on{background:var(--red);color:#fff}
+.say-line{font-size:clamp(24px,4vmin,40px);font-weight:900;text-align:center}
+.cheer{font-size:clamp(30px,6vmin,60px);font-weight:900;text-align:center}
+
+/* ---------- teacher (projector) ---------- */
+.tbar{display:flex;align-items:center;gap:12px;padding:8px 14px;background:#fff;box-shadow:0 3px 0 #f0e4cc}
+.tbar .num{display:grid;place-items:center;min-width:1.9em;height:1.9em;border-radius:999px;background:var(--purple);color:#fff;font-weight:900;font-size:24px;box-shadow:0 4px 0 var(--purple-d)}
+.tbar .name{flex:1;font-size:clamp(18px,3vh,30px);font-weight:900}
+.tbar .min{font-weight:800;color:var(--muted)}
+.tbar .ib{width:52px;height:52px;border-radius:16px;background:#f4f0ff;display:grid;place-items:center;box-shadow:0 4px 0 #ddd3ff;font-size:22px;font-weight:900}
+.prog{display:flex;gap:6px;padding:8px 14px 0}
+.prog button{flex:1;height:12px;border-radius:99px;background:#eadfca;padding:0}
+.prog button.done{background:#b9a8ff}
+.prog button.cur{background:var(--purple);transform:scaleY(1.6)}
+.tscreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:18px;min-height:calc(100vh - 110px)}
+.title{font-size:clamp(40px,9vmin,110px);font-weight:900;margin:0;text-align:center;line-height:1.05}
+.sub{font-size:clamp(22px,4vmin,48px);font-weight:800;margin:0;text-align:center}
+.agenda{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-size:clamp(18px,3vmin,30px);font-weight:800}
+.agenda span{background:#fff;border-radius:999px;padding:6px 18px;box-shadow:0 4px 0 #eedfc3}
+.wcard{display:flex;flex-direction:column;align-items:center;gap:10px}
+.wcard .big{width:min(52vmin,360px);height:min(52vmin,360px)}
+.wcard .w{font-size:clamp(54px,12vmin,140px);font-weight:900;visibility:hidden}
+.wcard .w.show{visibility:visible;animation:popIn .35s cubic-bezier(.3,1.6,.5,1)}
+.wcard .g{font-size:clamp(18px,3vmin,28px);color:var(--muted);font-weight:800}
+@media (max-width:600px){.tbar .min{display:none}.tbar .name{font-size:18px}}
+.keys{position:fixed;right:12px;bottom:6px;font-size:13px;color:#a59fb8;font-weight:700;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<canvas id="confetti"></canvas>
+<script>
+/* =====================================================================
+   LESSON: all content lives here. Change words, lines, stages and trails in this block only.
+   ===================================================================== */
+const LESSON = {
+  title: "Nature Trails",
+  topic: "Nature words",
+  goal: "I can say, read and use eight nature words.",
+  // The eight words, his list, in his order. gesture: a small hint for the teacher's "Meet the words".
+  words: [
+    { id: "air",      he: "אוויר",   gesture: "blow on your hand" },
+    { id: "dry",      he: "יבש",     gesture: "wipe your forehead" },
+    { id: "forest",   he: "יער",     gesture: "arms up like trees" },
+    { id: "grass",    he: "דשא",     gesture: "wiggle your fingers low" },
+    { id: "mountain", he: "הר",      gesture: "hands meet in a peak" },
+    { id: "nature",   he: "טבע",     gesture: "open your arms wide" },
+    { id: "river",    he: "נהר",     gesture: "hand swims like a snake" },
+    { id: "sea",      he: "ים",      gesture: "big waves with both arms" }
+  ],
+  // Teacher's projector stages. min: his minutes per stage (the smoke test holds the sum to 40-45 and the count to 6).
+  // Placeholder flow until Fable's design lands; the stage list is replaced from design/lesson-design.md.
+  stages: [
+    { name: "Welcome to nature", min: 5,  game: "intro" },
+    { name: "Meet the words",    min: 8,  game: "meet" },
+    { name: "Find your trail",   min: 3,  game: "trails" },
+    { name: "On the trails",     min: 20, game: "work" },
+    { name: "Show and tell",     min: 6,  game: "close" }
+  ],
+  // The three levels, as trails. Never named easy/medium/hard anywhere a kid sees (research/differentiation.md §7).
+  trails: [
+    { id: 1, name: "River trail",    he: "מסלול הנהר", pic: "river",    c: "#22b573", d: "#178a56", fg: "#fff",    tint: "#e3f8ec",
+      help: "Press a word to hear it. Then pick a mission.", heHelp: "לחצו על מילה כדי לשמוע אותה. אחר כך בחרו משימה." },
+    { id: 2, name: "Forest trail",   he: "מסלול היער", pic: "forest",   c: "#ffc21a", d: "#c48f00", fg: "#3d2c00", tint: "#fff4c7",
+      help: "Pick a mission. Press the speaker if you need help." },
+    { id: 3, name: "Mountain trail", he: "מסלול ההר",  pic: "mountain", c: "#ff4d5e", d: "#c42838", fg: "#fff",    tint: "#ffe3e6",
+      help: "Pick a mission and use the words in your own sentences." }
+  ],
+  // Missions per trail: kind is the door the kid presses (draw / solve / say); type is the engine that runs it.
+  missions: {
+    1: [
+      { kind: "draw",  type: "paint", say: "Colour the picture. Press a word, then press its part." },
+      { kind: "solve", type: "listen", say: "Listen. Press the right picture." },
+      { kind: "say",   type: "say",    say: "Look at the picture. Say the word." }
+    ],
+    2: [
+      { kind: "draw",  type: "paint", say: "Colour the picture. Press a word, then press its part." },
+      { kind: "solve", type: "build", say: "Look at the picture. Build the word." },
+      { kind: "say",   type: "say",   say: "Look at the picture. Say the word." }
+    ],
+    3: [
+      { kind: "draw",  type: "paint", say: "Colour the picture. Press a word, then press its part." },
+      { kind: "solve", type: "gap",   say: "Read the sentence. Press the missing word.",
+        items: [
+          ["Fish swim in the ___.", "river"], ["We climb the ___.", "mountain"], ["Birds fly in the ___.", "air"],
+          ["Cows eat green ___.", "grass"], ["Many trees make a ___.", "forest"], ["The desert is hot and ___.", "dry"],
+          ["Big waves are in the ___.", "sea"], ["Trees, rivers and the sea are all ___.", "nature"]
+        ] },
+      { kind: "say",   type: "say",   say: "Look at the picture. Say a sentence with the word." }
+    ]
+  },
+  doors: {
+    draw:  { name: "Draw it",  en: "Colour the nature picture", he: "לצייר ולצבוע" },
+    solve: { name: "Solve it", en: "Play the word puzzle",      he: "לפתור חידה" },
+    say:   { name: "Say it",   en: "Talk with a friend",        he: "לדבר עם חבר" }
+  },
+  text: {
+    hello: "Hi! Your trail is ready.", heHello: "בחרו את המסלול שהמורה נתן לכם",
+    finished: "Finished? Try the next trail!",
+    great: "Great job!", tryAgain: "Try again!",
+    welcome: "Welcome to nature!", soundTest: "Hello, class! Let's go on a nature trail."
+  },
+  settings: {
+    // One round per word, so every kid meets all eight words in a mission.
+    rounds: 8,
+    // Four pictures to choose from: one right and three wrong is enough to make him listen, few enough to fit a 390px screen.
+    choices: 4,
+    // A recording up to 6 s: one sentence of a 5th grader at A1 speed, with room to start late.
+    recSeconds: 6
+  }
+};
+
+/* All phrases the site can speak: [text, voice]. Words in both voices (the kids hear a boy and a girl);
+   every other line in one voice, boy and girl taking turns, so each says half. tools/voices.py records exactly this list. */
+function PHRASES(L) {
+  const out = [];
+  for (const w of L.words) { out.push([w.id, "boy"], [w.id, "girl"]); }
+  const lines = [];
+  const add = t => { if (t && !lines.includes(t)) lines.push(t); };
+  for (const t of L.trails) add(t.help);
+  for (const k of Object.keys(L.missions)) for (const m of L.missions[k]) { add(m.say); for (const it of m.items || []) add(it[0].replace("___", it[1])); }
+  for (const k of ["hello", "finished", "great", "tryAgain", "welcome", "soundTest"]) add(L.text[k]);
+  lines.forEach((t, i) => out.push([t, i % 2 ? "girl" : "boy"]));
+  return out;
+}
+/* CLIPS:BEGIN */
+const CLIPS = {};
+/* CLIPS:END */
+
+/* ===================================================================== */
+const S = LESSON.settings, T = LESSON.text, W = LESSON.words, WIDS = W.map(w => w.id);
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const app = $("#app");
+
+/* ---------- pictures: one cartoon style, thick dark outline ---------- */
+const O = "#2b2340";
+const G = inner => `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><g stroke="${O}" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">${inner}</g></svg>`;
+const ART = {
+  air: G(`<circle cx="100" cy="100" r="92" fill="#e6f6ff" stroke="none"/><path d="M30 80h90a22 22 0 1 0-22-22" fill="none" stroke="#2f80ed"/><path d="M30 110h120a20 20 0 1 1-20 20" fill="none" stroke="#2f80ed"/><path d="M50 140h50" fill="none" stroke="#7fc4ff"/><path d="M120 60c0-14 12-24 26-20 6-12 26-10 28 4 12 2 14 20 2 22h-50c-8 0-10-6-6-6z" fill="#fff"/>`),
+  dry: G(`<circle cx="100" cy="100" r="92" fill="#fff1d6" stroke="none"/><circle cx="148" cy="52" r="22" fill="#ffd23f"/><path d="M148 18v10M148 76v10M114 52h10M172 52h10" stroke="#ffb02e"/><path d="M14 120h172v52a14 14 0 0 1-14 14H28a14 14 0 0 1-14-14z" fill="#e9b87a"/><path d="M40 132l18 14-10 16 16 14M110 128l-8 18 18 10-6 18M150 140l14 10-12 14" fill="none" stroke="#a8743f"/><path d="M70 120v-26M70 104l-12-8M70 100l12-10" fill="none" stroke="#a8743f"/>`),
+  forest: G(`<circle cx="100" cy="100" r="92" fill="#e3f8ec" stroke="none"/><path d="M60 30L22 110h76z M60 70L16 150h88z" fill="#178a56"/><path d="M140 40L102 116h76z M140 80L96 160h88z" fill="#22b573"/><path d="M60 150v28M140 160v20" stroke="#8a5a2b" stroke-width="12"/>`),
+  grass: G(`<circle cx="100" cy="100" r="92" fill="#f0ffe8" stroke="none"/><path d="M20 176h160" /><path d="M40 176c0-40-14-70-24-86 20 16 34 44 36 86M70 176c0-50 6-90 20-112-6 30-6 70 0 112M100 176c4-46 20-78 44-92-20 24-28 60-30 92M130 176c0-40 10-66 24-80-6 26-6 54-4 80M156 176c2-30 12-50 26-60-10 22-12 40-10 60" fill="#22b573"/><circle cx="62" cy="116" r="8" fill="#ffd23f"/>`),
+  mountain: G(`<circle cx="100" cy="100" r="92" fill="#e9f4ff" stroke="none"/><path d="M10 176L80 40l70 136z" fill="#8a7bd8"/><path d="M100 176l46-90 48 90z" fill="#6f61c4"/><path d="M60 80l20-40 20 40-10-6-10 10-10-10z" fill="#fff"/>`),
+  nature: G(`<circle cx="100" cy="100" r="92" fill="#fff7e8" stroke="none"/><path d="M60 150c-30-40-10-100 60-110 10 60-10 110-60 110z" fill="#22b573"/><path d="M60 150c20-30 40-60 56-104" fill="none"/><path d="M138 150v-50" stroke="#178a56"/><circle cx="138" cy="86" r="10" fill="#ffd23f"/><g fill="#ff5fa2"><circle cx="138" cy="66" r="10"/><circle cx="158" cy="86" r="10"/><circle cx="138" cy="106" r="10" fill="none" stroke="none"/><circle cx="118" cy="86" r="10"/></g><circle cx="138" cy="86" r="10" fill="#ffd23f"/><path d="M30 170h140" />`),
+  river: G(`<circle cx="100" cy="100" r="92" fill="#7fd36b" stroke="none"/><path d="M70 14c-20 40 40 50 10 90s30 60 20 90h44c10-30-50-50-20-90S118 54 112 14z" fill="#3fa9f5"/><path d="M92 60c6 4 12 4 18 0M100 130c6 4 12 4 18 0" fill="none" stroke="#fff"/>`),
+  sea: G(`<circle cx="100" cy="100" r="92" fill="#c9ecff" stroke="none"/><circle cx="150" cy="56" r="18" fill="#ffd23f"/><path d="M10 110c20-20 40 20 60 0s40 20 60 0 40 20 60 0v80H10z" fill="#2f80ed"/><path d="M10 146c20-16 40 16 60 0s40 16 60 0 40 16 60 0" fill="none" stroke="#c9ecff"/><path d="M62 100l18-40v40zM50 104h50l-8 12H58z" fill="#fff"/>`)
+};
+const DOOR_ICON = {
+  draw: `<svg viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#ffe1ee" stroke="#ff5fa2" stroke-width="4"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg>`,
+  solve: `<svg viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#e6e0ff" stroke="#7357ff" stroke-width="4" stroke-linejoin="round"/></svg>`,
+  say: `<svg viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#dbe9ff" stroke="#2f80ed" stroke-width="4" stroke-linejoin="round"/><circle cx="18" cy="28" r="3.5" fill="#2f80ed"/><circle cx="28" cy="28" r="3.5" fill="#2f80ed"/><circle cx="38" cy="28" r="3.5" fill="#2f80ed"/></svg>`,
+  speaker: `<svg viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z" fill="#fff"/><path d="M16 8a5 5 0 0 1 0 8M18.5 5.5a8.5 8.5 0 0 1 0 13" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`
+};
+const SCENE = `<svg class="scene" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+ <rect width="960" height="560" fill="#bfe9ff"/><circle cx="820" cy="90" r="46" fill="#ffd23f"/>
+ <path d="M520 360 L720 90 L940 360Z" fill="#8a7bd8"/><path d="M690 130 L720 90 L752 132 L734 122 L720 140 L704 122Z" fill="#fff"/>
+ <rect y="330" width="960" height="230" fill="#7fd36b"/>
+ <path d="M0 470 C200 430 300 520 520 470 S820 420 960 470 V560 H0Z" fill="#3fa9f5"/>
+ <g fill="#178a56"><path d="M330 360 l30 -90 l30 90z"/><path d="M380 372 l34 -104 l34 104z"/><path d="M440 360 l26 -80 l26 80z"/></g>
+ <path d="M170 560 C150 480 230 430 330 470 S520 430 580 360 S700 330 760 300" stroke="#fff" stroke-width="8" stroke-dasharray="4 18" stroke-linecap="round" fill="none" opacity=".9"/>
+</svg>`;
+/* The colouring picture: each part carries the word it stands for. */
+const PAINT = `<svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg"><g stroke="${O}" stroke-width="5" stroke-linejoin="round">
+ <rect data-part="air" width="600" height="400" fill="#fff"/>
+ <path data-part="mountain" d="M300 260 L440 60 L590 260Z" fill="#fff"/>
+ <path data-part="forest" d="M40 260 l40-120 l40 120z M110 260 l40-140 l40 140z M180 260 l34-100 l34 100z" fill="#fff"/>
+ <path data-part="grass" d="M0 250 H600 V320 C480 300 360 340 240 320 S60 300 0 320Z" fill="#fff"/>
+ <path data-part="river" d="M250 250 C300 270 220 300 280 330 L330 330 C280 300 350 270 300 250Z" fill="#fff"/>
+ <path data-part="sea" d="M0 320 C60 300 180 340 300 330 S520 300 600 320 V400 H0Z" fill="#fff"/>
+ <path data-part="dry" d="M470 330 h110 v-14 c-30-10-80-10-110 0z" fill="#fff"/>
+ <circle data-part="nature" cx="520" cy="290" r="16" fill="#fff"/>
+</g></svg>`;
+/* The colour each part turns when painted right. */
+const PAINT_FILL = { air: "#c9ecff", mountain: "#8a7bd8", forest: "#22b573", grass: "#7fd36b", river: "#3fa9f5", sea: "#2f80ed", dry: "#e9b87a", nature: "#ff5fa2" };
+
+/* ---------- sound: recorded child voices only ---------- */
+let AC = null, AUDIO = null, flip = 0;
+window.SPOKEN = []; window.MISSING = [];
+function ac() { if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); } return AC; }
+function tone(f, d, type = "sine", vol = .15) {
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain(); o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(vol, a.currentTime); g.gain.exponentialRampToValueAtTime(.001, a.currentTime + d);
+  o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + d);
+}
+// Soft sounds only: a rising pair for right, one low soft note for "try again" (no harsh buzzers).
+const SFX = { ok() { tone(660, .15); setTimeout(() => tone(880, .2), 120); }, no() { tone(300, .25, "triangle", .1); } };
+function clipFor(text, voice) {
+  if (voice) return CLIPS[voice + ":" + text];
+  const both = ["boy", "girl"].filter(v => CLIPS[v + ":" + text]);
+  if (!both.length) return null;
+  // Words exist in both voices: alternate so the kid hears a boy and a girl.
+  return CLIPS[both[flip++ % both.length] + ":" + text];
+}
+function speak(text, voice) {
+  window.SPOKEN.push(text);
+  const src = clipFor(text, voice);
+  if (!src) { window.MISSING.push(text); return; }
+  try { if (AUDIO) AUDIO.pause(); AUDIO = new Audio(src); AUDIO.play().catch(() => {}); } catch (e) {}
+}
+function stopSound() { try { AUDIO && AUDIO.pause(); } catch (e) {} }
+
+/* ---------- confetti ---------- */
+const CV = $("#confetti"), CX = CV.getContext("2d");
+let PARTS = [], CRUN = false;
+const CCOL = ["#ff5fa2", "#7357ff", "#ffd23f", "#22b573", "#2f80ed", "#ff9f43"];
+function confetti(n = 120) {
+  CV.width = innerWidth; CV.height = innerHeight;
+  for (let i = 0; i < n; i++) PARTS.push({ x: innerWidth / 2, y: innerHeight * .35, vx: (Math.random() - .5) * 16, vy: -Math.random() * 14 - 4, c: CCOL[i % CCOL.length], r: Math.random() * 6 + 4, life: 90 });
+  if (!CRUN) { CRUN = true; requestAnimationFrame(ctick); }
+}
+function ctick() {
+  CX.clearRect(0, 0, CV.width, CV.height);
+  PARTS = PARTS.filter(p => p.life-- > 0);
+  for (const p of PARTS) { p.vy += .45; p.x += p.vx; p.y += p.vy; CX.fillStyle = p.c; CX.fillRect(p.x, p.y, p.r, p.r * .6); }
+  if (PARTS.length) requestAnimationFrame(ctick); else { CRUN = false; CX.clearRect(0, 0, CV.width, CV.height); }
+}
+
+const wordStrip = () => `<div class="words">${W.map(w => `<button data-say="${w.id}">${ART[w.id]}${w.id}</button>`).join("")}</div>`;
+document.addEventListener("click", e => { const b = e.target.closest("[data-say]"); if (b) speak(b.dataset.say); });
+const trailVars = t => `--c:${t.c};--d:${t.d};--fg:${t.fg};--tint:${t.tint}`;
+
+/* =====================================================================
+   STUDENT: landing map and trails
+   ===================================================================== */
+function landing() {
+  app.innerHTML = `<div class="land">${SCENE}
+    <div class="bar"><div class="hello">${T.hello}<small class="he" dir="rtl" lang="he">${T.heHello}</small></div>${wordStrip()}</div>
+    <div class="pins">${LESSON.trails.map(t => `<a class="pin btn t${t.id}" href="#level-${t.id}" style="${trailVars(t)};text-decoration:none;color:inherit">${ART[t.pic]}<b>${t.name}</b><span class="he" dir="rtl" lang="he">${t.he}</span><span class="go">Start ▶</span></a>`).join("")}</div>
+    <a class="teach" href="#teacher">Teacher ▶</a></div>`;
+}
+const doneKey = id => "nature-trail-" + id;
+function trail(id) {
+  const t = LESSON.trails.find(x => x.id === id), ms = LESSON.missions[id];
+  const done = JSON.parse(sessionStorage.getItem(doneKey(id)) || "[]");
+  const nx = LESSON.trails.find(x => x.id === id + 1);
+  app.innerHTML = `<div class="trail" style="${trailVars(t)}" data-trail="${id}">
+    <div class="thead">${ART[t.pic]}<div><b>${t.name}</b><span class="he" dir="rtl" lang="he">${t.he}</span></div>
+      <div class="dots">${ms.map((m, i) => `<i class="${done.includes(i) ? "on" : ""}"></i>`).join("")}</div></div>
+    ${wordStrip()}
+    <div class="help"><button class="play" data-say="${t.help}" aria-label="Listen">${DOOR_ICON.speaker}</button><span>${t.help}${t.heHelp ? `<span class="he" dir="rtl" lang="he">${t.heHelp}</span>` : ""}</span></div>
+    <div class="acts">${ms.map((m, i) => { const d = LESSON.doors[m.kind]; return `<button class="act btn ${done.includes(i) ? "done" : ""}" data-m="${i}">${DOOR_ICON[m.kind]}<span class="tx"><b>${d.name}</b><span class="en">${d.en}</span><span class="he" dir="rtl" lang="he">${d.he}</span></span></button>`; }).join("")}</div>
+    <div class="fin">🎉 ${T.finished}${nx ? ` <a class="nx btn" href="#level-${nx.id}" style="--nc:${nx.c};--nf:${nx.fg};text-decoration:none">${ART[nx.pic]} ${nx.name} ▶</a>` : ""}</div>
+  </div>`;
+  $$(".act", app).forEach(b => b.onclick = () => mission(t, +b.dataset.m));
+}
+function finishMission(t, i) {
+  const done = JSON.parse(sessionStorage.getItem(doneKey(t.id)) || "[]");
+  if (!done.includes(i)) done.push(i);
+  sessionStorage.setItem(doneKey(t.id), JSON.stringify(done));
+}
+function mission(t, i) {
+  delete app.dataset.ended;
+  const m = LESSON.missions[t.id][i];
+  stopSound();
+  app.innerHTML = `<div class="trail" style="${trailVars(t)}" data-trail="${t.id}" data-mission="${m.type}">
+    <div class="mtop"><button class="back btn">◀ ${t.name}</button><span class="score"></span></div>
+    <div class="help"><button class="play" data-say="${m.say}" aria-label="Listen">${DOOR_ICON.speaker}</button><span>${m.say}</span></div>
+    <div class="mission"></div></div>`;
+  $(".back", app).onclick = () => trail(t.id);
+  const box = $(".mission", app), score = $(".score", app);
+  const win = () => {
+    finishMission(t, i); SFX.ok(); confetti(); speak(T.great);
+    box.innerHTML = `<div class="cheer pop">⭐ ${T.great} ⭐</div><button class="back btn" data-end>◀ ${t.name}</button>`;
+    $("[data-end]", box).onclick = () => trail(t.id);
+    app.dataset.ended = "1";
+  };
+  ENGINES[m.type](box, m, t, score, win);
+}
+
+/* ---------- mission engines ---------- */
+const ENGINES = {
+  // Hear a word, press its picture: recognition by sound alone (no written word to lean on).
+  listen(box, m, t, score, win) {
+    const order = shuffle(WIDS).slice(0, S.rounds); let k = 0;
+    const round = () => {
+      if (k >= order.length) return win();
+      const w = order[k]; box.dataset.answer = w; score.textContent = `${k + 1} / ${order.length}`;
+      const opts = shuffle([w, ...shuffle(WIDS.filter(x => x !== w)).slice(0, S.choices - 1)]);
+      box.innerHTML = `<button class="play btn" data-say="${w}" style="width:84px;height:84px">${DOOR_ICON.speaker}</button><div class="choices">${opts.map(o => `<button class="choice btn" data-w="${o}">${ART[o]}</button>`).join("")}</div>`;
+      speak(w);
+      $$(".choice", box).forEach(b => b.onclick = () => {
+        if (b.dataset.w === w) { b.classList.add("ok"); SFX.ok(); k++; setTimeout(round, 600); }
+        else { SFX.no(); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); }
+      });
+    };
+    round();
+  },
+  // Build the whole word from shuffled letter tiles: reproduction of the spelling, not a 1-of-3 guess.
+  build(box, m, t, score, win) {
+    const order = shuffle(WIDS).slice(0, S.rounds); let k = 0;
+    const round = () => {
+      if (k >= order.length) return win();
+      const w = order[k]; box.dataset.answer = w; score.textContent = `${k + 1} / ${order.length}`; let pos = 0;
+      box.innerHTML = `<div class="big">${ART[w]}</div><div class="slots">${[...w].map(() => `<span class="slot"></span>`).join("")}</div><div class="tiles">${shuffle([...w]).map(c => `<button class="tile btn">${c}</button>`).join("")}</div>`;
+      $$(".tile", box).forEach(b => b.onclick = () => {
+        if (b.textContent === w[pos]) { const s = $$(".slot", box)[pos]; s.textContent = w[pos]; s.classList.add("f"); b.disabled = true; pos++; if (pos === w.length) { speak(w); SFX.ok(); k++; setTimeout(round, 900); } }
+        else { SFX.no(); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); }
+      });
+    };
+    round();
+  },
+  // Read a sentence and press the missing word: the words in context.
+  gap(box, m, t, score, win) {
+    const items = shuffle(m.items); let k = 0;
+    const round = () => {
+      if (k >= items.length) return win();
+      const [s, w] = items[k]; box.dataset.answer = w; score.textContent = `${k + 1} / ${items.length}`;
+      box.innerHTML = `<div class="gap">${s.replace("___", "<u>&nbsp;</u>")}</div><div class="choices">${shuffle(WIDS).map(o => `<button class="choice btn" data-w="${o}">${o}</button>`).join("")}</div>`;
+      $$(".choice", box).forEach(b => b.onclick = () => {
+        if (b.dataset.w === w) { b.classList.add("ok"); $(".gap u", box).textContent = w; speak(s.replace("___", w)); SFX.ok(); k++; setTimeout(round, 1600); }
+        else { SFX.no(); b.classList.remove("shake"); void b.offsetWidth; b.classList.add("shake"); }
+      });
+    };
+    round();
+  },
+  // Press a word, then its part of the picture: it fills with colour. All eight parts coloured = done.
+  paint(box, m, t, score, win) {
+    let sel = null, left = new Set(WIDS);
+    box.innerHTML = `<div class="paint"><div class="canvas">${PAINT}</div><div class="pal">${shuffle(WIDS).map(w => `<button data-w="${w}">${w}</button>`).join("")}</div></div>`;
+    score.textContent = `0 / ${WIDS.length}`;
+    $$(".pal button", box).forEach(b => b.onclick = () => { $$(".pal button", box).forEach(x => x.classList.remove("on")); b.classList.add("on"); sel = b.dataset.w; speak(sel); });
+    $$("[data-part]", box).forEach(p => p.addEventListener("click", e => {
+      e.stopPropagation(); if (!sel) return;
+      if (p.dataset.part === sel) { p.setAttribute("fill", PAINT_FILL[sel]); left.delete(sel); $(`.pal [data-w="${sel}"]`, box).disabled = true; SFX.ok(); sel = null; score.textContent = `${WIDS.length - left.size} / ${WIDS.length}`; if (!left.size) setTimeout(win, 600); }
+      else SFX.no();
+    }));
+  },
+  // See a picture, say it (to a friend, and to the laptop if the mic is allowed), hear yourself, then check with the clip.
+  say(box, m, t, score, win) {
+    const order = shuffle(WIDS).slice(0, S.rounds); let k = 0, rec = null;
+    const round = () => {
+      if (k >= order.length) return win();
+      const w = order[k]; box.dataset.answer = w; score.textContent = `${k + 1} / ${order.length}`;
+      box.innerHTML = `<div class="big">${ART[w]}</div><div class="say-line">?</div><div class="rec"><button data-r>🎤 Record</button><button data-c>👂 Check</button><button data-n>Next ▶</button></div>`;
+      $("[data-c]", box).onclick = () => { $(".say-line", box).textContent = w; speak(w); };
+      $("[data-n]", box).onclick = () => { k++; round(); };
+      $("[data-r]", box).onclick = async e => {
+        const b = e.currentTarget;
+        if (!navigator.mediaDevices?.getUserMedia) return;
+        try {
+          const st = await navigator.mediaDevices.getUserMedia({ audio: true }); const ch = [];
+          rec = new MediaRecorder(st); rec.ondataavailable = d => ch.push(d.data);
+          rec.onstop = () => { st.getTracks().forEach(x => x.stop()); b.classList.remove("on"); new Audio(URL.createObjectURL(new Blob(ch))).play().catch(() => {}); };
+          rec.start(); b.classList.add("on"); setTimeout(() => rec.state === "recording" && rec.stop(), S.recSeconds * 1000);
+        } catch (err) {}
+      };
+    };
+    round();
+  }
+};
+
+/* =====================================================================
+   TEACHER: projector stages, keys 1-N, arrows, Space/Enter, F
+   ===================================================================== */
+let cur = 0, ctrl = {};
+const STAGE_GAMES = {
+  intro(el) {
+    el.innerHTML = `<h1 class="title">${T.welcome}</h1><p class="sub">${LESSON.goal}</p><div class="agenda">${LESSON.stages.map((s, i) => `<span>${i + 1}. ${s.name}</span>`).join("")}</div>${wordStrip()}`;
+    return { static: true };
+  },
+  meet(el) {
+    let k = 0, shown = false;
+    const show = () => { const w = W[k]; shown = false; el.innerHTML = `<div class="wcard"><div class="big pop">${ART[w.id]}</div><div class="w">${w.id}</div><div class="g">✋ ${w.gesture}</div><div class="agenda"><span>${k + 1} / ${W.length}</span></div></div>`; speak(w.id); };
+    const reveal = () => { $(".w", el).classList.add("show"); shown = true; speak(W[k].id); };
+    show();
+    return { keys: "Space: show word · →: next word", space: () => shown ? speak(W[k].id) : reveal(),
+      next: () => { if (k < W.length - 1) { k++; show(); return true; } }, prev: () => { if (k > 0) { k--; show(); return true; } } };
+  },
+  trails(el) {
+    el.innerHTML = `<div class="land" style="min-height:70vh;width:100%;border-radius:30px">${SCENE}<div class="pins">${LESSON.trails.map(t => `<div class="pin t${t.id}" style="${trailVars(t)}">${ART[t.pic]}<b>${t.name}</b></div>`).join("")}</div></div><p class="sub">${T.finished}</p>`;
+    return { static: true };
+  },
+  work(el) {
+    el.innerHTML = `<h1 class="title">On the trails</h1><div class="agenda">${Object.values(LESSON.doors).map(d => `<span>${d.name}</span>`).join("")}</div><p class="sub">${T.finished}</p>`;
+    return { static: true };
+  },
+  close(el) {
+    el.innerHTML = `<h1 class="title">${T.great}</h1>${wordStrip()}`;
+    return { static: true };
+  }
+};
+function teacher(i) {
+  const st = LESSON.stages; cur = Math.max(0, Math.min(st.length - 1, i));
+  stopSound();
+  app.innerHTML = `<div class="tbar"><span class="num">${cur + 1}</span><span class="name">${st[cur].name}</span><span class="min">${st[cur].min} min</span>
+    <button class="ib" data-prev aria-label="Previous">◀</button><button class="ib" data-next aria-label="Next">▶</button><button class="ib" data-fs aria-label="Full screen"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" stroke="#4f37c9" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+    <div class="prog">${st.map((s, k) => `<button class="${k === cur ? "cur" : k < cur ? "done" : ""}" aria-label="Stage ${k + 1}"></button>`).join("")}</div>
+    <div class="tscreen" data-stage="${cur + 1}" data-game="${st[cur].game}"></div><div class="keys"></div>`;
+  ctrl = STAGE_GAMES[st[cur].game]($(".tscreen", app)) || {};
+  $(".keys", app).textContent = (ctrl.keys ? ctrl.keys + " · " : "") + `1-${st.length}: stage · ←/→ · F: full screen`;
+  $("[data-prev]", app).onclick = prev; $("[data-next]", app).onclick = next;
+  $("[data-fs]", app).onclick = toggleFS;
+  $$(".prog button", app).forEach((b, k) => b.onclick = () => teacher(k));
+  history.replaceState(null, "", "#teacher-" + (cur + 1));
+}
+function next() { if (ctrl.next && ctrl.next()) return; if (cur < LESSON.stages.length - 1) teacher(cur + 1); }
+function prev() { if (ctrl.prev && ctrl.prev()) return; if (cur > 0) teacher(cur - 1); }
+const toggleFS = () => { if (document.fullscreenElement) document.exitFullscreen?.(); else document.documentElement.requestFullscreen?.().catch(() => {}); };
+addEventListener("keydown", e => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  ac();
+  if (!/^#teacher/.test(location.hash)) return;
+  const k = e.key;
+  if ([" ", "Enter", "ArrowLeft", "ArrowRight"].includes(k)) e.preventDefault();
+  if (k === "f" || k === "F") return toggleFS();
+  if (/^[1-9]$/.test(k) && +k <= LESSON.stages.length) return teacher(+k - 1);
+  if (k === "ArrowRight") return next();
+  if (k === "ArrowLeft") return prev();
+  if (k === " " || k === "Enter") { stopSound(); return ctrl.space && ctrl.space(); }
+});
+
+/* ---------- routes: #level-N is a kid's trail (the link posted in Classroom), #teacher-N the projector ---------- */
+function route() {
+  const h = location.hash, lv = /^#level-([123])$/.exec(h), tc = /^#teacher(?:-(\d+))?$/.exec(h);
+  if (lv) return trail(+lv[1]);
+  if (tc) return teacher((+tc[1] || 1) - 1);
+  landing();
+}
+addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>
