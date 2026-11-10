@@ -1,0 +1,2781 @@
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+English Curriculum 2020
+
+No part of this curriculum may
+be reproduced, transmitted,
+translated or stored in any
+information storage or retrieval
+system without prior permission
+in writing from the Ministry of
+Education.
+
+,‫ לתרגם‬,‫ להקליט‬,‫ לצלם‬,‫ להעתיק‬,‫אין לשכפל‬
+‫לאחסן במאגר מידע כל חלק שהוא מתוכנית‬
+.‫הלימודים‬
+2020 ‫ נובמבר‬,‫כל הזכויות שמורות למשרד החינוך‬
+
+All rights reserved to the
+Ministry of Education,
+November 2020
+
+‫ي ﺟزء ﻣن اﻟﻣﻧﮭﺞ اﻟدراﺳﻲ أو ﺗﺻوﯾره أو‬
+ّ ‫ﻣﻣﻧوع ﻧﺳﺦ أ‬
+.‫ﺗﺳﺟﯾﻠﮫ أو ﺗرﺟﻣﺗﮫ أوﺗﺧزﯾﻧﮫ ﻓﻲ ﻣﺧزن اﻟﻣﻌﻠوﻣﺎت‬
+,‫ﺣﻘوق اﻟطﺑﻊ ﻣﺣﻔوظﺔ ﻟوزارة اﻟﺗرﺑﯾﺔ واﻟﺗﻌﻠﯾم‬
+2020 ‫ﺗﺷرﯾن اﻟﺛﺎﻧﻲ‬/‫ﻧوﻓﻣﺑر‬
+
+1
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Accompanying documents
+The English Curriculum 2020 is comprised of four interrelated constituents as follows:
+
+1) English Curriculum 2020
+This core document provides background information which relates to the development of the
+curriculum, a detailed description of its various components, and principles guiding teaching
+practice.
+
+2) The Can-do statements
+The can-do statements that describe what a
+learner can do at each level of progression from
+Pre-Basic User (Pre-A1) to Independent User II
+(B2 5-point Bagrut) constitute a central part of
+the English Curriculum 2020. As described
+previously, they relate to communicative
+activities (reception, production, interaction,
+mediation), communicative strategies,
+plurilingual and pluricultural competence and
+communicative language competences.
+
+pre A1
+A1
+A2
+B1
+B2
+All levels
+
+Can do’s
+PDF
+PDF
+PDF
+PDF
+PDF
+PDF
+
+Word
+Word
+Word
+Word
+Word
+Word
+
+3) Lexical Bands
+The Lexical Bands present all the lexical items
+across all levels of schooling in the following
+documents: Lexical Band I for elementary
+school, Lexical Band II for junior high school and
+Lexical Band III for high school.
+
+Band I
+Band II
+Band III
+
+Lexical Bands
+PDF
+Word
+PDF
+Word
+PDF
+Word
+
+Excel
+Excel
+Excel
+
+4) Grammar Bands
+The Grammar Bands present all the
+grammatical structures across all levels of
+schooling in the following documents:
+Grammar Band I for elementary school,
+Grammar Band II for junior high school and
+Grammar Band III for high school.
+
+Band I
+Band II
+Band III
+
+2
+
+Grammar Bands
+PDF
+Excel
+PDF
+Excel
+PDF
+Excel
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Curriculum Sub-committee for Elementary and Junior High School
+Tziona Levi, Director, English Language Education, Ministry of Education
+Elisheva Barkon, Chairperson, Advisory Committee for English Language Education, Ministry of
+Education; Oranim Academic College of Education
+Lisa Amdur, Chairperson, Curriculum Sub-committee; Tel Aviv University
+Debbie Lahav, Ruppin Academic Center
+Elana Spector-Cohen, Tel Aviv University
+Karen Abel, Beit Berl Academic College
+Mdalale Azam, National and Regional Counselor, Ministry of Education
+
+Curriculum Sub-committee for High School
+Tziona Levi, Director, English Language Education, Ministry of Education
+Elisheva Barkon, Chairperson, Advisory Committee for English Language Education, Ministry of
+Education; Oranim Academic College of Education
+Lisa Amdur, Chairperson, Curriculum Sub-committee; Tel Aviv University
+Beverly Chazan, Ministry of Education, Katzenelson High School, Kfar Saba
+Debbie Lahav, Ruppin Academic Center
+Elana Spector-Cohen, Tel Aviv University
+Lubna Ashkar, Ministry of Education; Ort Bustan Almarj High School, Nein
+Simone Duval, Ministry of Education
+
+Vocabulary Development
+Elisheva Barkon
+Lisa Amdur
+
+Grammar Development
+Debbie Lahav
+Lisa Amdur
+
+3
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Academic Consultants
+Prof. Batia Laufer, Haifa University
+Prof. Elite Olshtain, Hebrew University
+Prof. Penny Ur, Oranim Academic College of Education, Haifa University
+Prof. Norbert Schmitt, University of Nottingham
+Ms. Diane Schmitt, Nottingham Trent University
+Prof. Emerita, Ellen Spolsky, Bar-Ilan University
+Prof. Anat Zohar, Hebrew University
+
+Pre-Basic User (Pre-A1) Consultants
+Janina Kahn-Horwitz, Oranim Academic College of Education
+Aharona Gvaryahu, National Counselor, Ministry of Education
+Fern Levitt, David Yellin Academic College of Education
+Jackie Teplitz, Gordon Academic College of Education
+Rita Zeltsman-Kulick, Kibbutzim College of Education, Tel Aviv University
+Stephanie Fuchs, Gordon Academic College of Education
+Susie Russak, Beit Berl Academic College
+
+Editing
+Elisheva Barkon
+Elana Spector-Cohen
+
+Graphics and Print
+Lisa Amdur
+Sheli Amdur
+
+4
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Acknowledgements
+In the complex process of developing the English Curriculum 2020, we consulted academic
+experts, inspectors, counselors, Advisory Committee members, course book writers, test
+developers, coordinators and teachers. These consultations proved instrumental and we thank
+those who shared ideas and insights, and/or provided feedback on sections of the curriculum.
+Many thanks for the extensive work done by Sharon Fayerberger, together with Elisheva Barkon
+and Penny Ur, in developing the original band 3 lexical list while heading the lexical
+subcommittee in 2017- 2018. We wish to acknowledge the field work of Karen Abel, Chemda
+Benisty and Vera Kacevich carried out in the early stages of planning the lexical component.
+We offer special thanks to Prof. Norbert Schmitt and Diane Schmitt for their contribution to the
+development of the lexical component.
+We express our warm thanks to Sheli Amdur for designing the Bird’s Eye View and graphic icons.
+Finally, we extend our sincere gratitude and appreciation to Prof. Batia Laufer, Prof. Elite
+Olshtain and Prof. Penny Ur who were most generous with their time and provided invaluable
+advice and recommendations throughout the development process.
+
+5
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Bird’s Eye View
+
+6
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Contents
+Foreword ........................................................................................................................................9
+Preface ..........................................................................................................................................10
+Introduction ..................................................................................................................................11
+Alignment with the Common European Framework of Reference for Languages (CEFR) ..........12
+Levels of Progression ....................................................................................................................14
+Components of the English Curriculum 2020 ...............................................................................15
+
+Communicative Language Activities...........................................................................15
+Communicative language strategies ............................................................................................17
+
+Plurilingual and Pluricultural Competence ................................................................17
+
+Communicative Language Competences...................................................................18
+
+Vocabulary .................................................................................................................19
+
+Grammar ....................................................................................................................22
+Principles Underlying Teaching Practice ......................................................................................26
+Principles underlying language learning and language teaching .................................................26
+Principles underlying beginning language learning and teaching................................................28
+Principles underlying the selection of materials ..........................................................................30
+Principles underlying the design of tasks .....................................................................................30
+Principles underlying classroom assessment ...............................................................................31
+Principles underlying the integration of ICT.................................................................................31
+
+7
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Key to Communicative Language Activities ...............................................................32
+Spoken Reception Activities .........................................................................................................32
+Written Reception Activities ........................................................................................................33
+Spoken Production Activities........................................................................................................34
+Written Production Activities .......................................................................................................35
+Spoken Interaction Activities........................................................................................................36
+Written Interaction Activities .......................................................................................................37
+Online Interaction Activities .........................................................................................................37
+Mediation Activities .....................................................................................................................38
+Glossary of CEFR-related terms ....................................................................................................40
+References ....................................................................................................................................43
+
+List of Tables
+Table 1. Correspondence of the English Curriculum 2020, CEFR Global Scale and the Revised
+English Curriculum 2018 ...............................................................................................................14
+Table 2. Vocabulary Bands per Level............................................................................................20
+Table 3. Vocabulary Targets for Each Level*................................................................................21
+Table 4. Grammar Bands for Each Level ......................................................................................24
+Table 5. Principles Underlying Language Learning and Language Teaching ................................26
+Table 6. Principles of Beginning Language Learning and Language Teaching .............................29
+
+List of Figures
+Figure 1 Format of presentation ..................................................................................................25
+
+8
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Foreword
+Globalization, technologization, mobility, and migration present multiple challenges and
+have profound implications on the learning and teaching of English, especially in countries
+where English is a foreign language, like in Israel. High school graduates are expected to
+possess knowledge and demonstrate an expansive set of skills in various academic, workrelated, and social domains. In fact, during and after their academic studies, students are
+required to be literate and communicate orally in English. Students must use English to
+demonstrate both technological and intercultural skills in wide range of modalities.
+Additionally, given the global role of English as a lingua-franca, English is frequently used for
+both face-to-face and technology-mediated interaction in various work-related, social, and
+cultural contexts locally (in Israel) and globally. Any English curriculum must address these
+growing needs by adopting an action-oriented approach to prepare students to communicate
+effectively in English.
+Consequently, the curriculum framework for English instruction in Israeli schools must
+address these multifaceted linguistic skills and strategies which students as language users are
+obliged to acquire in order to function successfully in diverse spheres and contexts. A
+comprehensive, transparent, and coherent frame of reference is necessary; one that aligns to
+a widely accepted international approach to language learning and use; one that opens doors
+to higher education, promising workplaces, and social opportunities.
+The adoption of the CEFR in higher education in Israel clearly makes it advantageous to
+adapt and implement a CEFR based ELT curriculum in the Israeli school system. By connecting
+English teachers in schools to the CEFR, one continuum of English studies can be designed
+starting from the initial steps of language learning to the academic context, bridging teaching
+methods, materials, and tools. Creating a ‘common language’ across all levels of education in
+Israel, is an important step in modernizing and streamlining the teaching and learning of
+English in Israeli schools.
+In his famous book “The Prince”, written in the 16th century, Machiavelli stated: “It must
+be remembered that there is nothing more difficult to plan, more doubtful of success, nor
+more dangerous to manage than a new system.” Much later, in the 1920’s, Erika Landau, a
+well-known psychologist and educator, who dealt with the giftedness and creativity in
+children, claimed that creative thinking requires two conditions: one, finding new aspects in
+the known and familiar, and the other, the eagerness to face the new and the unknown. In
+order to offer a new and different way, one must have the courage to ask the questions,
+address important values and raise unresolved conflicts.
+Undeniably, re-examining the EFL national curriculum, while aligning it to international
+standards has been a major undertaking; EFL is a core subject in the Israeli school system and a
+high-profile discipline. Indeed, a great deal of thought was invested in the construction of the
+Curriculum 2020 to ensure that it truly serves the English language learning needs of Israeli
+students for years to come.
+
+9
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+I would like to thank the committee members for the endless hours they devoted to
+reviewing and writing the EFL Curriculum 2020. I would also like to thank my fellow
+policymakers at the Pedagogical Affairs Office of the Ministry of Education who approved this
+initiative. Finally, I would like to thank the many teachers and counselors for implementing
+sections of the drafts, providing input and feedback along the way. I look forward to the full
+adoption of the Curriculum 2020 by Israel's English teaching community.
+Dr. Tziona Levi
+Chief Inspector, English Language Education, Ministry of Education, Israel
+
+Preface
+
+The Curriculum Sub-committee was convened to develop a national curriculum for English
+language education aligned with the Common European Framework of Reference for Languages:
+Learning, Teaching, Assessment (CEFR) and in keeping with a position paper drafted by the
+Ministry of Education earlier that year (Ministry of Education, 2017). The initial stage of
+development of the English Curriculum 2020 involved an in-depth study of several curricular
+frameworks for language learning and teaching with a focus on the CEFR and the
+conceptualization of the components of the future curriculum.
+The second stage of development involved deliberations regarding the design of the
+curriculum and its different components. Once these were decided on, the elementary school
+curriculum was developed and posted on the English Inspectorate website in September 2018.
+The junior high curriculum was subsequently posted on the website in February 2019. The final
+stage of development involved the development of the high school curriculum and a review of
+the integrated version of the curriculum. This review was carried out to ensure consistency and
+clarity in presentation, coherent progression across levels and smooth transitions from level to
+level. The review also addressed feedback on specific components, editing and copyediting. For
+a general overview of the final curriculum components see the Bird’s Eye View.
+To develop and design the English Curriculum 2020 we consulted academic experts,
+inspectors, counselors, Advisory Committee members, course book writers, test developers,
+coordinators and teachers. These consultations provided a better understanding of the needs
+of the field on the one hand, and perspectives on academic standards, learning outcomes and
+assessment on the other. As the initial stages coincided with the development of the
+Professional Framework for English Teachers 2020 (Ministry of Education, 2019) we were able
+to draw on insights from our work on that document thus ensuring coherence and compatibility
+between the two.
+The alignment of the English Curriculum 2020 with the CEFR entailed the adoption of its
+terminology and conceptualizations. All key terms and concepts have been explicated in the
+section "Key to Communicative Language Activities", and other relevant terminology appears in
+the "Glossary of CEFR-related terms". To become familiar with the curriculum itself, we
+recommend readers peruse the can-do statements for each of the levels of progression. These
+can-do statements comprise the core of the curriculum. This core is supported by two additional
+
+10
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+curricular components, Lexical Bands, and Grammar Bands. These two components together
+define the lexical items and the contextualized use of grammatical structures to be studied
+across levels and enable the achievement of the can-do statements. For a detailed view of the
+progression across levels please refer to the separate can-do files.
+As the English Curriculum 2020 builds on and brings together local and international English
+curricula, we hope it will be perceived as part of the continuing evolution of English language
+education in Israel.
+Dr. Elisheva Barkon
+Chair, Advisory Committee for English
+Language Education
+Ministry of Education, Israel
+2017-2020
+
+Dr. Lisa Amdur
+Chair, Curriculum Sub-committee
+Ministry of Education, Israel
+2017-2020
+
+Introduction
+
+While the acquisition of English is a must to function in a dynamic, fast-changing world
+characterized by globalization, technologization, mobility and migration, the teaching of the
+language also presents multiple challenges. Insights from contemporary research in second
+language acquisition (SLA), learning additional languages and educational technology among
+other disciplines, allow practitioners to consider how to apply up-to-date thinking in classroom
+practice. The English Curriculum 2020 is the outcome of the revision and revamping of the
+Revised English Curriculum 2018. In many respects it may be considered an evolution, bringing
+the curriculum into alignment with international standards and contributing to students’ ability
+to experience a smooth transition from high school graduation to higher education and the
+global workplace.
+David Crystal (2003) suggests six reasons for studying English: it is fascinating, important, fun,
+beautiful, useful and because it’s there. Today, without question, English functions as an
+international language having taken on the global role of lingua franca in a plethora of workrelated, social and cultural contexts (Ministry of Education, 2017) thus rendering its acquisition
+essential in the context of mastering 21st-century competences. “English is recognized as the
+language of commerce, academia and diplomacy, and is used extensively in many professions
+and sectors (for example, aviation, media, science, medicine, technology and the internet). Even
+in parts of the economy and professions that are dominated by the home language (such as
+law), trends indicate that English will remain or become the relay language” (British Council,
+2018, p. 25).
+Learners are today required to develop a variety of language competences and to use English
+both orally and in writing in performing a wide range of tasks. The global role of English today
+has repercussions on employer expectations of school graduates in terms of proficiency and the
+communication skills required for the workplace (British Council, 2018). The alignment of the
+
+11
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+English Curriculum 2020 with the CEFR – a framework that defines the competences necessary
+for language learners to function and communicate effectively, translated into over 40
+languages including English, addresses these expectations (Council of Europe, 2011, 2018,
+2020). With teacher facilitation, learners can master technological and intercultural skills and
+strategies in English.
+As noted above, in a fast-changing world, teaching English presents multiple challenges. Keeping
+in mind that as English spreads the world over and increasing numbers of non-native speakers
+adapt it to their local context and needs, new and different linguistic standards may characterize
+global versions (British Council, 2018). This emphasizes the need to periodically revisit and
+update the curriculum to reflect the state of flux that characterizes all living languages.
+
+Alignment with the Common European Framework of Reference for
+Languages (CEFR)
+
+In 2001, the Council of Europe introduced the CEFR, designed to provide a set of clear and
+common standards and concepts for the teaching and assessment of foreign languages in
+Europe, including English. Since its introduction, it has been adopted in over 120 countries and
+translated into more than 40 languages including Hebrew (NITE, 2017) and Arabic. Furthermore,
+it is widely used in an ever-growing number of educational and occupational contexts and has
+become ‘a common language’ with which teachers and learners around the world are already
+familiar.
+The CEFR, based on current language education research, emphasizes the multi-dimensional
+nature of language learning and promotes the adoption of cutting-edge teaching methods,
+materials and tools. In Israel, it serves as a basis for the reconceptualization of English language
+education in line with internationally accepted standards. This reconceptualization and its
+localization to suit the specific needs of Israeli learners recently culminated in the CEFR-Aligned
+Framework for English in Higher Education in Israel 1 (for English studies in universities and
+colleges). Similarly, the English Curriculum 2020 is a product of the reconceptualization of
+English language education in schools. It is designed to create a continuum of progression from
+elementary to higher education as well as a bridge between Israeli and global contexts of English
+worldwide.
+The adoption and localization of the CEFR to the Israeli context ensures that the English
+Curriculum 2020:
+
+1 CEFR-Aligned Framework for English in Higher Education in Israel (2017). Tempus ECOSTAR:
+
+Project number 543683-TEMPUS-1-2013-1-2013-1-IL-TEMPUS-JPCR. Downloadable
+from https://tempus-ecostar.iucc.ac.il/wp-content/uploads/2016/04/FRAMEWORK-ATAR-withpreface.pdf
+
+12
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+•
+
+addresses the unique context of Israel, taking its ethnically and linguistically
+heterogeneous population into consideration;
+
+•
+
+provides a high level of specificity and resolution of what is required at each level of
+study;
+
+•
+
+allows learners to develop meta-awareness of language (as language learning goals are
+transparent), to pursue self- and peer-assessment and more importantly, set their own
+learning goals and take responsibility for their learning;
+
+•
+
+promotes equity and fairness across diverse learner populations;
+
+•
+
+ensures equal opportunities and enhances life chances for learners from different
+cultures, regions and sectors;
+
+•
+
+promotes instruction that can open doors to higher education, workplaces and social
+opportunities;
+
+•
+
+promotes international recognition by organizations and institutions and enhances
+intercultural understanding;
+
+•
+
+supports virtual and physical learner exchanges, participation in national and
+international projects, as well as critical and creative thinking through exchanges of ideas
+with people from diverse backgrounds;
+
+•
+
+facilitates the development of high-resolution materials and valid, reliable and fair tests
+aligned with the CEFR;
+
+•
+
+serves as a blueprint for teachers as they create and prepare materials, set learning
+goals, review exemplars and assess student work;
+
+•
+
+fosters teacher cooperation in Professional Learning Communities (PLCs) as discussions
+and sharing revolve around a ‘common language’ and mutual understandings of what
+learners can do at each level.
+
+The English Curriculum 2020, in line with the CEFR, adopts an action-oriented approach
+whereby communication is viewed as a social activity designed to accomplish specific tasks. As
+such, it recognizes students as active participants in the learning process, and they learn to use
+language through the performance of meaningful tasks in real-life social contexts. This reflects
+a descriptive rather than prescriptive approach to language teaching. Teachers do not lose their
+pedagogic freedom; quite the opposite, they are afforded opportunities to exploit their
+professional competences and contextualize teaching. The curriculum defines language use in
+the form of can-do statements. These define what English language learners can actually do with
+language in varying situations, for different purposes, and therefore are formulated in positive
+terms at each level of developing language proficiency. The descriptive scheme and the actionoriented approach
+
+13
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+“…. put the co-construction of meaning [bold in original] (through
+interaction) at the center of the learning and teaching process. This has
+clear implications for the classroom. At times, this interaction will be
+between teacher and learner(s), but at times, it will take a collaborative
+nature between learners themselves. The precise balance between
+teacher-centered instruction and such collaborative interaction between
+learners in small groups is likely to reflect the context, the pedagogic
+tradition in that context and the proficiency level of the learners
+concerned. In the reality of today’s increasingly diverse societies, the
+construction of meaning may take place across languages and draw upon
+user/learners’ plurilingual and pluricultural repertoires” (CEFR, 2018, p.
+27)
+
+Levels of Progression
+
+The English Curriculum 2020 provides a general frame of reference. It defines explicit, clear and
+transparent can-do statements that specify what a language learner can do with the language
+as proficiency develops. It conforms to global standards and current views of language learning
+and use, while also satisfying the requirements of the Israeli Ministry of Education in terms of
+the competences, skills and strategies (i.e. benchmarks) required within each one of the Revised
+English Curriculum 2018 domains (i.e. Social Interaction; Access to Information; Presentation;
+Appreciation of Literature and Culture, and Language). Table 1 presents a comparison across the
+levels of development described in the English Curriculum 2020, the relevant levels of the CEFR
+Global Scale 2 and the Revised English Curriculum 2018.
+T ABLE 1. CORRESPONDENCE OF THE E NGLISH CURRICULUM 2020, CEFR GLOBAL SCALE AND THE REVISED E NGLISH
+C URRICULUM 2018
+
+English Curriculum 2020
+
+CEFR Global
+Scale
+
+Revised English
+Curriculum 2018
+
+Pre-Basic User
+
+Pre-A1
+
+Pre-foundation
+
+Basic User I
+
+A1
+
+Foundation
+
+Basic User II*
+
+A2
+
+Intermediate
+
+Independent User I (4-point Bagrut)
+
+B1
+
+Proficiency
+
+Independent User II (5-point Bagrut)
+
+B2
+
+Proficiency
+
+* Basic User II describes the exit level for junior high school and for 3-point Bagrut.
+
+2
+The CEFR global scale includes two additional levels: C1 and C2 which reflect the highest levels of
+language proficiency for learners.
+
+14
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Components of the English Curriculum 2020
+
+The English Curriculum 2020 comprises six interconnected constituents: communicative
+language activities, communicative language strategies, communicative language competences,
+plurilingual and pluricultural competence, vocabulary and grammar. The first four consist of cando statements listed per level (see Table 1) and principally are based on the (CEFR, 2001, 2018,
+2020). Additional frameworks consulted were: Guidelines for the Teaching of English at the PreFoundation Level (GEPF) (Ministry of Education, 2019). This document served as an additional
+source for Pre-Basic User can-do statements. For Basic Users I and II we consulted the Global
+Scale of English (GSE) developed by Pearson, and the Australian Curriculum (AUS).
+Regarding presentation, each can-do statement includes its source, stated alone if adopted
+verbatim, listed as adapted if changed from the original or as new, if created to suit the local
+context. Can-do statements for the communicative language activities, communicative language
+strategies, language competences and plurilingual and pluricultural competence are specified
+for each level of schooling.
+The levels of progression for language activities appear in Table 7, for plurilingual and
+pluricultural competence in Table 8 and for language competences in Table 9. Two additional
+constituents of the curriculum involve detailed lexical items and grammatical structures. The
+lexical items (including single words and lexical chunks) are divided by level of schooling and
+categorized as receptive or productive, and the grammatical structures are divided by grade
+level and into four levels of progression in the learner’s use of structures and their accuracy.
+
+Communicative Language Activities
+
+Communicative language activities portray actual language in use making them the core of the
+curriculum. They are divided into four modes described below, each mode including a number
+of scales that characterize it.
+Reception activities
+In reception activities the language users/learners receive and process language input from an
+oral text, written text or multimodal 3 text and construct a representation of the meaning
+expressed. Reception includes spoken reception (listening comprehension) and written
+reception (reading comprehension). The aspects of listening comprehension included under
+spoken reception are different kinds of one-way listening, excluding Understanding the
+interlocutor (as a participant in an interaction), which is included under interaction activities.
+3 Multimodal texts combine two or more modes such as written language, spoken language, visual (still and moving
+
+image), audio, gestural, and spatial meaning (The New London Group, 1996; Cope and Kalantzis, 2009).
+
+15
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+The approach is strongly influenced by the metaphor of concentric circles as one moves from
+the role as participant in an interaction towards the one-way role of an over hearer or bystander,
+to being a member of a live audience, to being a member of an audience at a distance – via
+media (CEFR, 2018). In written reception activities the learner reads and processes written texts
+of various genres and produced for a range of purposes (CEFR, 2018). Texts include non-fiction
+and fiction and encompass magazines, newspapers, blogs, biographies, instructions,
+correspondence, and more. Purposes include reading for orientation (skimming and scanning),
+reading for information/argument and reading for leisure.
+Production activities
+In production activities the language users/learners generate language in both speaking and
+writing activities. Spoken production “is a ‘long turn,’ which may involve a short description or
+anecdote, or may imply a longer, more formal presentation.” (CEFR, 2018, p. 68). It covers
+monologues that deal with descriptions, argument (e.g., in debate) and information. Written
+production encompasses written reports and essays as well as creative writing. The scales
+relevant to reports and essays include content (moving from routine factual information to
+complex topics distinguishing personal viewpoints from sources), types of texts (from short
+reports to presenting a case) and complexity of discourse (from linking sentences with simple
+connectors to creating effective logical structure). Creative writing involves “personal,
+imaginative expression in a variety of text types” (CEFR, 2018, p. 76). The scales include aspects
+described (from everyday information to descriptions of personal experience), types of texts
+(from diary entries to imaginative texts), the complexity of discourse and the use of language
+(from basic vocabulary and simple sentences to a style suited to the genre and reader).
+Interaction activities
+Interaction involves at least two individuals participating in an oral, written and/or online
+exchange. In interaction activities production and reception alternate and sometimes overlap.
+Interaction includes spoken, written and online interaction. Spoken interaction covers
+conversation, discussion and goal-oriented collaboration. Written interaction relates mainly to
+correspondence (written exchange that is often of an interpersonal nature) and notes, messages
+and forms (mainly concerning information transfer). Online interaction, characterized by
+mediation through a machine, implies that it is different to face-to-face interaction (CEFR, 2018).
+The scale includes online conversation and discussion which may involve simultaneous (real
+time) and consecutive interaction (allowing time to prepare a draft and/or consult resources),
+comments and reactions on posts and embedded media, and the ability to add “symbols,
+images, and other codes for making the message convey tone, stress and prosody, but also the
+affective/emotional side, irony etc.” (CEFR, 2018, p. 96). It also addresses goal-oriented
+
+16
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+transactions (e.g., purchasing goods) and collaboration (e.g., participating in collaborative
+project work).
+Mediation activities
+Mediation activities which were limited in scope in the original CEFR (2001), but were developed
+and expanded in the updated versions of the CEFR (2018, 2020). In mediation the language
+users/learners serve as intermediaries for others who may not have access due to linguistic,
+cultural, semantic or technical constraints. Mediation activities may also involve mediating a text
+for oneself (e.g., taking notes) or expressing reactions to texts, particularly creative texts. As
+literary texts often contain references to other cultures, traditions and lifestyles, these may be
+invaluable in language teaching. Mediation involves reception, production and frequently also
+interaction as it includes relating for others specific information in speech and/or writing.
+
+Communicative language strategies
+
+In order to perform a task, strategies that are most appropriate to the completion of the task
+are usually activated and mobilized. These may be general strategies and/or communicative
+language strategies. In the context of the English Curriculum 2020 communicative language
+strategies are a type of link between communicative language activities and communicative
+language competences. Strategies involve the application of metacognitive principles of preplanning, execution, monitoring and repair in relation to activities. Specific strategies may be
+suited to specific activities, for example, the strategy of “taking the floor” or “turntaking” is
+relevant in the context of interaction activities. The can-do statements for specific strategies
+appear immediately following the can-do statements for each activity at each level of the
+curriculum, excluding Pre-Basic User I.
+
+Plurilingual4 and Pluricultural Competence
+
+The component of plurilingual and pluricultural competence is based on the notion that, at the
+level of the individual learner, languages are interrelated and interconnected. The
+
+4
+
+The CEFR distinguishes between multilingualism (the coexistence of different languages at the social or individual
+level) and plurilingualism (the dynamic and developing linguistic repertoire of an individual user/learner). The term
+plurilingual competence refers to an individual's ability to communicate in several languages and switch among them
+to suit circumstances, taking into account that language acquisition and use are dynamic (Council of Europe, 2001).
+In language education, the notion of plurilingualism particularly highlights the relevance of learners’ language
+repertoires and takes these into account in teaching and assessment. For more background information, see: Coste,
+D., Moore, D., & Zarate, G. (2008). Plurilingual and Pluricultural Competence. Council of Europe. Accessed from:
+https://rm.coe.int/CoERMPublicCommonSearchServices/DisplayDCTMContent?documentId=090000168069d29b
+
+17
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+communicative competences of the individual language learner are, to a great extent, derived
+from knowledge and experience of language(s) which together with cultures are “not kept in
+separated mental compartments” (CEFR, 2018, p. 157). In any language learning context, the
+learner may draw upon all available linguistic and cultural resources and experiences (CEFR,
+2018).
+
+Communicative Language Competences
+
+The CEFR based the development of the can-do statements for communicative language
+competences on different competence models in the field of applied linguistics. These models
+often relate to four main aspects of competence: strategic, linguistic, socio-linguistic and
+pragmatic. Following the organization principles of the CEFR, strategic competence, is presented
+as a separate component in the English Curriculum 2020 (see ‘communicative language
+strategies’ above). The remaining three competences make up the component of
+communicative language competences. Following is a short description of each.
+Linguistic competence relates to language usage (as in ‘correct usage’) and includes general
+linguistic range, vocabulary size and depth, grammatical accuracy as well as phonological and
+orthographic control. Sociolinguistic competence defines the knowledge and skills required to
+deal with the social dimension of language use, i.e., sociolinguistic appropriateness. Pragmatics
+describes actual language use in the (co-) construction of discourse and relates to how messages
+are organized, structured, arranged and used to perform communicative functions.
+
+18
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Vocabulary
+
+Foreword by Prof. Batia Laufer
+“The real intrinsic difficulty of learning a foreign language lies in that of having to master its
+vocabulary” (Sweet, 1906, p. 6). More and more, language researchers and practitioners have
+come to realize the truth of Sweet’s statement. Unlike grammar, which is a system of a limited
+number of rules, vocabulary is an open set of many thousands of items.
+Since many English second language learners operate with a limited vocabulary, the basic
+question for English syllabus designers and teachers is how many and which words these learners
+need to know in order to function in the language successfully.
+Research shows that 3,000 most frequent word families suffice for comprehension of movies, TV
+and conversation, 5,000 for reading authentic argumentative texts and novels with support (of
+a dictionary or teacher) and 8,000 word families for reading without support. (A word family
+includes the base word, its inflections and most common derivations.) Hence, word frequency in
+a language, as reflected in language corpora, was the main guiding principle for including words
+in the revised lexical syllabus. Some words may be infrequent in the language, but useful and
+relevant to learners in a particular language learning context. Such words were included in the
+syllabus as well. In addition to single words, numerous multiword units, or chunks, (e.g.,, as a
+matter of fact, take off, to say the least) appear on the lists. There is no consensus among
+researchers in criteria for deciding which chunks should be counted with the same status as single
+words, though some lists of multiword units have been suggested in recent years. It is the
+teaching experience of the list maker that provides the best guidance for deciding which chunks
+should be studied. The chunks that appear in the revised vocabulary syllabus were considered
+useful and important by the curriculum committee.
+How do learners acquire lexical knowledge? Learning new vocabulary in a foreign language
+environment is determined by two major factors: how many times words are encountered in the
+language input and what learners do with these words. Furthermore, what is done with the word
+may have a more lasting effect on knowledge than exposure. There is no set number of word
+repetitions that will guarantee word retention. What all researchers emphasize is the importance
+of repetitions. There is also consensus and empirical evidence as to the efficacy of word-focused
+instruction – a variety of exercises that require learners to recognize, recall and use words in
+different contexts.
+The principles that have guided my own word-focused teaching are variation in vocabulary
+activities, periodic recycling of words and a judicious exploitation of L1. The activities could be
+communicative and non-communicative, contextualized and decontextualized, related to
+
+19
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+textbook and to novel contexts, focused on comprehension and production. Such variation is
+particularly beneficial in the case of words that have different uses in different contexts.
+Recycling words that have been introduced earlier in the course is of utmost importance because
+students are likely to forget words that are not repeatedly encountered or used. To prevent
+vocabulary loss, several minutes per lesson could be devoted to reviewing ‘vocabulary oldies’ in
+short activities or quizzes.
+Earlier studies of errors and more recent analyses of learner corpora have shown that many
+lexical problems result from the influence of learners’ first language. Students appreciate
+occasional translations of words, brief explanations of L1-L2 differences and practice of L1
+induced difficulties, and research has provided evidence for the effectiveness of L1-related
+activities.
+Acquisition of functional and effective lexis is not an easy task, but the mission is not impossible.
+Sweet, H. (1906). The practical study of languages. A guide for teachers and learners. NY:
+Henry Holt and Company.
+Vocabulary Component
+The vocabulary component, Lexical Bands, aims to provide all learners from elementary through
+high school with essential vocabulary for fluent and natural discourse both spoken and written.
+The component comprises three bands of single words and chunks further divided into core lists
+for all levels from Basic User to Independent User II (see Table 2). Frequency constituted the
+main selection criterion for most of the lexical items together with expert judgement which took
+learners’ age and the local context into consideration. Regarding the Pre-Basic User, items were
+selected in relation to phonological and orthographic principles coupled with the need to
+introduce single words and chunks as stepping stones to conversation in the first year of English
+studies.
+Table 2. Vocabulary Bands per Level
+Level
+
+Lexical Band
+
+Grade Level
+
+Pre-Basic User (Pre-A1)
+
+Pre-Band I
+
+Grade 3 and/or first months of Grade
+4
+
+Basic User I (A1)
+
+Band I Core I
+
+Grade 4 – Mid-Grade 5
+
+Band I Core II
+
+Mid-Grade 5 – End Grade 6
+
+Band II Core I
+
+Grade 7 – Mid-Grade 8
+
+Band II Core II
+
+Mid-Grade 8 – End Grade 9
+
+Independent User I (B1)
+
+Band III (4 points)
+
+Grade 10 – Grade 12
+
+Independent User II (B2)
+
+Band III (5 points)
+
+Grade 10 – Grade 12
+
+Basic User II (A2)
+
+20
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+In addition to the division into bands and cores, the lists from Basic User I to Independent User
+II differentiate receptive from productive vocabulary. The ratio of receptive and productive
+targets changes as learners move up levels. As Band I covers high frequency foundation
+vocabulary, all its lexical items are expected to become productive by the end of elementary
+school. In Bands II and III, the differential ratios reflect the notion that language users recognize
+more lexical items than they use repeatedly in spoken and written contexts. Therefore, once
+students have mastered the foundation (high frequency) vocabulary, the ratio of productive to
+receptive items decreases. In other words, there is a lower percentage of items required to be
+learned productively in junior high and high school.
+Table 3 presents the number of receptive and productive targets and cumulative targets for
+each level. It also displays the targets for 3, 4 and 5 point Bagrut learners. Meeting the targets
+ensures that, at minimum, all high school graduates know the high frequency vocabulary of the
+language and those graduating 4- and 5-point Bagrut levels will also have knowledge of midfrequency items essential for academic, professional and social purpose.
+T ABLE 3. VOCABULARY TARGETS FOR E ACH LEVEL *
+
+Level
+
+Pre-Basic
+User (Pre A1)
+
+Grades
+
+Basic User I
+(A1)
+
+3-6
+
+Basic User II
+(A2)
+
+Independent
+User I (B1)
+
+Independent
+User II (B2)
+
+7-9,
+Bagrut 3
+points
+
+10-12,
+Bagrut 4
+points
+
+10-12
+Bagrut 5
+points
+
+Receptive
+per level
+
+200
+
+1200
+
+2000
+
+900
+
+1100
+
+Productive
+per level
+
+200
+
+1000
+
+800
+
+500
+
+500
+
+Cumulative
+receptive
+
+200
+
+1400
+
+3400
+
+4300
+
+5400
+
+Cumulative
+productive
+
+200
+
+1200
+
+2000
+
+2500
+
+3000
+
+*Note: the numbers presented constitute approximate targets.
+
+21
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Grammar
+
+Foreword by Prof. Elite Olshtain
+The goal of grammar teaching and learning is to enable learners to communicate effectively in
+context (Celce-Murcia, 2016): they need to understand the language produced by others and
+they need to produce and communicate their own ideas to others. Context entails the situation
+within which the communicative interaction takes place, and the topic or purpose of that
+interaction. All these are relevant to the grammatical choices we make.
+Grammatical constructions in English can be characterized by three dimensions: 1) structure or
+form, 2) meaning, and 3) use in terms of pragmatic appropriacy (politeness rules or sociocultural
+norms). For example, a question in the progressive entails the employment of be as an auxiliary
+and the inversion of elements of form as in “Are you limping?” The meaning of this question
+refers to the fact that the speaker wants to find out whether the listener, for some reason, is in
+a temporary condition of ‘limping’. With regards to politeness, you can ask a friend such a
+question; but when the listener is a stranger, this might be offensive.
+Traditional grammar teaching has stressed form and as a result, learners often felt that they
+needed to remember a rule without understanding its meaning or use. Nowadays we want to
+place more emphasis on meaning and its relation to context. This is particularly important since
+very few grammatical structures in English are completely context-free. This means that their
+form does not depend on context, and in all situations, they function the same way like the s on
+third person singular, or agreement of subject predicate in “be” sentences. Thus, s, on third
+person singular, is always required irrespective of context or the intended purpose of
+communication.
+Most English structures are context-dependent and therefore allow the language user to make
+choices like the one between present progressive and present simple – “I live in Tel Aviv” when
+this is a fact about me, but “I am living in Tel Aviv” when this is a temporary state which might
+change soon. It is therefore important that learners always use language in relevant contexts.
+Learners can use grammatical forms in given situations before possessing full understanding of
+these forms. The acquisition of grammar is gradual and enhanced by exposure and use.
+Grammar learning must entail constant recycling and reintroduction at all levels in order to allow
+this gradual acquisition.
+With young language learners we try to keep explicit teaching of form to a minimum. Instead,
+we want to make sure that we expose them to large amounts of language in use. Rather than
+explain how present simple versus present progressive ‘works’, we engage learners in hearing
+and reading texts where progressive is used for descriptions of “here and now” and present
+
+22
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+simple for typical behavior and natural, stable and timeless phenomena. The following sentences
+illustrate these typical uses. “The boys are playing in the backyard” as opposed to “They always
+play football; They don’t play basketball”, and “The sun rises in the east.” In this way, learners
+will first begin to understand the difference between these two aspects and much later they will
+also be able to produce them appropriately and accurately. We should draw the learners’
+attention to form and meaning so that they notice the differences, but always within a relevant
+context.
+Following ample exposure to a grammatical construction, when learners seem to grasp the
+meaning, we begin to practice the form more consciously and to talk about it explicitly, yet we
+do not expect fully accurate use by learners. The general sequence for a grammatical structure
+will be: 1) massive exposure of use in context; 2) learners show some, mostly receptive,
+understanding of the meaning of the new structure; 3) they begin to use the structure
+appropriately either as a chunk or memorized phrase (emerging production); 4) they use it
+accurately most of the time but may still have some issues with form (developing production)
+and therefore make some errors.
+When teaching grammar to young children we want to arouse their interest in the ways English
+works, and we expect them to engage in activities that are meaningful without an emphasis on
+accuracy. The more learners engage in language use, the more they express their own ideas
+successfully, the more they will feel motivated and enjoy the learning process.
+Celce-Murcia, M. (2016) The importance of the discourse level in understanding and teaching
+English grammar. In E. Hinkel (Ed.) Teaching English grammar to speakers of other languages
+(pp. 6-17). New York, Routledge.
+
+Grammar Component
+The grammar component, English Curriculum 2020 Grammar Bands, aims to enable learners at
+all levels of proficiency to understand and produce messages in context. Grammar like
+vocabulary conveys meaning and supports the achievement of the can-do statements specified
+for all levels of schooling.
+The grammar component, based primarily on the English Grammar Profile (EGP) (Cambridge
+University Press, 2015), comprises three CEFR aligned bands spanning from Basic User I through
+Independent User II. Table 4 presents the bands by levels (A1 - B2) and grades (4-12) and
+differentiates 3, 4, and 5- point Bagrut.
+
+23
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+T ABLE 4. GRAMMAR BANDS FOR E ACH LEVEL
+
+Level
+
+Grammar Band
+
+Grade Level
+
+Basic User I (A1)
+
+Band I
+
+Grade 4 – Grade 6
+
+Basic User II (A2)
+
+Band II
+
+Grade 7 – Grade 9
+
+Basic User II+ (A2+)
+
+Band III (3 points)
+
+Grade 10 – Grade 12
+
+Independent User I (B1)
+
+Band III (4 points)
+
+Grade 10 – Grade 12
+
+Independent User II (B2)
+
+Band III (5 points)
+
+Grade 10 – Grade 12
+
+The acquisition of grammar evolves over time and, similar to vocabulary, progresses from
+receptive knowledge to productive use. To allow the development of in-depth knowledge and
+to afford multiple opportunities to achieve competence in pragmatic appropriateness, usage
+and accuracy, basic structures are reentered within and across the bands. The progression from
+receptive knowledge to usage and various degrees of accuracy may be viewed in terms of a
+continuum with four flexible transition points described below.
+Mostly receptive
+Learners understand the general message conveyed by the structure and produce mostly
+memorized formulaic lexical chunks in routine and familiar contexts.
+Emerging usage and accuracy
+Learners understand the main message conveyed by the structure and attempt to use it in
+familiar and novel contexts. Production begins to be ‘creative’ (novel utterances) with errors
+that may interfere with intelligibility.
+Evolving usage and accuracy
+Learners understand the full message conveyed by the structure. Usage appears in a range of
+relevant contexts and focuses on communication. Production may at times be inaccurate though
+errors mostly do not interfere with intelligibility.
+Mostly correct usage and accuracy
+Learners understand the full message conveyed by the structure. Usage appears in a wide range
+of relevant contexts and focuses on communication. Production for the most part is accurate
+with occasional errors that do not interfere with intelligibility.
+Figure I displays the presentation of the grammar structures, the developing levels of
+progression, a short description of each structure and contextualized example sentences. These
+have been included to emphasize the importance of context in the teaching and use of grammar.
+
+24
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Figure 1 Format of presentation 5
+
+Color coding for levels of progression. Capitalization for function. Italics for function and examples. Square
+brackets for added context.
+
+5
+
+25
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Principles Underlying Teaching Practice 6
+The alignment of the English Curriculum 2020 with the CEFR and its adaptation to local needs can
+be viewed as an evolutionary process with certain aspects of the Revised English Curriculum
+(Ministry of Education, 2018) preserved or adapted. This applies in particular to the principles
+that underlie teaching practice. These principles address: language learning and teaching,
+beginning language learning and teaching, selection of materials, design of tasks, classroom
+assessment, and integration of Information and Communications Technology (ICT).
+
+Principles underlying language learning and language teaching
+
+Meaningful language learning is active, constructive, authentic and cooperative. Learners are
+motivated when they engage in activities relevant to their lives. When tasks make sense to and
+interest learners on a personal level, they can relate to them in depth, cognitively and affectively.
+This is particularly appropriate within the action-oriented approach that characterizes the CEFR.
+The following principles underlie meaningful language learning and teaching:
+T ABLE 5. PRINCIPLES UNDERLYING LANGUAGE LEARNING AND LANGUAGE TEACHING
+
+Language Learning
+
+Language Teaching
+
+Language learning is facilitated when
+learners:
+
+Teachers promote learning when they:
+
+• have maximum exposure to the target
+
+• afford learners opportunities to acquire
+
+• can use linguistic resources (L1 and other
+
+• recognize the importance of relating to
+
+• are motivated and willing to invest time
+
+• choose interesting, relevant and
+
+• develop self-efficacy and confidence in
+
+• provide success-oriented tasks and
+
+language through encounters with a
+variety of spoken and written texts,
+allowing for incidental acquisition of
+English.
+
+vocabulary and other language features
+incidentally by speaking English in the
+classroom, and by providing a languagerich environment with a variety of verbal
+and visual stimuli.
+
+languages) when it helps them promote
+comprehension.
+
+learners’ linguistic resources (L1,
+additional languages, English).
+
+and effort.
+
+appropriate topics, materials and
+activities.
+
+using the language.
+
+6
+
+constructive feedback.
+
+Based on the Revised English Curriculum 2018
+
+26
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Language Learning
+
+Language Teaching
+
+Language learning is facilitated when
+learners:
+
+Teachers promote learning when they:
+
+• are willing to take risks.
+
+• create a non-threatening and supportive
+
+• build on their world knowledge and
+
+• choose content and language that will
+
+• are aware of their own progress and have
+
+• provide transparent and attainable goals.
+
+• are challenged within the range of their
+
+• provide differentiated instruction.
+
+• understand language conventions.
+
+• draw learners’ attention to and clarify
+
+• practice grammar and vocabulary in
+
+• create meaningful opportunities and
+
+• increase and expand vocabulary size and
+
+• set and meet lexical targets based on the
+
+• make the transition from receptive
+
+• engage learners in tasks that encourage
+
+• have opportunities to use the target
+
+• provide tasks that require learners to use
+
+• understand the usefulness and
+
+• provide authentic, real-world tasks, and
+
+• collaborate with peers by sharing
+
+• provide opportunities for peer interaction
+
+learning environment that encourages
+risk taking.
+
+linguistic resources.
+
+build on learners’ prior knowledge.
+
+a sense of accomplishment.
+
+zone of proximal development.
+
+language conventions.
+
+focused, meaningful and contextualized
+tasks.
+
+provide focused contextualized tasks to
+practice grammar and vocabulary.
+
+depth.
+
+items specified in the lexical bands and
+provide frequent vocabulary-focused
+learning and recycling activities to ensure
+mastery and retention.
+
+knowledge of vocabulary to productive
+use.
+
+the productive use of new vocabulary.
+
+language meaningfully and purposefully.
+
+the target language for meaningful
+communication.
+
+significance of what they are learning.
+
+ensure that learners appreciate the
+significance of what they are learning.
+
+information and exchanging ideas and
+opinions.
+
+by incorporating pair and group work into
+classroom activities.
+
+27
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Language Learning
+
+Language Teaching
+
+Language learning is facilitated when
+learners:
+
+Teachers promote learning when they:
+
+• are conscious of how they learn and can
+
+• encourage reflection and metacognitive
+
+• are aware of general and specific learning
+
+• explain the objectives of the instructional
+
+• develop language learning strategies that
+
+• teach language learning strategies and
+
+• take responsibility for their own language
+
+• encourage learners to set goals and guide
+
+• have opportunities for critical and
+
+• provide challenging tasks that require the
+
+• have opportunities to choose texts and
+
+• include procedures where students can
+
+• read different text types that are
+
+• provide exposure to a wide range of text
+
+• read level-appropriate books regularly
+
+• set aside time for extensive reading
+
+• are motivated to explore language and
+
+• encourage learners to relate to different
+
+reflect on and evaluate their learning.
+
+awareness before, during and after
+learning opportunities.
+
+objectives.
+
+facilitate autonomous learning.
+
+unit, lesson and specific tasks.
+
+provide opportunities for their
+application.
+
+learning.
+
+them in evaluating their own progress.
+
+creative thinking.
+
+application of critical and creative
+thinking.
+
+tasks according to individual preferences.
+
+choose between a variety of texts or
+tasks.
+
+appropriate to their level.
+
+types appropriate to their level.
+
+and develop independent reading habits.
+
+(reading for pleasure).
+
+cultures through creative and multimodal
+texts (including literature).
+
+languages and cultures through creative
+and multimodal texts (including
+literature).
+
+Principles underlying beginning language learning and teaching
+
+Instruction for young learners at the Pre-Basic User (Pre-A1) level focuses primarily on
+establishing aural/oral skills, as a basis for reading and writing. Teaching should therefore first
+provide for extensive listening and speaking practice prior to the introduction of literacy in
+English.
+
+28
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+T ABLE 6. PRINCIPLES OF BEGINNING LANGUAGE LEARNING AND LANGUAGE TEACHING
+
+Beginning Language Learning
+
+Beginning Language Teaching
+
+Beginning language learning is facilitated
+when learners:
+
+Teachers promote beginning language
+learning when they:
+
+• have developed literacy skills in their L1.
+
+• work together with the homeroom
+
+• encounter rich comprehensible language
+
+• provide exposure to familiar and new
+
+• are exposed to high-frequency
+
+• focus on the most useful high-frequency
+
+• develop a basic oral vocabulary in English
+
+• ensure an extensive period of meaningful
+
+• reinforce their listening comprehension
+
+• provide multiple opportunities for
+
+• learn through age-appropriate activities
+
+• use stories, games, visual materials and
+
+• attend to the sounds and sound
+
+• teach phonemic awareness.
+
+• learn the letters and their corresponding
+
+• teach learners to decode and encode
+
+• can automatically, accurately and rapidly
+
+• provide extensive practice to ensure the
+
+teacher to ensure L1 literacy.
+
+input.
+
+comprehensible language from a variety
+of level-appropriate texts and contexts.
+
+vocabulary, lexical chunks and language
+patterns.
+
+words and conversational expressions.
+
+before starting to read and write.
+
+listening and speaking (aural/oral)
+practice prior to the teaching of reading
+and writing.
+
+and speaking skills through extensive
+repetition.
+
+learners to listen to and recite rhymes,
+chants, songs and simple dialogues.
+
+and materials.
+
+realia to motivate young learners.
+
+combinations of the language as
+preparation for literacy.
+sounds.
+
+letters and syllables.
+
+recognize a limited range of high
+frequency written words and expressions.
+
+acquisition of sight vocabulary
+(automatic, accurate and rapid word
+recognition).
+
+29
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Principles underlying the selection of materials
+
+Instructional materials comprise a course book approved by the Ministry of Education and other
+additional print or digital materials. The following principles underlie the selection of materials.
+Instructional materials
+• cover the can-do statements (activities and communicative competences), and the lexical
+
+and grammar bands;
+• are inclusive, unprejudiced, inoffensive and non-stereotypical;
+• include a variety of text types and media;
+• are targeted to meet a variety of purposes and different audiences;
+• provide opportunities for action-oriented, contextualized language practice and use;
+• are appropriate to the learners’ age and language proficiency;
+• build on learners’ backgrounds, interests, experiences and prior knowledge;
+• enrich learners’ general world knowledge and encourage further exploration;
+• provide opportunities for meaningful communication;
+• promote independent and self-regulated learning;
+
+Principles underlying the design of tasks
+
+The following principles underlie the design of instructional tasks.
+Instructional tasks
+• are meaningful;
+• are transparent in terms of goals, on-going process and product;
+• allow for a focus on form, meaning and use;
+• afford opportunities for recycling and enrichment of linguistic and communicative competences;
+• encourage convergent and divergent thinking;
+• link to the learners’ prior knowledge and experiences;
+• provide opportunities for applying global competences including critical thinking, problem
+
+solving, metacognition, collaboration and creativity;
+• allow for multiple solutions;
+• encourage learners to respond using multiple modes of expression (e.g., drawing, writing,
+singing);
+• promote opportunities for peer interaction;
+• challenge learners with simulated or real-world issues to apply or adapt new knowledge;
+• motivate learners to broaden horizons and explore other cultures through creative texts;
+• encourage learners to use English as a means for gaining information in other subject areas;
+• promote learner reflection and self-evaluation.
+
+30
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Principles underlying classroom assessment
+
+Assessment, formal or informal, employing traditional or alternative methods, constitutes an
+integral part of the teaching-learning process. It involves collecting evidence of learning over
+time using a variety of traditional and alternative methods which together form complementary
+components in the process. Assessment may be formative or summative. In the former, the
+goal is to monitor learning and provide ongoing feedback that will inform teaching and learning.
+In the latter, the goal is to evaluate learning at the end of a unit or period of time comparing
+learning outcomes with a preset standard or benchmark.
+The following principles underlie classroom assessment:
+• Assessment entails review and consolidates learning.
+• Assessment tools are valid and reliable.
+• Multiple methods of assessment are used for collecting information regarding students’
+
+progress and language development over time.
+• Feedback offered benefits learners and other stakeholders.
+• Assessment should include tasks that promote learners’ involvement and reflection on
+learning.
+• Assessment should require learners to use a variety of learning strategies and resources.
+• Learners are familiar with assessment criteria.
+• Learners take an active role in their assessment, evaluate their own progress and that of
+their peers and may collaborate in the determination of criteria.
+• Rubrics and checklists can be used to evaluate learners’ performance of oral and written
+tasks.
+• Teachers take measures to minimize test anxiety (e.g., explaining test layout, teaching
+test-taking strategies).
+
+Principles underlying the integration of ICT
+
+Rapid, on-going developments in ICT provide new means of communication and interaction and
+offer novel options and possibilities for accessing, using and creating information. These
+developments entail the acquisition of specific skills that will allow learners to function in an
+ever-changing digital world.
+
+31
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+The following principles underlie the integration of ICT within language teaching
+and learning:
+• Learners are encouraged to interact with digital media.
+• Learners are provided with tools to access, manage, store, create, critically evaluate and
+
+use information media and technologies competently.
+• Learners are encouraged to critically evaluate digital tools, utilize them judiciously by
+exploring their affordances and constraints.
+• Learners are encouraged to utilize different modes and channels of digital
+communication.
+• Learners practice how to access online information in accordance with their language
+abilities.
+• Teachers provide opportunities for learners to engage in virtual exchange, collaborative
+language-learning and task-based activities based on Web environments, such as Google
+Docs and wikis.
+• Learners are afforded opportunities to communicate and collaborate with local and global
+communities emphasizing the understanding that they may encounter cross-cultural
+differences in regard to the perception and use of digital tools.
+• Learners create and share original digital products online.
+• Learners are aware of rules related to acceptable online behavior (netiquette).
+• Learners are aware of the possible dangers and ethical considerations involved in using
+the Internet (e.g., compliance with notions of intellectual property, confidentiality and esafety).
+
+Key to Communicative Language Activities
+
+The communicative language activities for reception, production, interaction and mediation
+comprise can-do statements for all levels (Pre-Basic User – Independent User II) classified under
+sub-headings that include a general description and the key concepts operationalized in the
+statements. The following section describes the sub-headings 7 for each of the four communicative language
+activities. It should be noted that these serve as a type of “key” for reading the can-do statements for the
+communicative language activities for each of the levels of progression – Pre-Basic User (Pre-A1), Basic User I (A1),
+Basic User II (A2), Independent User I (B1) and Independent User II (B2).
+
+Spoken Reception Activities
+
+Understanding conversation between expert language users (adapted)
+
+7
+
+Based on the descriptions of the Common European Framework (CEFR, 2018)
+
+32
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Concerns two situations: one when other speakers talk to each other across the
+learner; the other when the learner can overhear a conversation. Both pose difficulties as
+the learner is not directly addressed.
+Key operationalized concepts: identify topic and changes of topic; identify logical
+progression; identify when people agree/disagree.
+Listening as a member of a live audience
+Concerns listening to a speaker whose presentation is relatively structured addressing an
+audience using a neutral register and voice projection.
+Key operationalized concepts: keeping up with and following the speaker; familiarity with
+the context, topic and subject matter; following the argument, distinguishing main points,
+etc.
+Listening to announcements, instructions and directions (adapted)
+Listening to announcements involves a more focused type of listening and the aim is mainly
+to recognize specific information.
+Key operationalized concepts: understanding directions and instructions; catching main
+point of announcements; accommodating to changes in degree of clarity and speed.
+Listening to audio media and recordings
+Involves broadcast media including messages, weather forecasts, narrated stories,
+interviews and the like.
+Key operationalized concepts: picking out concrete information; identifying and
+understanding main points and essential information; recognizing the speaker’s mood,
+attitudes and viewpoints.
+Watching TV, film and video
+Includes live and recorded video and film materials.
+Key operationalized concepts: following topic changes; identifying main points and details.
+
+Written Reception Activities
+Reading correspondence
+
+Involves reading personal and formal correspondence.
+Key operationalized concepts: length and complexity of the message; concreteness of
+information and type of format; standard vs. other language varieties; familiarity of topic.
+Reading for orientation
+Reading for orientation (sometimes called search reading) involves skimming to judge
+relevance) and scanning for specific information.
+Key operationalized concepts: the type of texts (notes, articles, books etc.); scanning text for
+relevance; picking out concrete information; identifying important information.
+
+33
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Reading for information and argument
+Reading for information and argument (sometimes called detailed reading) involves the
+careful study of a text once the reader decides on its relevance for the purpose at hand.
+Key operationalized concepts: type of texts, from simple short illustrated information
+material to complex reports and articles; subject of texts, from familiar everyday subjects of
+personal interest to topics outside his/her area of interest; depth of understanding, from
+getting an idea of the content to understanding finer points and implications.
+Reading instructions
+Reading instructions is considered a specialized form of reading for information that forms
+the basis to perform an action or create a product.
+Key operationalized concepts: instruction topics; instruction types (from routine
+prohibitions on simple notices and straightforward directions to detailed conditions and
+complex instructions); degree of contextualization and familiarity; length (from a few words
+to detailed and lengthy continuous text).
+Reading as a leisure activity
+Reading as a leisure activity involves a wide range of written works including fiction and
+nonfiction, creative texts, other literary text types, newspapers and biographies.
+Key operationalized concepts: length, variety of texts with/without illustrations; text types
+(from simple descriptions of people and places, through various types of narrative texts to
+contemporary and classical writings in a range of genres); topics (from everyday concrete
+situations to a full range of abstract and literary topics); style (from stylistically simple to
+increasingly complex); ease of comprehension (from guessing with the help of images,
+through mostly independent reading allowing the appreciation of the text); depth of
+comprehension (from partial to full comprehension of explicit and implicit meaning).
+
+Spoken Production Activities
+
+Sustained monologue: Describing experience
+Concerns narrative and description.
+Key operationalized concepts: aspects described (from simple everyday information through
+classic functions such as describing plans, arrangements, habits, routines, past activities and
+personal experiences to detailed descriptions of complex subjects).
+Sustained monologue: Giving information
+Concerned with explaining information to a recipient in a long turn.
+Key operationalized concepts: type of information (from simple descriptions of objects,
+through straightforward factual information on familiar topics to complex professional
+procedures); degree of precision (from simple general descriptions through explaining
+points with reasonable precision to communicating detailed information accurately).
+
+34
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Sustained monologue: Putting a case (e.g., in debate)
+Describes the ability to sustain an argument.
+Key operationalized concepts: topics (likes/dislikes, opinions on everyday life subjects
+through to complex issues); manner of argument (from simple, direct comparisons through
+systematic expansion and support of viewpoints).
+Public announcements
+Public announcements are a specialized means of passing on information to a group of
+people. This could be in a private context (e.g., at a wedding), or as a public announcement
+at a train station.
+Key operationalized concepts: content type (from predictable and familiar content to
+announcements on a range of topics); intelligibility (from a challenging delivery requiring
+listener concentration to one with effective use of prosody); preparation (from short,
+rehearsed announcements to spontaneous and almost effortless fluency).
+Addressing audiences
+Addressing audiences involves giving a pre-prepared presentation or speech at a public
+event, and answering follow-up questions.
+Key operationalized concepts: type of address: from a very short, rehearsed statement,
+through a prepared straightforward presentation on a familiar topic to a well-structured
+presentation of a complex subject.
+
+Written Production Activities
+Creative writing
+
+Creative writing involves personal, imaginative expression in a variety of text types.
+Key operationalized concepts: aspects described (from simple everyday information,
+through a variety of subjects related to fields of interest to engaging stories and descriptions
+of experiences); text types (from diary entries, short, imaginary biographies, and simple
+poems, to well-structured and developed descriptions and imaginative texts); discourse
+complexity (from simple words and phrases, through clear connected text to writing that
+follows established conventions of the genre); lexis (from high frequency vocabulary to midfrequency and academic vocabulary in line with the genre); style (from neutral or contrived
+to a more personal genre-appropriate manner of written expression).
+Written reports and essays
+Written reports and essays involve more formal types of writing.
+Key operationalized concepts: content (from familiar subjects of interest and routine factual
+information, to complex academic and professional topics); presenting viewpoint
+(distinguishing one’s own perspectives from those in the source materials); text type (from
+short reports and posters, to complex texts); discourse complexity (from linking sentences
+with simple connectors, to coherent and cohesive expositions).
+
+35
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Spoken Interaction Activities
+
+Understanding an interlocutor
+
+Understanding the interlocutor concerns understanding a person with whom the learner is
+conversing directly in an interaction and often involves the negotiation of meaning between
+the parties.
+Key operationalized concepts: topic and setting (from personal details and needs, to
+complex, abstract, specialized topics); type of interlocutor delivery (from careful and slow to
+standard speech); accent (from familiar to less familiar); degree of interlocutor
+accommodation (from sympathetic repetition and clarification to just confirmation of details
+if necessary).
+Conversation
+Conversion concerns interaction with a primarily social function: the establishment and
+maintenance of personal relationships.
+Key operationalized concepts: setting (from short exchanges through maintaining a
+conversation and sustaining relationships to flexible use for social purposes); topics (from
+personal news and familiar topics to more general conversation topics); language functions
+(from greetings and small talk through offers, invitations and affording permission to
+expressing of emotions, telling jokes and using and allusive language).
+Informal and formal discussions (adapted)
+Informal and formal discussion includes interpersonal use of language as well as more formal
+talk, mainly in a professional or academic context.
+Key operationalized concepts: topics (from what to do and where to go, to abstract,
+complex, unfamiliar, sensitive topics and issues; ability to follow the discussion (from some
+comprehension breaks and requests for clarification to full comprehension of the topic and
+language); language functions (from discussion and the expression of
+agreement/disagreement to voicing ideas with precision); ability to contribute (from simple
+agreement to offering one’s own perspective on the discussion points).
+Goal-oriented co-operation (e.g., repairing a car, discussing a document, organizing an event)
+Goal-oriented co-operation concerns collaborative, task-focused work to achieve a specific
+goal.
+Key operationalized concepts: following the discussion (from understanding simple
+instructions to reliably understanding detailed ones); active contribution to the work (e.g.,
+giving instructions, making suggestions).
+Obtaining goods and services
+Obtaining goods and services concerns service encounters such as in restaurants, shops and
+banks).
+Key operationalized concepts: types of situations; getting service; requesting satisfactory
+service.
+
+36
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Information exchange
+Information exchange involves the exchanging of factual information.
+Key operationalized concepts: type of transaction; type of information.
+Interviewing and being interviewed
+Interviewing and being interviewed concerns specialized roles such as job applications,
+conducting and/or responding to surveys, and participation in education projects.
+Key operationalized concepts: independence from the interlocutor; taking the initiative;
+conducting the interview.
+Using telecommunications
+Using telecommunications concerns the use of telephones and internet-based apps for
+audio and video communication.
+Key operationalized concepts: range of information and transactions involved (from simple
+messages and predictable conversation topics to a variety of personal and professional
+purposes); interlocutor: from someone known to strangers); length of exchange (from short
+and simple to extended communication).
+
+Written Interaction Activities
+Correspondence
+
+Correspondence concerns personal and formal correspondence.
+Key operationalized concepts: type of message (from simple, personal messages, to indepth, personal and professional correspondence); type of language (from formulaic
+expressions to emotional and allusive language usage characterized by appropriate tone and
+style).
+Notes, messages and forms
+Notes, message and forms involve a range of transactional interactive writing.
+Key operationalized concepts: filling in forms; leaving and taking messages and notes (from
+short and simple to and from family/friends to less personal and more detailed to service
+providers, teachers etc.).
+
+Online Interaction Activities
+
+Online conversation and discussion
+Online conversation and discussion in the context of online interaction activities are
+considered a multi-modal phenomenon covering social exchanges and serious issues.
+Key operationalized concepts: instances of simultaneous (real time) and consecutive
+interaction (affording preparation time); participation in sustained interaction with one or
+more interlocutors; composing posts and contributions for others to respond to;
+commenting on posts; reacting to embedded media; using symbols, images and other
+codes to convey tone, stress and prosody, and affective/emotional aspects.
+
+37
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Goal-oriented online transactions and collaboration
+Goal-oriented online transactions and collaboration focuses on the potentially collaborative
+nature of online interaction.
+Key operationalized concepts: purchasing goods and services online; engaging in
+transactions requiring negotiations of conditions; participation in collaborative project work;
+dealing with communication problems.
+
+Mediation Activities
+
+Mediation activities cover the mediation of texts and the mediation of concepts. Each is
+described below.
+Mediating a text involves relaying the content of a text to others who may not have access on
+account of linguistic, cultural, semantic or technical barriers.
+Relaying specific information
+Relaying specific information refers to the way information of immediate relevance is
+extracted from the target text and relayed to someone else in speech or writing. The
+emphasis is on relevant content rather than the main ideas or lines of argument.
+Key operationalized concepts: relaying information from announcements or written
+artefacts (e.g., times, places, prices); relaying sets of directions or instructions; relaying
+specific, relevant information from information texts (such as guidebooks, brochures,
+correspondence, or from longer, complex texts such as articles and reports).
+Explaining data
+Explaining data refers to transforming information in diagrams, charts, figures and the like
+into a verbal spoken or written text.
+Key operationalized concepts: describing graphic material on familiar topics (e.g.,, flow
+charts, weather charts); presenting trends in graphs; commenting on bar charts; selecting
+and interpreting the salient relevant points of graphically presented empirical data).
+Processing text
+Processing text involves understanding the information and/or arguments included in a
+spoken or written source text and transferring these, usually in a more condensed and
+context-appropriate form to another text.
+Key operationalized concepts: summarizing the main points in a source text; collating
+information and arguments from different sources; recognizing and clarifying the purpose
+and viewpoint of the original to others.
+Translating a written text into speech
+Translating a written text into speech is largely an informal activity that involves
+spontaneously rendering a spoken translation of a written text.
+
+38
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Key operationalized concepts: providing an approximate translation; capturing the essential
+information; capturing nuances.
+Expressing a personal response to creative texts (including literature)
+Involves a focus on expression of the effect of a work 8of literature on the learner.
+Key operationalized concepts: explaining what he/she liked, found interesting about the
+work; describing characters, including those identified with; relating aspects of the work to
+personal experience; relating feelings and emotions; expressing a personal interpretation of
+aspects of the work or the work as a whole.
+Analysis of creative texts (including literature) (adapted)
+Analysis of creative texts includes a focus on the significance of events in a novel and
+treatment of the same themes in different literary works.
+Key operationalized concepts: comparing different works; offering a reasoned
+opinion/argument regarding aspects of a literary work.
+Mediating concepts refers to the process of facilitating access to knowledge and concepts for
+others. There are two main ways this occurs: one is in the context of collaborative work
+(collaboration in a group) and the other is when someone has the official or unofficial role of
+facilitator (leading group work).
+Collaboration in a group relates to establishing conditions for effective work.
+Facilitating collaborative interaction with peers
+The learner contributes to collaboration in a group, with a specific shared objective or task.
+Key operationalized concepts: collaborative participation; active orientation of teamwork;
+use of questions and contributions to move the discussion forward; use of questions and
+turn-taking to balance contributions from all group members.
+Collaborating to construct meaning
+Collaborating to construct meaning is concerned with stimulating and developing ideas as a
+member of a group.
+Key operationalized concepts: cognitively framing collaborative tasks by deciding on aims,
+processes and steps; co-constructing ideas/solutions; asking others to explain their thinking;
+summarizing the discussion and planning ahead.
+
+8 The term “a work” appears under three sub-headings: Reading as a leisure activity (Written Reception); Response to
+
+a creative text (including literature) (Mediation); Analysis of a creative text (including literature) (Mediation). For each
+level of schooling the term “a work” focuses on different texts and genres. (For details)
+
+39
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Leading group work relates to the facilitation of group work
+Managing interaction
+The learner has a lead role in the organization of communicative activities among group
+members.
+Key conceptualized concepts: leading an activity; giving instructions; monitoring and
+facilitating communication; adapting contributions to support group communication.
+Encouraging conceptual talk
+Encouraging conceptual talk involves scaffolding to enable another to construct a new
+concept.
+Key conceptualized concepts: asking questions to stimulate logical reasoning; building
+contributions into coherent and cohesive discourse.
+
+Glossary of CEFR-related terms
+
+In aligning with the CEFR, much of its terminology has been adopted. This glossary contains the
+terms most relevant to the English Curriculum 2020. Many are defined within the curriculum
+itself, but are presented here for easy reference.
+A work
+The term “a work” appears under three sub-headings: Reading as a leisure activity (Written
+Reception); Response to a creative text (including literature) (Mediation); Analysis of a creative
+text (including literature). For each level of schooling – elementary, junior high and high school –
+the term “a work” focuses on different texts and genres, growing in its scope as students move
+up levels. For Basic User I (A1), “a work” focuses on creative texts such as short rhymes, poems,
+songs, and limericks. For Basic User II (A2), “a work” focuses on a wider range of creative texts
+that include short stories, poems, and popular songs. For Independent User I (B1) and
+Independent User II (B2), “a work” also refers to classical writings in a variety of literary genres 9.
+CEFR
+The CEFR is the abbreviation for the Common European Framework of Reference for
+Languages: Learning, Teaching, Assessment. It was developed by the Council of Europe within
+the project “Language Learning for European Citizenship” between 1989-1996 and was
+
+9
+
+The approved list of works is currently under review.
+
+40
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+published in 2001 10. The six reference levels (A1, A2, B1, B2, C1, C2) are widely
+accepted as the standard for evaluating an individual’s language proficiency. A revised CEFR
+was published in 2018 11 and again in 2020 12
+Common standards
+Standards refer to descriptions of what students are expected to know and be able to do at
+different stages of their education. Common standards are those that are applied consistently
+throughout the education system. These are used to guide instruction, assessment and curricula
+(Great Schools Partnership, 2014).
+Communicative language strategies
+Where communicative language activities describe actual language use, communicative language
+strategies are a type of link between these and language competences. The English Curriculum
+2020 specifies relevant communicative language strategies for each of the communicative
+language activities
+Communicative language competences
+Communicative language competences relate to linguistic, pragmatic and sociolinguistic aspects
+of language ability. The English Curriculum 2020 specifies relevant communicative language
+competences for each level of proficiency.
+Creative texts
+The term “creative texts” relates to a wide range of imaginative works, their use of language and
+other effects, possibilities of responses and interpretations. The following quote highlights these
+points.
+“Imaginative texts, in their use of language, by virtue of their genre, are
+playful. They are absolutely exempt from using words, sounds, rhythms,
+and themes in the most probable ways, because imaginative texts are most
+successful when they surprise their audiences with new insights. They are
+emotionally evocative, inviting imaginative and responsive participation.
+They invite playful responses from their audiences. There can, then, never
+be a single right interpretation for an imaginative work, be it a poem or a
+movie. It is the freedom to play afforded by the various genres of literary
+texts, and the opportunity of tapping into personal emotions and pleasure
+that recommends them as ideal subjects of focus in the language
+
+10 https://rm.coe.int/CoERMPublicCommonSearchServices/DisplayDCTMContent?documentId=0900001680459f97
+11 https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2018/1680787989
+
+12
+
+https://rm.coe.int/common-european-framework-of-reference-for-languages-learning-teaching/16809ea0d4
+
+41
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+classroom. Of course, creative texts in all genres provide the same
+opportunities for learning vocabulary and grammar, as do non-fictional
+genres, and are similarly occasions for oral or written response. But it is
+because they also provide the freedom for creative response, because they
+promise that there are a lot more right answers than wrong ones that they
+work with the goal of making the language classroom a place where the
+pleasure of emotional involvement, imaginative exploration, and language
+experimentation is welcome” (Prof. E. Spolsky, personal communication,
+November, 2019)
+Multimodal texts
+Multimodal texts combine two or more modes such as written language, spoken language, visual
+(still and moving image), audio, gestural, and spatial meaning (The New London Group, 1996;
+Cope and Kalantzis, 2009).
+Domains
+In the CEFR, domains refer to a particular sector or sphere of life in which language is used –
+personal, social, educational, professional. Domains are not specified in the English Curriculum
+2020.
+Plurilingual and pluricultural competence
+Plurilingual and pluricultural competence relates to a learner’s knowledge and experience of
+other languages. Pluriligual and pluricultural competence is specified for each level of proficiency
+(Basic User I (A1), Basic User II (A2), Independent User I (B1) and Independent User II (B2) in the
+English Curriculum 2020.
+
+42
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+References
+
+British Council (2018). The future demand for English in Europe: 2025 and beyond. Commissioned by The British
+Council. Authored by The Trajectory Partnership. Accessed from:
+https://www.britishcouncil.org/education/schools/support-for-languages/thought-leadership/researchreport/future-of-english-eu-2025
+Byram, M. & Parmenter L. (Eds.) (2012). The Common European Framework of Reference: The globalization of
+language education policy. Multilingual Matters.
+Cambridge University Press (2015). English Grammar Profile. Cambridge: Cambridge University Press. Accessed
+from http://www.englishprofile.org/english-grammar-profile/egp-online
+Cope, B., & Kalantzis, M. (2009). “Multiliteracies”: New literacies, new learning. Pedagogies: An International
+Journal, 4(3), 164-195
+Council of Europe (2011). Common European Framework of Reference for Languages: Learning, Teaching,
+Assessment. Council of Europe. Accessed from: https://www.coe.int/en/web/languagepolicy/home?e1_en.asp
+Council of Europe (2018). Common European Framework of Reference for Languages: Learning, Teaching,
+Assessment. Companion Volume with New Descriptors. Council of Europe. Accessed from:
+https://rm.coe.int/cefr-companion-volume-with-new-descriptors-2018/1680787989
+Council of Europe (2020). Common European Framework of Reference for Languages: Learning, Teaching,
+Assessment. Companion Volume with New Descriptors. Council of Europe. Accessed from:
+https://rm.coe.int/common-european-framework-of-reference-for-languages-learningteaching/16809ea0d4
+Crystal, D. (2003). The Cambridge Encyclopedia of the English Language. Cambridge University Press.
+ECOSTAR. (2017). CEFR-Aligned Framework for English in Higher Education in Israel. Accessed from:
+https://tempus-ecostar.iucc.ac.il/wp-content/uploads/2016/04/FRAMEWORK-ATAR-with-preface.pdf
+Great Schools Partnership (2014). The Glossary of Education Reform. Great Schools Partnership. Accessed from:
+https://www.ynet.co.il/news/article/Hkvsi0GPw#autoplay
+Ministry of Education (2017). Position paper: Application of the CEFR to English learning and instruction in Israeli
+schools. Internal report: Unpublished.
+National Institute for Testing and Evaluation. (2016). Common European Framework of Reference for Languages
+(CEFR) Hebrew Version. NITE, Israel.
+State of Israel, Ministry of Education (2018). Revised English Curriculum. Pedagogical Secretariat, Ministry of
+Education. Accessed from:
+http://meyda.education.gov.il/files/HaarachatOvdeyHoraa/Englishcurriculum.pdf
+State of Israel, Ministry of Education (2019). Professional Framework for English Teachers 2020. Pedagogical
+Secretariat, Ministry of Education. Accessed from:
+https://meyda.education.gov.il/files/Mazkirut_Pedagogit/English/framework2020.pdf
+State of Israel, Ministry of Education, (2019). Guidelines for the teaching of English at the pre-foundation level:
+Aligned with can-do descriptors (CEFR) and the ABLE assessment kit. Pedagogical Secretariat, Ministry of
+Education. Accessed from
+https://meyda.education.gov.il/files/Mazkirut_Pedagogit/English/prefoundationcando.pdf (Original
+guidelines published 2009)
+The New London Group. (1996). A pedagogy of multiliteracies: Designing social futures. Harvard educational
+review, 66 (1), 60-93.
+
+43
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Presentation of the can-do statements
+
+The can-do statements that describe what a learner can do at each level of progression from PreBasic User (Pre-A1) to Independent User II (B2 5-point Bagrut) constitute a central part of the
+English Curriculum 2020. As described previously, they relate to communicative activities
+(reception, production, interaction, mediation), communicative strategies, plurilingual and
+pluricultural competence and communicative language competences.
+The can-do statements are presented in two formats: by level of progression for each level of
+schooling and in the three tables depicting progression across all levels .
+
+pre A1
+A1
+A2
+B1
+B2
+All levels
+
+Band I
+Band II
+Band III
+
+Access the Can do’s
+PDF
+Word
+PDF
+Word
+PDF
+Word
+PDF
+Word
+PDF
+Word
+PDF
+Word
+
+Access the Lexical Bands
+PDF
+Word
+PDF
+Word
+PDF
+Word
+
+Access the Grammar Bands
+Band I
+PDF
+Excel
+Band II
+PDF
+Excel
+Band III
+PDF
+Excel
+
+44
+
+Excel
+Excel
+Excel
+
+
+===== Linked from the curriculum (Access the Can do's): candospreA1.pdf =====
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Pre-basic user (Pre- A1)
+RECEPTION ACTIVITIES
+Spoken reception
+Overall spoken reception
+Can understand short, very simple questions and statements provided they are delivered
+slowly and clearly and accompanied by visuals or manual gestures to support
+understanding and repeated-if necessary
+● Can recognize Pre-Band I vocabulary, including instructions, provided they are delivered
+
+clearly and slowly in a well-defined, familiar, everyday context
+● Can recognize numbers, prices, dates and days of the week, provided they are delivered
+slowly and clearly in a defined, familiar, everyday context
+● Can recognize words, names and numbers that he/she already knows in simple, short
+recordings, provided they are delivered very slowly and clearly
+● Can understand short, simple instructions for actions such as ‘Stop,’ ‘Close the door,’
+etc., provided they are delivered slowly face-to-face, accompanied by pictures or manual
+gestures and repeated if necessary
+
+Written reception
+
+Overall reading comprehension
+Can recognize all the words and phrases in Lexical Pre-Band I especially if accompanied by
+pictures or illustrations
+● Can recognize the letters of the alphabet in upper and lower case
+● Can recognize the use of a full stop to signal the end of a sentence and a question mark
+
+to signal a question
+● Can recognize the use of upper case to signal the beginning of a sentence and a proper
+noun
+● Can self-correct when decoding a familiar word by choosing the correct phoneme for a
+grapheme that may be associated with multiple phonemes
+● Can read familiar ‘irregular words’
+● Can accurately read and pronounce phonetically-spelled words and words with familiar
+orthographic patterns
+● Can accurately and fluently read familiar words and chunks read aloud
+● Can read sentences in the correct direction, from left to right and from the top of the
+page to the bottom
+● Can read and understand sentences that contain lexical items from Pre-Band I
+● Can demonstrate understanding of a word by matching it to a picture
+● Can recognize familiar lexical items accompanied by pictures, such as a fast-food
+restaurant menu illustrated with photos or a picture book using familiar vocabulary Can
+recognize a range of basic everyday nouns and adjectives (e.g., colors, numbers,
+classroom objects) and basic action words (e.g., ‘clap’, ‘stamp’, ‘jump’, ‘walk’)
+
+1
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Pre-basic user (Pre- A1)
+PRODUCTION ACTIVITIES
+Spoken production
+Overall spoken production
+Can produce short phrases about themselves, giving basic personal information (e.g., name,
+address, family) and describe him/herself
+Can recite and sing using appropriate stress, rhythm and intonation
+● Can repeat phrases and short sentences, if spoken slowly and clearly
+● Can use basic informal expressions for greeting and leave-taking (e.g., ‘hello’, ‘hi’, ‘bye’)
+● Can ask someone their name using a basic phrase
+● Can use a few basic words and phrases to show politeness (e.g., ‘please’, ‘thank you’)
+● Can ask about the identity of an object using a basic phrase (e.g., ‘What is it?’)
+● Can give a simple evaluation, using a fixed expression (e.g., ‘Yes/No’, ‘Good/Bad’)
+● Can produce short phrases about themselves, giving basic personal information (e.g., name
+
+and address)
+● Can describe him/herself (e.g., name, age, family), using simple words and formulaic
+expressions, provided he/she can prepare in advance
+● Can say how he/she is feeling using simple words like ‘happy’ accompanied by body
+language
+● Can recite a short, simple rhyme or chant
+● Can sing a basic song from memory with or without the support of gestures and pictures
+● Can ask someone the time
+● Can ask for the spelling of a word, using a basic phrase
+● Can get someone’s attention using a fixed expression
+● Can ask people to do things with them, using a fixed expression (e.g., ‘Let’s play.’)
+● Can start and end a simple phone call to family or friends using informal formulaic
+expressions
+● Can make a few basic requests related to immediate personal needs (e.g., ‘Can I go
+outside?’
+
+Written production
+Overall written production
+Can form letters in accordance with standard print conventions and in relation to marked lines
+Can give basic personal information in writing (e.g., name, address)
+● Can trace individual letters in the correct direction
+● Can copy individual letters in the correct direction
+● Can write their own name with the correct use of capital letters
+● Can write the letters of the alphabet in upper and lower case
+● Can copy short sentences containing familiar words, if presented in standard printed form
+● Can signal the end of a sentence using a full stop
+● Can label simple pictures related to familiar topics by copying single words
+
+2
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Pre-basic user (Pre- A1)
+INTERACTION ACTIVITIES
+Spoken interaction
+Overall spoken interaction
+Can ask and answer questions related to personal information using short formulaic
+expressions and gestures when necessary
+● Can understand simple questions which directly concern him/her, about name, age,
+address or similar things, if the person is asking slowly and clearly
+● Can tell people his/her name and ask other people their name
+● Can ask and answer questions about him/herself and daily routines, using short,
+formulaic expressions and relying on gestures to reinforce the information
+● Can ask very simple questions for information, such as ‘What is this?’ and understand
+very short answers
+● Can understand and use some basic responses including ‘Yes,’ ‘No,’ ‘Please,’ ‘Sorry’ and
+formulaic expressions such as ‘Excuse me,’ ‘Thank you,’ ‘No thank you,’
+● Can recognize and produce simple greetings, say his/her name and take leave
+
+Written interaction
+Overall written interaction
+Can write short phrases and sentences giving basic personal information
+
+COMMUNICATIVE LANGUAGE COMPETENCES
+Linguistic (Pre-Band I Vocabulary)
+● Can use isolated words and basic expressions to give simple information about
+
+him/herself
+
+● Can spell words according to the appropriate stage in developmental spelling
+● Can employ very simple principles of word order in short statements
+
+Spoken fluency
+
+● Can manage very short, isolated, rehearsed utterances using gesture and signaled
+
+requests for help when necessary
+
+3
+
+
+===== Linked from the curriculum (Access the Can do's): candosA1.pdf =====
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+RECEPTION ACTIVITIES
+Spoken reception
+Overall spoken reception
+Can understand concrete information (e.g., places and times) on familiar topics
+encountered in everyday life, delivered in slow and carefully articulated speech when
+necessary
+Can understand basic sentences describing someone’s physical appearance, (e.g., eye/hair
+color, height), and familiar everyday items (e.g., color, size), especially when supported by
+pictures
+Understanding conversation between expert language users
+● Can understand some words and expressions when people are talking about themselves,
+
+family, school, hobbies or surroundings
+
+● Can recognize words and simple phrases related to familiar topics with or without the
+
+support of pictures
+● Can understand simple language related to naming and describing people’s clothes
+● Can understand basic information about someone’s immediate family with or without
+the support of pictures or gestures
+● Can identify people in their immediate surroundings or in pictures from a short, simple
+description of their physical appearance and clothes
+● Can understand words and short sentences when listening to a simple conversation (e.g.,
+between a customer and a waiter in a cafe), when people talk slowly and clearly
+● Can identify the day and date in short, simple dialogues, if spoken slowly and clearly and
+supported by pictures or gestures
+● Can identify the names of people or places in short, simple dialogues, if spoken slowly
+and clearly
+Listening as a member of a live audience
+● Can understand teacher talk and classroom discussions
+● Can understand teacher feedback expressed in simple language
+● Can understand basic questions about objects present in their immediate surroundings
+
+or in pictures (e.g., ‘What’s this?’)
+● Can identify the day, date and time (e.g., 8:00, this afternoon) in short, simple dialogues,
+spoken slowly and clearly, with or without the support of pictures or gestures
+● Can understand basic phrases about the weather, spoken slowly and clearly
+● Can understand short, simple questions related to basic personal information
+● Can follow a short, familiar story, with or without the support of pictures, gestures and
+repetition when delivered slowly and clearly
+● Can recognize familiar words and basic phrases in short, illustrated stories, read out
+slowly and clearly
+1
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+● Can recognize familiar key words and phrases in short, basic descriptions (e.g., of objects,
+
+people or animals), spoken slowly and clearly
+
+● Can understand sentence types (e.g., questions) through word order rather than
+
+intonation alone
+● Can seek repetition and clarification to understand spoken language, and may ask other
+speakers for meanings of words to check or confirm their own understandings
+● Can understand basic descriptors (adjectives from Band I Cores I and II) about where
+things or people are, if spoken slowly and clearly and where necessary supported by
+pictures or gestures
+● Can identify the names of people or places in short, simple dialogues, if spoken slowly
+and clearly
+● Can follow a short, familiar story, with or without the support of pictures, gestures and
+repetition
+Listening to announcements, instructions and directions
+● Can understand and follow short and simple instructions/directions addressed carefully
+
+and slowly to him/her, including simple teacher instructions and explanations
+● Can understand when someone tells him/her where something is, provided the object is
+in the immediate environment
+● Can understand information (e.g., figures, prices and times) spoken slowly and clearly in
+a public announcement, (e.g., at a railway station or in a shop)
+● Can understand a simple instruction containing a qualifying condition (e.g., ‘If your
+birthday is in March, stand here.’)
+Listening to audio media and recordings
+● Can pick out concrete information (e.g., places and times) from short audio recordings
+
+on familiar everyday topics, provided they are delivered slowly and clearly
+Watching TV, film and video
+
+● Can recognize familiar words and phrases and identify the topics in headline news
+
+summaries and many of the products in advertisements, by exploiting visual information
+and activating general background knowledge
+
+Written reception
+Overall written reception
+Can understand stories and short texts on a range of familiar topics (e.g., sports, music or
+travel) written in level-appropriate language (vocabulary and grammar), and supported by
+illustrations and pictures, rereading as required
+Reading correspondence
+● Can understand short, simple messages in notes, social media or email (e.g., proposing
+
+what to do, when and where to meet)
+
+2
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+Reading for orientation
+● Can find and understand simple, important information in advertisements, programs for
+
+special events, leaflets and brochures (e.g., what is proposed, costs, the date and place
+of the event, departure times, etc.)
+● Can understand the information in a simple school timetable giving days and times of
+classes
+Reading for information and argument
+● Can form an idea of the content of simple informational material and short simple
+
+descriptions, especially if there is visual support
+● Can differentiate between main ideas and unimportant information in factual texts (new)
+Reading instructions and directions
+● Can follow basic instructions for making something (e.g., a mask, a clock), if supported by
+
+pictures/illustrations
+● Can understand basic written instructions for classroom activities (e.g., ‘Read and
+match’)
+● Can follow short, simple written directions (e.g., to go from X to Y)
+Reading as a leisure activity
+
+● Can understand (illustrated) creative texts that are written in level-appropriate language
+
+(vocabulary and grammar)
+o Can understand simple stories and shorter texts with the help of pictures and
+drawings
+o Can recognize key words and basic phrases in short, simple cartoon stories
+o Can follow simple dialogues in short, illustrated stories
+● Can understand short, simple descriptions of familiar places written in level-appropriate
+language (vocabulary and grammar) and occasionally supported by illustrations
+
+PRODUCTION ACTIVITIES
+Spoken production
+Overall spoken production
+Can provide factual personal information about him/herself using level-appropriate
+language (vocabulary and grammar)
+Sustained monologue: Describing experience
+● Can describe him/herself, what he/she does and where he/she lives
+● Can describe simple aspects of his/her everyday life in a series of simple sentences, using
+
+level-appropriate language (vocabulary and grammar), especially if he/she can prepare in
+advance
+3
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+Sustained monologue: Giving information
+● Can answer a series of simple questions about family and friends, using basic phrases
+● Can talk about their immediate family members
+● Can express likes and dislikes in relation to familiar topics in a basic way
+● Can describe someone’s physical appearance in a basic way
+● Can say what the weather is like
+● Can draw simple conclusions about people in pictures (e.g., ‘he’s happy’), using a limited
+
+range of formulaic expressions
+
+● Can say what someone’s job is, using familiar common job names
+● Can give a simple description of an object or picture while showing it to others using
+
+basic words, phrases and formulaic expressions, especially when he/she can prepare in
+advance
+● Can describe the position of objects or people using pictures or gestures
+Addressing audiences
+● Can read a very short, rehearsed statement – (e.g., to introduce the participants in a role
+
+play)
+Playing with spoken language (new)
+
+● Can sing an age-appropriate, level-appropriate song or recite a rhyme from memory
+● Can say simple tongue-twisters and other types of playful language
+● Can take part in age-appropriate, level-appropriate games that use formulaic expressions
+
+or rhymes
+
+● Can re-tell parts of a story (with or without pictures) read by the teacher or from
+
+previous knowledge
+
+Written production
+Overall written production
+Can write simple isolated phrases and sentences using level-appropriate language
+(vocabulary and grammar) and spelling that approximates accurate conventions based on a
+developmental continuum
+Creative writing
+● Can write about themselves and fictitious people, where they live and what they do
+● Can describe certain everyday objects (e.g., the color of a car, whether it is big or small)
+
+PRODUCTION STRATEGIES
+Compensating
+● Can use gesture instead of or to support simple words in expressing a need
+
+4
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+INTERACTION ACTIVITIES
+Spoken interaction
+Overall spoken interaction
+Can engage in limited interactions (restricted in the number of turn-takings and scope)
+where communication may involve repetition, at a slower rate of speech and rephrasing
+Understanding the interlocutor
+● Can understand everyday expressions aimed at the satisfaction of simple needs of a
+
+concrete type, delivered directly to him/her in clear, slow and repeated speech by a
+sympathetic speaker
+● Can understand questions and instructions addressed carefully and slowly to him/her
+and follow short, simple directions
+Conversation
+● Can take part in a simple conversation of a basic factual nature on a predictable topic
+
+(e.g., his/her home country, family, school)
+● Can introduce people and use basic greetings and leave-taking expressions
+● Can ask how people are and react to personal news
+Informal and formal discussions
+
+● Can exchange likes and dislikes for sports, foods, etc. when addressed clearly, slowly and
+
+directly
+Goal-oriented co-operation (e.g., repairing a bike, discussing a document, organizing an
+event)
+● Can act on short, basic instructions that involve times, locations, numbers, etc.
+● Can ask people for things and give people things
+
+Obtaining goods and services
+● Can ask people for basic products/services and give people basic products/services
+● Can ask for food and drink using basic expressions
+● Can ask for the price of basic products/services (new)
+
+Information exchange
+● Can ask and answer simple questions in areas of immediate need or on very familiar
+
+topics
+
+● Can ask and answer questions about themselves and other people, where they live,
+
+people they know, things they have
+Interviewing and being interviewed
+
+● Can reply in an interview to simple direct questions about personal details
+
+5
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+● Can state in simple language the nature of a problem to a health professional and answer
+
+simple questions such as ‘Does that hurt?’ though he/she may use gestures and body
+language to reinforce the message
+
+Written interaction
+Overall written interaction
+Can ask for or pass on personal details in written form
+Correspondence
+● Can write messages and online postings as a series of very short sentences about hobbies
+
+and likes/dislikes, using level-appropriate language (vocabulary and grammar)
+Notes, messages and forms
+
+● Can leave a simple informative message giving, for example, where he/she has gone,
+
+what time he/she will be back
+
+● Can write his/her name, address, age, date of birth, nationality, numbers etc. where
+
+required (e.g.,, on a registration form)
+
+Online interaction
+Online conversation and discussion
+● Can post short reactions to simple online postings using formulaic expressions and
+
+combinations of simple words
+Goal-oriented online transactions and collaboration
+
+● Can fill out sections of a very simple online purchase or application, providing basic
+
+personal information (e.g., name, e-mail address or telephone number)
+
+INTERACTION STRATEGIES
+Asking for clarification
+● Can indicate with words, intonation, and gestures that he/she does not understand
+
+6
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+MEDIATION ACTIVITIES
+Language A and Language B may be two different languages, two varieties of the same language,
+two registers of the same variety, or any combination of the above. The can-do statements can
+also refer to the same language and in that case “Language A” and “Language B” are irrelevant.
+Language A = communication source
+Language B = communication output
+
+Mediating a text
+Overall mediation
+Can convey simple, predictable information of immediate interest given in short,
+simple signs and notices, posters and programs
+Relaying specific information in speech
+•
+
+● Can convey (in Language B), in speech, simple, predictable information of immediate
+
+interest given in short, signs and notices, posters and programs (written/spoken in
+Language A)
+Relaying specific information in writing
+● Can list (in Language B) names, numbers, prices and very simple information of
+
+immediate interest (in Language A), especially if the speaker’s articulation is slow and
+clear, with some repetition
+Processing text in speech
+● Can convey (in Language B) simple, predictable information given in short, very simple
+
+signs, notices and posters (written in Language A)
+Expressing a personal response to creative texts (including literature)
+
+● Can use simple words, phrases and sentences to say how a work made him/her feel
+
+Mediating concepts
+Collaboration
+Facilitating collaborative interaction with peers
+● Can invite peer contributions to very simple tasks using short, simple phrases
+● Can indicate that he/she understands and ask whether others understand
+
+Collaborating to construct meaning
+● Can express an idea in simple language and ask what others think
+
+7
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+PLURILINGUAL AND PLURICULTURAL COMPETENCE
+Building a pluricultural repertoire
+● Can recognize different ways of numbering, telling the time, greetings and farewells, etc.
+
+Building a plurilingual repertoire
+● Can mobilize his/her plurilingual repertoire to ask for help or clarification
+
+COMMUNICATIVE LANGUAGE COMPETENCES
+Linguistic (Lexical Band I and Grammar Band I)
+General linguistic range
+● Can exploit a very basic range of simple expressions related to personal details and needs of
+a concrete type
+● Can use some basic structures in sentences with some omission or reduction of elements
+Vocabulary range and control
+● Can draw on his/her receptive and productive knowledge of vocabulary (Lexical Band I)
+when relating to particular concrete situations
+Grammatical accuracy
+● Can use a few simple grammatical structures and sentence patterns (specified in Grammar
+Band I) to fulfill simple communicative needs
+
+Phonological control
+Sound articulation
+● Can correctly reproduce a range of sounds in simple, familiar words and phrases with
+appropriate stress
+Prosodic features
+● Can articulate a limited repertoire of words and phrases using appropriate prosodic features
+(stress, rhythm, intonation) despite possible interference from other language(s) he/she
+speaks
+
+8
+
+State of Israel - Ministry of Education
+Pedagogical Secretariat - Language Department
+English Language Education
+
+Can do’s – Basic user I - A1
+
+Orthographic control
+● Can copy familiar words and common, frequent short phrases (e.g., simple signs,
+
+instructions, names of everyday objects and shops)
+● Can spell the lexical entries in Lexical Band I marked as productive with reasonable accuracy
+● Shows evolving control of periods, commas, question marks, apostrophes and capital letters
+
+Sociolinguistic appropriateness
+● Can establish basic social contact by using the simplest everyday polite forms of: greetings
+
+and farewells; introductions; saying ‘please’, ‘thank you’, ‘sorry’, etc.
+
+Pragmatic
+Coherence and cohesion
+● Can link words or groups of words with basic linear connectors (e.g., ‘and’, ‘then’)
+Propositional precision
+● Can communicate basic information about personal details and needs of a concrete type in a
+simple way
+Spoken fluency
+• Can produce single words and lexical chunks while pausing to search for ways to
+articulate less familiar lexical items and/or to repair communication
+
+9
+
+
