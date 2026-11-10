@@ -6,7 +6,13 @@
   "heard": "Air",
   "ok": true,
   "seed": 2,
-  "tries": 2
+  "tries": 2,
+  "old_s": 0.578,
+  "new_s": 0.602,
+  "tempo": 1.0,
+  "final_s": 0.602,
+  "final_heard": "Air",
+  "used": "chain"
  },
  "girl:air": {
   "text": "air",
@@ -15,7 +21,13 @@
   "heard": "Air.",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.554,
+  "new_s": 0.674,
+  "tempo": 1.0,
+  "final_s": 0.674,
+  "final_heard": "Air",
+  "used": "chain"
  },
  "boy:dry": {
   "text": "dry",
@@ -25,7 +37,13 @@
   "ok": true,
   "seed": 102,
   "tries": 4,
-  "rep": 2
+  "rep": 2,
+  "old_s": 0.722,
+  "new_s": 0.818,
+  "tempo": 1.0,
+  "final_s": 0.818,
+  "final_heard": "Dry",
+  "used": "chain"
  },
  "girl:dry": {
   "text": "dry",
@@ -35,7 +53,13 @@
   "ok": true,
   "seed": 101,
   "tries": 4,
-  "rep": 1
+  "rep": 1,
+  "old_s": 0.626,
+  "new_s": 0.53,
+  "tempo": 0.8466,
+  "final_s": 0.626,
+  "final_heard": "Dry",
+  "used": "chain"
  },
  "boy:forest": {
   "text": "forest",
@@ -44,7 +68,13 @@
   "heard": "Forest",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.866,
+  "new_s": 0.794,
+  "tempo": 0.9169,
+  "final_s": 0.866,
+  "final_heard": "Forest",
+  "used": "chain"
  },
  "girl:forest": {
   "text": "forest",
@@ -53,7 +83,13 @@
   "heard": "forest.",
   "ok": true,
   "seed": 3,
-  "tries": 3
+  "tries": 3,
+  "old_s": 0.842,
+  "new_s": 0.89,
+  "tempo": 1.0,
+  "final_s": 0.89,
+  "final_heard": "Forest",
+  "used": "chain"
  },
  "boy:grass": {
   "text": "grass",
@@ -62,7 +98,13 @@
   "heard": "grass",
   "ok": true,
   "seed": 2,
-  "tries": 2
+  "tries": 2,
+  "old_s": 0.77,
+  "new_s": 0.626,
+  "tempo": 0.813,
+  "final_s": 0.77,
+  "final_heard": "GRASS",
+  "used": "chain"
  },
  "girl:grass": {
   "text": "grass",
@@ -71,7 +113,13 @@
   "heard": "GRASS",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.866,
+  "new_s": 1.082,
+  "tempo": 1.0,
+  "final_s": 1.082,
+  "final_heard": "GRASS",
+  "used": "chain"
  },
  "boy:mountain": {
   "text": "mountain",
@@ -80,7 +128,13 @@
   "heard": "Mountain",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.866,
+  "new_s": 0.986,
+  "tempo": 1.0,
+  "final_s": 0.986,
+  "final_heard": "Mountain",
+  "used": "chain"
  },
  "girl:mountain": {
   "text": "mountain",
@@ -89,7 +143,13 @@
   "heard": "Mountain",
   "ok": true,
   "seed": 3,
-  "tries": 3
+  "tries": 3,
+  "old_s": 0.866,
+  "new_s": 1.13,
+  "tempo": 1.0,
+  "final_s": 1.13,
+  "final_heard": "Mountain",
+  "used": "chain"
  },
  "boy:nature": {
   "text": "nature",
@@ -98,7 +158,13 @@
   "heard": "Nature",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.794,
+  "new_s": 1.106,
+  "tempo": 1.0,
+  "final_s": 1.106,
+  "final_heard": "Nature",
+  "used": "chain"
  },
  "girl:nature": {
   "text": "nature",
@@ -107,7 +173,13 @@
   "heard": "Nature",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.818,
+  "new_s": 0.866,
+  "tempo": 1.0,
+  "final_s": 0.866,
+  "final_heard": "Nature",
+  "used": "chain"
  },
  "boy:river": {
   "text": "river",
@@ -116,7 +188,13 @@
   "heard": "River",
   "ok": true,
   "seed": 2,
-  "tries": 2
+  "tries": 2,
+  "old_s": 0.626,
+  "new_s": 0.746,
+  "tempo": 1.0,
+  "final_s": 0.746,
+  "final_heard": "River",
+  "used": "chain"
  },
  "girl:river": {
   "text": "river",
@@ -125,7 +203,13 @@
   "heard": "River",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.986,
+  "new_s": 0.674,
+  "tempo": 0.6836,
+  "final_s": 0.986,
+  "final_heard": "River",
+  "used": "chain"
  },
  "boy:sea": {
   "text": "sea",
@@ -134,7 +218,13 @@
   "heard": "See-",
   "ok": true,
   "seed": 4,
-  "tries": 4
+  "tries": 4,
+  "old_s": 0.698,
+  "new_s": 0.53,
+  "tempo": 0.7593,
+  "final_s": 0.698,
+  "final_heard": "See",
+  "used": "chain"
  },
  "girl:sea": {
   "text": "sea",
@@ -143,7 +233,13 @@
   "heard": "See",
   "ok": true,
   "seed": 3,
-  "tries": 3
+  "tries": 3,
+  "old_s": 0.866,
+  "new_s": 0.938,
+  "tempo": 1.0,
+  "final_s": 0.938,
+  "final_heard": "See",
+  "used": "chain"
  },
  "boy:Listen. Say the word.": {
   "text": "Listen. Say the word.",
@@ -152,7 +248,13 @@
   "heard": "Listen.  Say the word.",
   "ok": true,
   "seed": 2,
-  "tries": 2
+  "tries": 2,
+  "old_s": 2.546,
+  "new_s": 2.018,
+  "tempo": 1.0,
+  "final_s": 2.018,
+  "final_heard": "Listen, say the word.",
+  "used": "chain"
  },
  "girl:Listen. Press the picture.": {
   "text": "Listen. Press the picture.",
@@ -161,7 +263,13 @@
   "heard": "Listen, press the picture.",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 1.97,
+  "new_s": 2.138,
+  "tempo": 1.0,
+  "final_s": 2.138,
+  "final_heard": "Listen. Press the picture.",
+  "used": "chain"
  },
  "boy:Look. Press the word.": {
   "text": "Look. Press the word.",
@@ -170,7 +278,13 @@
   "heard": "Look, press the word.",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 1.394,
+  "new_s": 1.514,
+  "tempo": 1.0,
+  "final_s": 1.514,
+  "final_heard": "Look, press the word.",
+  "used": "chain"
  },
  "girl:Build the word.": {
   "text": "Build the word.",
@@ -179,7 +293,13 @@
   "heard": "Build the word.",
   "ok": true,
   "seed": 2,
-  "tries": 2
+  "tries": 2,
+  "old_s": 1.01,
+  "new_s": 1.322,
+  "tempo": 1.0,
+  "final_s": 1.322,
+  "final_heard": "Build the Word",
+  "used": "chain"
  },
  "boy:Listen. Press the word.": {
   "text": "Listen. Press the word.",
@@ -188,7 +308,13 @@
   "heard": "Listen, press the word.",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 2.33,
+  "new_s": 2.69,
+  "tempo": 1.0,
+  "final_s": 2.69,
+  "final_heard": "Listen, press the word.",
+  "used": "chain"
  },
  "girl:Well done!": {
   "text": "Well done!",
@@ -197,6 +323,12 @@
   "heard": "Well done!",
   "ok": true,
   "seed": 1,
-  "tries": 1
+  "tries": 1,
+  "old_s": 0.986,
+  "new_s": 1.226,
+  "tempo": 1.0,
+  "final_s": 1.226,
+  "final_heard": "Well done!",
+  "used": "chain"
  }
 }

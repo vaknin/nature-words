@@ -170,32 +170,98 @@ def cmd_all():
     subprocess.run([str(PY["cb"]), "-I", __file__, "gen"], check=True)
 
 
-def to_mp3(wav, out):
+def to_mp3(wav, out, tempo=1.0):
     """As tools/voices.py: silence cut at both ends, loudness -16 LUFS, mono 24 kHz mp3 64 kbps (no stretch: the
-    slow reference already makes the pace)."""
+    slow reference already makes the pace). tempo < 1 slows the whole finished clip (lead-in included) with
+    rubberband, pitch kept, so its length scales by exactly 1/tempo before the one mp3 encode."""
     tr = "silenceremove=start_periods=1:start_threshold=-50dB:start_silence=0.05"
     af = f"{tr},areverse,{tr},areverse,loudnorm=I=-16:TP=-1.5:LRA=11,adelay=40"
+    if tempo != 1.0:
+        af += f",aresample=24000,rubberband=tempo={tempo:.6f}:pitchq=quality"
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(wav), "-af", af, "-ac", "1", "-ar", "24000", "-b:a", "64k", str(out)], check=True)
 
 
-def cmd_embed():
-    """Swaps each passing chain clip into index.html's CLIPS block, same key; failing ones keep their old clip."""
-    man = json.loads(MAN.read_text())
-    src = (ROOT / "index.html").read_text()
+# One mp3 frame at 24 kHz is 1152 samples = 0.048 s, the length granularity of the encode: a slowed word counts as
+# at its old length when it is within one frame of it.
+FRAME_S = 1152 / SR
+MARK = "/* voice chain: kokoro+chatterbox */"
+
+
+def decoded_s(mp3_bytes):
+    """Length of an mp3 as ffmpeg decodes it (16 kHz mono s16 = 32000 bytes a second), the way the step check reads it."""
+    pcm = subprocess.run(["ffmpeg", "-v", "error", "-i", "pipe:0", "-f", "s16le", "-ac", "1", "-ar", "16000", "-"],
+                         input=mp3_bytes, capture_output=True, check=True).stdout
+    return len(pcm) / 32000
+
+
+def read_block(src):
     a, b = src.index("/* CLIPS:BEGIN */"), src.index("/* CLIPS:END */")
     block = src[a:b]
-    clips = json.loads(block[block.index("{"):block.rindex("}") + 1])
+    return a, b, block, json.loads(block[block.index("{"):block.rindex("}") + 1])
+
+
+def old_clips(src):
+    """The OmniVoice CLIPS as they were before any chain embed: the page's own block while it has no chain marker,
+    else the newest committed index.html without the marker (so a rerun can still fall back to the old voice)."""
+    if MARK not in src:
+        return read_block(src)[3]
+    revs = subprocess.run(["git", "-C", str(ROOT), "rev-list", "HEAD", "--", "index.html"], capture_output=True, text=True, check=True).stdout.split()
+    for r in revs:
+        old = subprocess.run(["git", "-C", str(ROOT), "show", f"{r}:index.html"], capture_output=True, text=True, check=True).stdout
+        if MARK not in old:
+            return read_block(old)[3]
+    sys.exit("no index.html without the chain marker in git history: the old clips are gone")
+
+
+def cmd_embed():
+    """Swaps each passing chain clip into index.html's CLIPS block, same key. A single word that comes out shorter
+    than its old clip is slowed (rubberband, tempo new_s/old_s) to its old length. Every final mp3 is Whisper-checked;
+    a mishear, or a clip that failed gen, keeps its old OmniVoice clip. chain.json records per key old_s, new_s,
+    tempo, final_s, final_heard and used ('chain' or 'old')."""
+    man = json.loads(MAN.read_text())
+    src = (ROOT / "index.html").read_text()
+    a, b, _, clips = read_block(src)
+    old = old_clips(src)
+    ear = subprocess.Popen([str(PY["fw"]), "-I", __file__, "hear"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+
+    def hear(path):
+        ear.stdin.write(str(path) + "\n"); ear.stdin.flush()
+        return json.loads(ear.stdout.readline())
+
     done, kept = [], []
     with tempfile.TemporaryDirectory() as d:
         for k in clips:
-            if man.get(k, {}).get("ok"):
-                mp3 = Path(d) / "c.mp3"
-                to_mp3(OUT / man[k]["file"], mp3)
+            m = man.setdefault(k, {})
+            if "old_s" not in m:
+                m["old_s"] = round(decoded_s(base64.b64decode(old[k].split(",", 1)[1])), 4)
+            if not m.get("ok"):
+                clips[k] = old[k]; m["used"] = "old"; kept.append(k)
+                continue
+            mp3 = Path(d) / f"{k.replace(':', '-')}.mp3"
+            to_mp3(OUT / m["file"], mp3)
+            m["new_s"] = round(decoded_s(mp3.read_bytes()), 4)
+            tempo = 1.0
+            if len(m["text"].split()) == 1 and m["new_s"] < m["old_s"]:
+                tempo = m["new_s"] / m["old_s"]
+                to_mp3(OUT / m["file"], mp3, tempo)
+                # Encoder framing can leave it a frame short: correct the tempo once by what was measured.
+                fin = decoded_s(mp3.read_bytes())
+                if fin < m["old_s"] - FRAME_S:
+                    tempo *= fin / m["old_s"]
+                    to_mp3(OUT / m["file"], mp3, tempo)
+            m["tempo"] = round(tempo, 4)
+            m["final_s"] = round(decoded_s(mp3.read_bytes()), 4)
+            m["final_heard"] = hear(mp3)
+            if norm(m["final_heard"]) == norm(m["text"]):
                 clips[k] = "data:audio/mpeg;base64," + base64.b64encode(mp3.read_bytes()).decode()
-                done.append(k)
+                m["used"] = "chain"; done.append(k)
             else:
-                kept.append(k)
-    head = "/* CLIPS:BEGIN */\n/* voice chain: kokoro+chatterbox */\n"
+                clips[k] = old[k]; m["used"] = "old"; kept.append(k)
+            print(f"{k}: old {m['old_s']:.2f} s, new {m['new_s']:.2f} s, tempo {m['tempo']}, final {m['final_s']:.2f} s, "
+                  f"heard '{m['final_heard']}' -> {m['used']}", flush=True)
+    ear.stdin.close()
+    MAN.write_text(json.dumps(man, indent=1) + "\n")
+    head = "/* CLIPS:BEGIN */\n" + MARK + "\n"
     src = src[:a] + head + "const CLIPS = " + json.dumps(clips, indent=0) + ";\n" + src[b:]
     (ROOT / "index.html").write_text(src)
     print(f"index.html: {len(done)} chain clips, old voice kept: {kept or 'none'}")
