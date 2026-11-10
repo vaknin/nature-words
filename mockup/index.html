@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nature Words: student landing, 3 options</title>
+<style>
+/* Palette carried over from letter-b so the series looks like one family. */
+:root{--ink:#2b2340;--bg:#fff7e8;--card:#fff;--purple:#7357ff;--pink:#ff5fa2;--yellow:#ffd23f;
+--green:#22b573;--green-d:#178a56;--blue:#2f80ed;--sky:#c9ecff;--muted:#6f6a86;
+--font:"Baloo 2","Nunito","Varela Round","Segoe UI Rounded","Arial Rounded MT Bold",system-ui,sans-serif;
+--he:"Rubik","Assistant","Arial Hebrew",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#f1eefb;color:var(--ink);font-family:var(--font)}
+header.top{padding:28px 32px 8px;max-width:1500px;margin:auto}
+h1{margin:0 0 6px;font-size:34px}
+.lead{color:var(--muted);font-size:18px;margin:0 0 10px;max-width:900px}
+section.opt{max-width:1500px;margin:26px auto;padding:22px 28px;background:#fff;border-radius:26px;box-shadow:0 6px 30px #2b234014}
+.opt h2{margin:0 0 4px;font-size:26px}
+.opt .why{margin:0 0 16px;color:var(--muted);font-size:17px}
+.pick{display:inline-block;background:var(--green);color:#fff;border-radius:999px;padding:2px 14px;font-size:16px;margin-left:10px;vertical-align:middle}
+.row{display:flex;gap:28px;align-items:flex-start;flex-wrap:wrap}
+.lbl{font-size:14px;color:var(--muted);margin:0 0 6px}
+/* Laptop frame: 960x560 is a 1366x768 screen at 70% (the school laptops' common size, scaled so both frames fit side by side). */
+.laptop{width:960px;height:560px}
+/* Phone frame: 390px is the narrow width the lesson skill says every page must survive. */
+.phone{width:390px;height:780px}
+.frame{container-type:inline-size;overflow:hidden;border:10px solid #2b2340;border-radius:22px;background:var(--bg);position:relative}
+.phone.frame{border-radius:36px}
+.he{font-family:var(--he);direction:rtl;unicode-bidi:isolate}
+svg{display:block}
+.btn{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+.btn:hover{transform:translateY(-4px) scale(1.02)}
+.btn:active{transform:translateY(2px) scale(.98)}
+
+/* ---------- Option A: nature map ---------- */
+.A{height:100%;position:relative;display:flex;flex-direction:column}
+.A .scene{position:absolute;inset:0;z-index:0}
+.A .bar{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:14px 20px}
+.A .hello{background:#ffffffe6;border-radius:20px;padding:8px 18px;font-size:24px;font-weight:800}
+.A .hello small{display:block;font-size:16px;font-weight:600;color:var(--muted)}
+.A .steps{margin-left:auto;display:flex;gap:6px}
+.A .steps span{background:#ffffffcc;border-radius:999px;padding:4px 12px;font-size:14px;font-weight:700}
+.A .steps .on{background:var(--yellow)}
+.A .pins{position:relative;z-index:1;flex:1}
+.A .pin{position:absolute;width:210px;background:#fff;border-radius:24px;padding:12px 14px 14px;text-align:center;box-shadow:0 8px 0 #2b234033,0 12px 24px #2b234033;border:4px solid var(--c)}
+.A .pin b{display:block;font-size:24px;margin-top:4px}
+.A .pin .he{font-size:16px;color:var(--muted)}
+.A .pin .go{margin-top:8px;background:var(--c);color:#fff;border-radius:999px;font-weight:800;font-size:18px;padding:6px 0}
+.A .pin svg{margin:auto}
+.A .p1{left:6%;top:36%}.A .p2{left:39%;top:6%}.A .p3{right:6%;top:40%}
+@container (max-width:600px){
+ .A .bar{flex-direction:column;align-items:stretch}
+ .A .steps{margin:0;justify-content:center}
+ .A .pins{display:flex;flex-direction:column;gap:14px;padding:10px 22px}
+ .A .pin{position:static;width:auto;display:grid;grid-template-columns:64px 1fr;text-align:left;align-items:center;column-gap:10px}
+ .A .pin svg{grid-row:span 3;width:60px;height:60px}
+ .A .pin b{margin:0}
+}
+
+/* ---------- Option B: big cards ---------- */
+.B{height:100%;display:flex;flex-direction:column;padding:22px 28px;gap:16px;background:linear-gradient(180deg,#e6f7ff 0,#fff7e8 60%)}
+.B .head{display:flex;align-items:center;gap:16px}
+.B .owl{flex:none}
+.B .bubble{background:#fff;border-radius:22px;padding:12px 18px;font-size:26px;font-weight:800;box-shadow:0 4px 0 #2b23401a}
+.B .bubble .he{display:block;font-size:17px;font-weight:600;color:var(--muted)}
+.B .words{display:flex;flex-wrap:wrap;gap:8px}
+.B .words span{background:#fff;border:3px solid #e6e0ff;border-radius:14px;padding:4px 12px;font-size:18px;font-weight:700}
+.B .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;flex:1}
+.B .card{background:var(--c);color:#fff;border-radius:28px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;box-shadow:0 10px 0 var(--d)}
+.B .card b{font-size:32px;margin-top:6px}
+.B .card .en{font-size:18px;opacity:.95}
+.B .card .he{font-size:16px;opacity:.9}
+.B .card .go{margin-top:12px;background:#fff;color:var(--d);border-radius:999px;padding:6px 24px;font-weight:800;font-size:20px}
+@container (max-width:600px){
+ .B{padding:16px}
+ .B .bubble{font-size:20px}
+ .B .owl{width:64px;height:64px}
+ .B .cards{grid-template-columns:1fr;gap:14px}
+ .B .card{flex-direction:row;justify-content:flex-start;gap:12px;text-align:left;padding:12px 16px;box-shadow:0 6px 0 var(--d)}
+ .B .card svg{width:56px;height:56px;flex:none}
+ .B .card b{font-size:24px;margin:0}
+ .B .card .go{display:none}
+ .B .words span{font-size:15px;padding:2px 8px}
+}
+
+/* ---------- Option C: guide chat + quest board ---------- */
+.C{height:100%;display:grid;grid-template-columns:330px 1fr;background:#183153;color:#fff}
+.C .guide{padding:22px;display:flex;flex-direction:column;gap:12px;background:#204070}
+.C .msg{background:#fff;color:var(--ink);border-radius:18px 18px 18px 4px;padding:10px 14px;font-size:20px;font-weight:700}
+.C .msg .he{display:block;font-size:15px;color:var(--muted);font-weight:600}
+.C .xp{margin-top:auto;font-size:15px}
+.C .xpbar{height:16px;border-radius:999px;background:#ffffff33;overflow:hidden}
+.C .xpbar i{display:block;height:100%;width:30%;background:var(--yellow)}
+.C .board{padding:22px;display:flex;flex-direction:column;gap:14px}
+.C .board h3{margin:0;font-size:30px}
+.C .quest{display:flex;align-items:center;gap:16px;background:#ffffff14;border:3px solid #ffffff30;border-radius:22px;padding:14px 18px}
+.C .quest b{font-size:26px;display:block}
+.C .quest .en{font-size:16px;opacity:.85}
+.C .quest .go{margin-left:auto;background:var(--c);border-radius:16px;padding:10px 22px;font-weight:800;font-size:20px;color:#fff;box-shadow:0 5px 0 #0004}
+.C .stars{color:var(--yellow);font-size:18px;letter-spacing:2px}
+@container (max-width:600px){
+ .C{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+ .C .guide{padding:14px;flex-direction:row;align-items:center}
+ .C .guide .msg{font-size:16px}
+ .C .guide .xp{display:none}
+ .C .board{padding:14px}
+ .C .board h3{font-size:22px}
+ .C .quest{flex-wrap:wrap;padding:10px 12px}
+ .C .quest svg{width:48px;height:48px}
+ .C .quest b{font-size:20px}
+ .C .quest .go{margin-left:0;width:100%;text-align:center}
+}
+
+/* Classroom card mock + questions */
+.gc{max-width:1500px;margin:26px auto;padding:22px 28px;background:#fff;border-radius:26px}
+.gccard{max-width:640px;border:1px solid #dadce0;border-radius:8px;font-family:Roboto,Arial,sans-serif;color:#3c4043;background:#fff}
+.gccard .t{display:flex;gap:14px;align-items:center;padding:16px 20px;border-bottom:1px solid #dadce0}
+.gccard .ic{width:40px;height:40px;border-radius:50%;background:#1e8e3e;display:grid;place-items:center}
+.gccard .ti{font-size:18px;color:#202124}
+.gccard .body{padding:16px 20px}
+.gccard .link{display:flex;border:1px solid #dadce0;border-radius:8px;overflow:hidden;max-width:380px;margin-top:12px}
+.gccard .link .th{width:110px;background:#c9ecff}
+.gccard .link .tx{padding:10px 12px;font-size:14px}
+.gccard .link .tx div{color:#5f6368;font-size:12px}
+.gccard .turn{float:right;background:#1a73e8;color:#fff;border-radius:4px;padding:8px 22px;font-size:14px}
+ol.q{font-size:18px;line-height:1.5;max-width:1100px}
+ol.q li{margin-bottom:12px}
+ol.q .mine{color:var(--green-d);font-weight:700}
+</style>
+</head>
+<body>
+<header class="top">
+ <h1>Nature Words: what a kid sees when he opens his level link</h1>
+ <p class="lead">One page, three looks. Each kid gets only his own level's link from Google Classroom, so the page never shows "Level 1/2/3": he just sees his mission and three activities to choose from (draw, solve, say). Shown here: a level-2 kid. Left is a laptop (1366×768 at 70%), right is a 390px phone width. The buttons react on hover/press.</p>
+</header>
+
+<section class="gc">
+ <h2 style="margin:0 0 10px">Step 0, the same for every option: the card he sees in Google Classroom</h2>
+ <div class="gccard">
+  <div class="t"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24"><path fill="#fff" d="M4 4h16v12H5.2L4 17.2z"/></svg></div><div class="ti">🌍 Nature Quest: open me!</div></div>
+  <div class="body">Press the picture below to start. Headphones on 🎧<br><span class="he">לחצו על התמונה כדי להתחיל. שימו אוזניות</span>
+   <div class="link"><div class="th"></div><div class="tx"><b>Nature Quest</b><div>vaknin.github.io</div></div></div>
+   <div style="margin-top:12px;overflow:hidden"><span class="turn">Mark as done</span></div>
+  </div>
+ </div>
+ <p class="lead" style="margin-top:12px">Same title for all three levels; only the link ending differs (#level-1, #level-2, #level-3), and each is assigned to its own kids. Nobody sees another level.</p>
+</section>
+
+<template id="tA">
+<div class="A">
+ <svg class="scene" viewBox="0 0 960 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+  <rect width="960" height="560" fill="#bfe9ff"/>
+  <circle cx="820" cy="90" r="46" fill="#ffd23f"/>
+  <path d="M120 360 L330 110 L520 360Z" fill="#8a7bd8"/><path d="M290 160 L330 110 L372 162 L350 150 L330 170 L310 150Z" fill="#fff"/>
+  <path d="M430 360 L600 170 L780 360Z" fill="#6f61c4"/>
+  <rect y="330" width="960" height="230" fill="#7fd36b"/>
+  <path d="M0 470 C200 430 300 520 520 470 S820 420 960 470 V560 H0Z" fill="#3fa9f5"/>
+  <path d="M600 330 C640 380 560 420 620 470" stroke="#3fa9f5" stroke-width="34" fill="none" stroke-linecap="round"/>
+  <g fill="#178a56"><path d="M40 360 l30 -70 l30 70z"/><path d="M80 370 l34 -84 l34 84z"/><path d="M850 360 l30 -70 l30 70z"/><path d="M890 372 l26 -64 l26 64z"/></g>
+  <g stroke="#22b573" stroke-width="4" stroke-linecap="round"><path d="M300 420 l-6 -16 M310 420 l0 -18 M320 420 l6 -16"/><path d="M760 430 l-6 -16 M770 430 l0 -18 M780 430 l6 -16"/></g>
+ </svg>
+ <div class="bar">
+  <div class="hello">Hi! Pick one mission 👇<small class="he">בחרו משימה אחת</small></div>
+  <div class="steps"><span>1 Listen ✓</span><span class="on">2 Choose</span><span>3 Done</span></div>
+ </div>
+ <div class="pins">
+  <div class="pin btn p1" style="--c:#ff5fa2"><svg width="70" height="70" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#ffe1ee" stroke="#ff5fa2" stroke-width="4"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><b>Draw it</b><span class="he">לצייר ולצבוע</span><div class="go">Start ▶</div></div>
+  <div class="pin btn p2" style="--c:#7357ff"><svg width="70" height="70" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#e6e0ff" stroke="#7357ff" stroke-width="4" stroke-linejoin="round"/></svg><b>Solve it</b><span class="he">לפתור חידה</span><div class="go">Start ▶</div></div>
+  <div class="pin btn p3" style="--c:#2f80ed"><svg width="70" height="70" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#dbe9ff" stroke="#2f80ed" stroke-width="4" stroke-linejoin="round"/><circle cx="18" cy="28" r="3.5" fill="#2f80ed"/><circle cx="28" cy="28" r="3.5" fill="#2f80ed"/><circle cx="38" cy="28" r="3.5" fill="#2f80ed"/></svg><b>Say it</b><span class="he">לדבר עם חבר</span><div class="go">Start ▶</div></div>
+ </div>
+</div>
+</template>
+
+<template id="tB">
+<div class="B">
+ <div class="head">
+  <svg class="owl" width="90" height="90" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#a8743f"/><ellipse cx="32" cy="44" rx="13" ry="14" fill="#f3d9b1"/><circle cx="23" cy="28" r="9" fill="#fff"/><circle cx="41" cy="28" r="9" fill="#fff"/><circle cx="24" cy="29" r="4" fill="#2b2340"/><circle cx="40" cy="29" r="4" fill="#2b2340"/><path d="M29 35 l3 5 l3 -5z" fill="#ffb02e"/><path d="M12 16 l8 6 M52 16 l-8 6" stroke="#a8743f" stroke-width="6" stroke-linecap="round"/></svg>
+  <div class="bubble">Hi! Choose your mission 👇<span class="he">בחרו את המשימה שלכם</span></div>
+ </div>
+ <div class="words"><span>🌬 air</span><span>🏜 dry</span><span>🌲 forest</span><span>🌱 grass</span><span>⛰ mountain</span><span>🍃 nature</span><span>🏞 river</span><span>🌊 sea</span></div>
+ <div class="cards">
+  <div class="card btn" style="--c:#ff5fa2;--d:#c43a78"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#fff"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><div><b>Draw it</b><div class="en">Colour the nature map</div><div class="he">לצבוע את המפה</div></div><span class="go">Start ▶</span></div>
+  <div class="card btn" style="--c:#7357ff;--d:#4f37c9"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#fff"/></svg><div><b>Solve it</b><div class="en">Build the words</div><div class="he">לבנות את המילים</div></div><span class="go">Start ▶</span></div>
+  <div class="card btn" style="--c:#22b573;--d:#178a56"><svg width="96" height="96" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#fff"/><circle cx="18" cy="28" r="3.5" fill="#22b573"/><circle cx="28" cy="28" r="3.5" fill="#22b573"/><circle cx="38" cy="28" r="3.5" fill="#22b573"/></svg><div><b>Say it</b><div class="en">Talk with a friend</div><div class="he">לדבר עם חבר</div></div><span class="go">Start ▶</span></div>
+ </div>
+</div>
+</template>
+
+<template id="tC">
+<div class="C">
+ <div class="guide">
+  <svg width="70" height="70" viewBox="0 0 64 64" style="flex:none"><ellipse cx="32" cy="36" rx="22" ry="24" fill="#a8743f"/><ellipse cx="32" cy="44" rx="13" ry="14" fill="#f3d9b1"/><circle cx="23" cy="28" r="9" fill="#fff"/><circle cx="41" cy="28" r="9" fill="#fff"/><circle cx="24" cy="29" r="4" fill="#2b2340"/><circle cx="40" cy="29" r="4" fill="#2b2340"/><path d="M29 35 l3 5 l3 -5z" fill="#ffb02e"/></svg>
+  <div class="msg">Great listening! ⭐ Now pick a quest.<span class="he">עכשיו בחרו משימה</span></div>
+  <div class="xp">Your stars<div class="xpbar"><i></i></div></div>
+ </div>
+ <div class="board">
+  <h3>Quest board</h3>
+  <div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M32 6C17 6 6 17 6 30c0 10 8 12 13 10 5-2 8 2 6 7-2 6 3 11 9 11 15 0 24-13 24-27S46 6 32 6z" fill="#ffe1ee"/><circle cx="20" cy="26" r="5" fill="#2f80ed"/><circle cx="32" cy="17" r="5" fill="#22b573"/><circle cx="45" cy="24" r="5" fill="#ffd23f"/></svg><div><b>Draw it</b><span class="en">Colour the nature map · <span class="he">לצבוע</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#ff5fa2">Play</span></div>
+  <div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M10 14h16a6 6 0 1 1 12 0h16v16a6 6 0 1 0 0 12v16H38a6 6 0 1 0-12 0H10V42a6 6 0 1 1 0-12z" fill="#e6e0ff"/></svg><div><b>Solve it</b><span class="en">Build the words · <span class="he">לבנות</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#7357ff">Play</span></div>
+  <div class="quest btn"><svg width="60" height="60" viewBox="0 0 64 64"><path d="M8 12h40a6 6 0 0 1 6 6v20a6 6 0 0 1-6 6H26l-12 10v-10H8a6 6 0 0 1-6-6V18a6 6 0 0 1 6-6z" fill="#dbe9ff"/></svg><div><b>Say it</b><span class="en">Talk with a friend · <span class="he">לדבר</span></span><div class="stars">☆☆☆</div></div><span class="go" style="--c:#22b573">Play</span></div>
+ </div>
+</div>
+</template>
+
+<section class="opt" data-option="A">
+ <h2>A · Nature map <span class="pick">my pick</span></h2>
+ <p class="why">The lesson's own words are the menu: a mountain, river, sea and forest scene, with three big pins to press. Most fun, and the picture keeps the eight words in front of him while he chooses. On a phone the pins stack into a list over the scene.</p>
+ <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tA"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tA"></div></div></div>
+</section>
+<section class="opt" data-option="B">
+ <h2>B · Big cards</h2>
+ <p class="why">Clearest of the three: an owl guide says what to do, the eight words sit in a strip as a reminder, and three huge coloured cards are the only things to press. Calmer, less of a game.</p>
+ <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tB"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tB"></div></div></div>
+</section>
+<section class="opt" data-option="C">
+ <h2>C · Quest board</h2>
+ <p class="why">A game menu on a dark night sky: the owl talks in a chat bubble, each quest earns up to 3 stars, a star bar fills up. Most "game-like", but more on screen and the dark look breaks with letter-b's bright style.</p>
+ <div class="row"><div><p class="lbl">Laptop</p><div class="frame laptop" data-t="tC"></div></div><div><p class="lbl">390px</p><div class="frame phone" data-t="tC"></div></div></div>
+</section>
+
+<section class="gc">
+ <h2 style="margin:0 0 8px">Questions, each with my pick (answer only where you disagree)</h2>
+ <ol class="q">
+  <li><b>Look:</b> A, B or C? <span class="mine">My pick: A</span>: most fun for 5th graders and the scene itself teaches the words; B's three-card clarity is built into it (one label, one Start button per pin).</li>
+  <li><b>Do kids see their level?</b> <span class="mine">My pick: no.</span> Same title "Nature Quest" for all; the level is only in the link and in your Classroom view. Animal names (turtle/fox/eagle) tend to read as a ranking.</li>
+  <li><b>Who goes to which level?</b> <span class="mine">My pick: you sort them from what you and the class teacher know (about a third each)</span>; no placement test, it eats lesson time.</li>
+  <li><b>Choice inside a level:</b> the research says matching kids to "learning styles" (art kid, logic kid, talk kid) doesn't improve learning; what works is levels by readiness plus a small free choice. <span class="mine">My pick: every kid picks 1 of 3 (draw / solve / say) inside his level.</span></li>
+  <li><b>Hebrew help:</b> <span class="mine">My pick: level 1 always sees a short Hebrew line, level 2 one tap away, level 3 none.</span></li>
+  <li><b>Headphones:</b> do the kids have them? <span class="mine">My pick: assume yes</span> (30 laptops talking at once is chaos); if not, sound stays on the projector only and the laptops are silent text + pictures.</li>
+  <li><b>"Say it" recording:</b> the laptop records the kid and plays it back to him, nothing saved or sent. <span class="mine">My pick: yes</span> (needs one "Allow microphone" click). Or skip recording and just talk to a partner.</li>
+  <li><b>Exit ticket:</b> <span class="mine">My pick: a 3-question check at the end of the site + "Mark as done" in Classroom</span> (you see who finished live). Alternative: a Google Forms quiz assignment.</li>
+  <li><b>Student Groups:</b> does your school's Classroom show a "Groups" tab when you assign? If not, you tick names for each level (2 minutes, done once). <span class="mine">My pick: tick names; works on every licence.</span></li>
+  <li><b>Voices:</b> <span class="mine">My pick: English clips only, in letter-b's boy voice you liked plus a matching girl, each checked by speech recognition; no 5-takes picker this time</span> (shorter lesson, and the Hebrew voices failed last time; Hebrew stays as text).</li>
+ </ol>
+</section>
+
+<script>
+// Each option is written once and cloned into both frames, so laptop and phone always show the same design.
+document.querySelectorAll('.frame').forEach(f=>f.appendChild(document.getElementById(f.dataset.t).content.cloneNode(true)));
+</script>
+</body>
+</html>
