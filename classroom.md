@@ -1,54 +1,42 @@
-# What to post in Google Classroom, click by click
+# What to post in Google Classroom
 
-Nothing is posted for you: this is the exact list to do yourself, about 10 minutes, the day before or at least
-10 minutes before class (scheduled posts can arrive up to 5 minutes late).
+**One post, one link, for the whole class.** Nothing is sent to each kid separately: every kid opens the same
+link, takes a short, cute quiz, and the site tells him his trail ("Your trail is River! Well done!"). Nothing is
+posted for you: the class teacher (or you) pastes this once, about 10 minutes before the lesson.
 
-You post **three assignments, one per trail**. Each kid sees only the one you assign him, so nobody sees the
-other trails in Classroom. The trail names are neutral (River, Forest, Mountain), so the title can say them.
+The link: **https://vaknin.github.io/nature-words/**
 
-| Trail | Title the kids see | Link to attach | Who gets it |
-|---|---|---|---|
-| River (green) | 🌊 Nature Trails: River | https://vaknin.github.io/nature-words/#level-1 | kids who still read slowly and need Hebrew help |
-| Forest (yellow) | 🌲 Nature Trails: Forest | https://vaknin.github.io/nature-words/#level-2 | kids who read single words |
-| Mountain (red) | ⛰️ Nature Trails: Mountain | https://vaknin.github.io/nature-words/#level-3 | kids who read and write short sentences |
-
-About a third of the class on each trail is a fine start; you know them best. Inside the site every trail ends
-with "Finished? Try the next trail!", so a fast kid moves on by himself without a new Classroom post.
-
-## 1. One topic for the lesson
+## Click by click
 1. Open the class, then the **Classwork** tab.
-2. Press **+ Create**, then **Topic**.
-3. Type `🌍 Nature Words` and press **Add**.
-
-## 2. The River trail assignment (do this three times, once per row of the table)
-1. On **Classwork**, press **+ Create**, then **Assignment**.
-2. **Title:** `🌊 Nature Trails: River`
-3. **Instructions:** paste these two lines:
+2. Press **+ Create**, then **Material** (no hand-in and no grade needed; the site itself shows each kid's stars).
+3. **Title:** `🌍 Nature Trails`
+4. **Description:** paste these two lines:
    ```
-   Headphones on 🎧 Press the link below. When you finish, press "Mark as done".
-   שימו אוזניות 🎧 לחצו על הקישור. כשתסיימו, סמנו את המשימה כבוצעה.
+   Headphones on 🎧 Press the link, then press Start.
+   שימו אוזניות 🎧 לחצו על הקישור ואז על Start.
    ```
-4. Under **Attach**, press **Link**, paste `https://vaknin.github.io/nature-words/#level-1`, press **Add link**.
-   Keep it the only attachment, so the kid has exactly one thing to press.
-5. On the right, under **For**, open the **All students** menu, untick **All students**, then tick the names of
-   this trail's kids.
-6. **Points:** choose **Ungraded**. **Due:** no due date. **Topic:** `🌍 Nature Words`.
-7. Top right: press the arrow next to **Assign** and choose **Schedule** (class start minus 10 minutes), or press
-   **Assign** now.
+5. Under **Attach**, press **Link**, paste `https://vaknin.github.io/nature-words/`, press **Add link**. Keep it the
+   only attachment, so the kid has exactly one thing to press.
+6. Leave **For** on **All students**.
+7. Press **Post** (or the arrow next to it, then **Schedule**, for 10 minutes before class: scheduled posts can
+   arrive a few minutes late).
 
-Repeat steps 1-7 for Forest (`#level-2`) and Mountain (`#level-3`) with their titles and names from the table.
-A kid missing from all three lists sees nothing, so check that every name is ticked once.
+## The trail links, for you only
+The site sends each kid to his trail by itself. If you want to move a kid by hand, these open a trail directly:
+- River: https://vaknin.github.io/nature-words/#level-1
+- Forest: https://vaknin.github.io/nature-words/#level-2
+- Mountain: https://vaknin.github.io/nature-words/#level-3
 
-## 3. In class
+A kid who gets several right in a row is offered the next trail up, and after several wrong in a row another
+trail; he chooses. Every trail ends with "Finished? Try the next trail!".
+
+## In class
 1. On your laptop open `https://vaknin.github.io/nature-words/#teacher`, press **F** for full screen on the
-   projector, and press the speaker words once to test sound.
-2. When you reach the trails stage, the kids open **Classwork**, press their own card, then the link.
-3. While they work, the **Classwork → (assignment) → Student work** page shows who pressed **Mark as done**:
-   your live list of who finished.
+   projector, and press **Space** on the first word to test the sound.
+2. When you reach "Find your trail", the kids open **Classwork → 🌍 Nature Trails → the link → Start**.
 
 ## If something goes wrong
-- **A kid opened the wrong trail:** he can press the trail he was given on the map page
-  (`https://vaknin.github.io/nature-words/`), or you move him by ticking his name on another assignment.
-- **No sound on a laptop:** the words are recorded clips inside the page, so it is the laptop's volume or
+- **No sound on a laptop:** the voices are recorded clips inside the page, so it is the laptop's volume or
   headphones, not the internet.
 - **The internet drops:** a page already open keeps working; it needs no connection once loaded.
+- **A kid closed the tab:** he opens the link again and redoes the quick quiz (about a minute), or you give him his trail link above.
