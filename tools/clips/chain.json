@@ -1,0 +1,202 @@
+{
+ "boy:air": {
+  "text": "air",
+  "voice": "boy",
+  "file": "boy-air.wav",
+  "heard": "Air",
+  "ok": true,
+  "seed": 2,
+  "tries": 2
+ },
+ "girl:air": {
+  "text": "air",
+  "voice": "girl",
+  "file": "girl-air.wav",
+  "heard": "Air.",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "boy:dry": {
+  "text": "dry",
+  "voice": "boy",
+  "file": "boy-dry.wav",
+  "heard": "Dry",
+  "ok": true,
+  "seed": 102,
+  "tries": 4,
+  "rep": 2
+ },
+ "girl:dry": {
+  "text": "dry",
+  "voice": "girl",
+  "file": "girl-dry.wav",
+  "heard": "dry.",
+  "ok": true,
+  "seed": 101,
+  "tries": 4,
+  "rep": 1
+ },
+ "boy:forest": {
+  "text": "forest",
+  "voice": "boy",
+  "file": "boy-forest.wav",
+  "heard": "Forest",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "girl:forest": {
+  "text": "forest",
+  "voice": "girl",
+  "file": "girl-forest.wav",
+  "heard": "forest.",
+  "ok": true,
+  "seed": 3,
+  "tries": 3
+ },
+ "boy:grass": {
+  "text": "grass",
+  "voice": "boy",
+  "file": "boy-grass.wav",
+  "heard": "grass",
+  "ok": true,
+  "seed": 2,
+  "tries": 2
+ },
+ "girl:grass": {
+  "text": "grass",
+  "voice": "girl",
+  "file": "girl-grass.wav",
+  "heard": "GRASS",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "boy:mountain": {
+  "text": "mountain",
+  "voice": "boy",
+  "file": "boy-mountain.wav",
+  "heard": "Mountain",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "girl:mountain": {
+  "text": "mountain",
+  "voice": "girl",
+  "file": "girl-mountain.wav",
+  "heard": "Mountain",
+  "ok": true,
+  "seed": 3,
+  "tries": 3
+ },
+ "boy:nature": {
+  "text": "nature",
+  "voice": "boy",
+  "file": "boy-nature.wav",
+  "heard": "Nature",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "girl:nature": {
+  "text": "nature",
+  "voice": "girl",
+  "file": "girl-nature.wav",
+  "heard": "Nature",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "boy:river": {
+  "text": "river",
+  "voice": "boy",
+  "file": "boy-river.wav",
+  "heard": "River",
+  "ok": true,
+  "seed": 2,
+  "tries": 2
+ },
+ "girl:river": {
+  "text": "river",
+  "voice": "girl",
+  "file": "girl-river.wav",
+  "heard": "River",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "boy:sea": {
+  "text": "sea",
+  "voice": "boy",
+  "file": "boy-sea.wav",
+  "heard": "See-",
+  "ok": true,
+  "seed": 4,
+  "tries": 4
+ },
+ "girl:sea": {
+  "text": "sea",
+  "voice": "girl",
+  "file": "girl-sea.wav",
+  "heard": "See",
+  "ok": true,
+  "seed": 3,
+  "tries": 3
+ },
+ "boy:Listen. Say the word.": {
+  "text": "Listen. Say the word.",
+  "voice": "boy",
+  "file": "boy-listen-say-the-word.wav",
+  "heard": "Listen.  Say the word.",
+  "ok": true,
+  "seed": 2,
+  "tries": 2
+ },
+ "girl:Listen. Press the picture.": {
+  "text": "Listen. Press the picture.",
+  "voice": "girl",
+  "file": "girl-listen-press-the-picture.wav",
+  "heard": "Listen, press the picture.",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "boy:Look. Press the word.": {
+  "text": "Look. Press the word.",
+  "voice": "boy",
+  "file": "boy-look-press-the-word.wav",
+  "heard": "Look, press the word.",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "girl:Build the word.": {
+  "text": "Build the word.",
+  "voice": "girl",
+  "file": "girl-build-the-word.wav",
+  "heard": "Build the word.",
+  "ok": true,
+  "seed": 2,
+  "tries": 2
+ },
+ "boy:Listen. Press the word.": {
+  "text": "Listen. Press the word.",
+  "voice": "boy",
+  "file": "boy-listen-press-the-word.wav",
+  "heard": "Listen, press the word.",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ },
+ "girl:Well done!": {
+  "text": "Well done!",
+  "voice": "girl",
+  "file": "girl-well-done.wav",
+  "heard": "Well done!",
+  "ok": true,
+  "seed": 1,
+  "tries": 1
+ }
+}
