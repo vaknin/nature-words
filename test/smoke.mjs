@@ -1,5 +1,5 @@
 // Smoke test: opens every teacher stage and every trail page (#level-1..3, the links posted in Classroom),
-// plays every mission to its end, screenshots each, at laptop and phone size.
+// plays the start quiz and every trail game to its end, screenshots each, at two laptop sizes.
 // Run: cd test && npm install && timeout 300 node smoke.mjs [URL]   (default: the live site)
 import puppeteer from 'puppeteer-core';
 import { mkdirSync, rmSync } from 'fs';
@@ -12,7 +12,8 @@ const SHOTS = path.join(here, 'shots');
 rmSync(SHOTS, { recursive: true, force: true }); mkdirSync(SHOTS, { recursive: true });
 const CHROME = process.env.CHROME || '/usr/bin/chromium';
 // His two check sizes: the school laptop's 1366x768 and a 390px-wide phone.
-const SIZES = { laptop: { width: 1366, height: 768 }, phone: { width: 390, height: 844 } };
+// His word: laptop only. 1366x768 is the common school laptop; 1280x720 the smallest laptop screen in use.
+const SIZES = { laptop: { width: 1366, height: 768 }, small: { width: 1280, height: 720 } };
 // His limits for this lesson: at most 6 stages, 40-45 minutes in all.
 const MAX_STAGES = 6, MIN_MIN = 40, MAX_MIN = 45;
 
@@ -56,10 +57,23 @@ async function run(name, vp) {
   const open = async hash => { console.log('  open', hash); await page.goto(BASE + hash, { waitUntil: 'load' }); await page.evaluate(() => window.dispatchEvent(new HashChangeEvent('hashchange'))); await sleep(120); };
   const click = async sel => { const h = await page.$(sel); ok(h, `missing ${sel}`); if (h) { await h.click(); await sleep(40); } };
 
-  // ---- landing
+  // ---- the one Classroom link: start, quiz, "Your trail is ...!"
   await open('');
-  ok(await page.$$eval('.pin', p => p.length) === 3, 'landing shows three trail pins');
-  await check('landing'); await shot('landing');
+  await check('start'); await shot('start');
+  await click('[data-go]'); await sleep(150);
+  ok(await page.$('[data-quiz]'), 'Start opens the trail quiz');
+  await check('quiz'); await shot('quiz');
+  // Laptop answers every quiz question right (must land on Mountain); the small laptop misses each first (River).
+  const allRight = name === 'laptop';
+  for (let guard = 0; guard < 20 && !(await page.$('[data-result]')); guard++) {
+    const ans = await page.$eval('.stage', e => e.dataset.answer || '');
+    if (!allRight) { await page.$$eval('.choice', (c, a) => { const x = c.find(x => x.dataset.w !== a); x && x.click(); }, ans); await sleep(700); continue; }
+    await click(`.choice[data-w="${ans}"]`); await sleep(1300);
+  }
+  const res = await page.$eval('[data-result]', e => +e.dataset.result).catch(() => 0);
+  ok(res === (allRight ? 3 : 1), `quiz ${allRight ? 'all right' : 'all wrong'} gave trail ${res}`);
+  ok(/Your trail is (River|Forest|Mountain)! Well done!/.test(await page.$eval('[data-result]', e => e.textContent).catch(() => '')), 'quiz result line');
+  await check('result'); await shot('result');
 
   // ---- teacher stages
   await open('#teacher');
@@ -86,44 +100,33 @@ async function run(name, vp) {
     }
   }
 
-  // ---- the three trails and every mission on them
+  // ---- the three trails: every game to its end
   for (const lv of [1, 2, 3]) {
     await open(`#level-${lv}`);
     ok(await page.$eval('.trail', e => +e.dataset.trail).catch(() => 0) === lv, `#level-${lv} opens its own trail`);
-    const acts = await page.$$eval('.act', a => a.length);
-    ok(acts >= 1, `#level-${lv} has no missions`);
     ok(await page.$eval('.trail', e => e.innerText.trim().length).catch(() => 0) > 40, `#level-${lv} is empty`);
     await check(`level ${lv}`); await shot(`level-${lv}`);
-    for (let m = 0; m < acts; m++) {
-      await page.$$eval('.act', (a, m) => a[m].click(), m); await sleep(120);
-      const type = await page.$eval('.trail', e => e.dataset.mission); console.log('  mission', lv, type);
-      await check(`level ${lv} ${type}`); await shot(`level-${lv}-${type}`);
-      // 200 moves: 8 rounds of a long word's letters (mountain: 8) with room to spare; a mission that never ends fails.
-      for (let guard = 0; guard < 200 && !(await page.evaluate(() => app.dataset.ended)); guard++) {
-        const ans = await page.$eval('.mission', e => e.dataset.answer || '');
-        if (type === 'listen' || type === 'gap') await click(`.choice[data-w="${ans}"]`);
-        else if (type === 'build') {
-          const slot = await page.$$eval('.slot', s => s.findIndex(x => !x.textContent));
-          if (slot < 0) { await sleep(1000); continue; }
-          await page.$$eval('.tile', (t, c) => t.find(x => !x.disabled && x.textContent === c).click(), ans[slot]);
-        } else if (type === 'paint') {
-          const w = await page.$$eval('.pal button', b => (b.find(x => !x.disabled) || {}).dataset?.w);
-          if (!w) { await sleep(700); continue; }
-          await click(`.pal [data-w="${w}"]`);
-          await page.$eval(`.canvas [data-part="${w}"]`, p => p.dispatchEvent(new MouseEvent('click', { bubbles: true })));
-        } else if (type === 'say') { await click('[data-c]'); await click('[data-n]'); }
-        else { fail(`unknown mission ${type}`); break; }
-        // Engines wait up to 1.6 s between rounds (the gap sentence is read aloud); poll until the next round shows.
-        await sleep(type === 'gap' ? 1700 : type === 'paint' ? 50 : 950);
-      }
-      ok(await page.evaluate(() => app.dataset.ended), `level ${lv} ${type}: never reached its end`);
-      await shot(`level-${lv}-${type}-end`);
-      await click('[data-end]');
+    let lastGame = '', offers = 0;
+    // 200 moves: 3 games x 8 rounds, a long word's 8 letters each, with room; a trail that never ends fails.
+    for (let guard = 0; guard < 400 && !(await page.evaluate(() => app.dataset.ended)); guard++) {
+      if (await page.$('.offer')) { offers++; await shot(`level-${lv}-offer`); await click('.offer [data-no]'); await sleep(200); continue; }
+      const g = await page.$eval('.trail', e => e.dataset.game || '').catch(() => '');
+      if (g && g !== lastGame) { lastGame = g; await check(`level ${lv} ${g}`); await shot(`level-${lv}-${g}`); }
+      const ans = await page.$eval('.stage', e => e.dataset.answer || '').catch(() => '');
+      const type = await page.$eval('.stage', e => e.dataset.type || '').catch(() => '');
+      if (type === 'build') {
+        const slot = await page.$$eval('.slot', s => s.findIndex(x => !x.textContent));
+        if (slot < 0) { await sleep(400); continue; }
+        await page.$$eval('.tile', (t, c) => { const x = t.find(x => !x.disabled && x.textContent === c); x && x.click(); }, ans[slot]);
+        await sleep(30);
+      } else if (await page.$(`.choice[data-w="${ans}"]:not(.ok)`)) { await click(`.choice[data-w="${ans}"]`); await sleep(400); }
+      else await sleep(300);
     }
-    const done = await page.$$eval('.act.done', a => a.length);
-    ok(done === acts, `level ${lv}: ${done} of ${acts} missions marked done`);
-    const nx = await page.$('.fin .nx');
-    if (lv < 3) ok(nx, `level ${lv}: no "next trail" button`);
+    ok(await page.evaluate(() => app.dataset.ended), `level ${lv}: never reached the end`);
+    // Kids who get every first try right are offered the next trail up (not on the last trail).
+    if (lv < 3) ok(offers > 0, `level ${lv}: no "try a new trail" offer after a run of right answers`);
+    await check(`level ${lv} end`); await shot(`level-${lv}-end`);
+    if (lv < 3) ok(await page.$('[data-next]'), `level ${lv}: no "next trail" button`);
   }
 
   // Every phrase spoken during the run must have a recorded clip.
