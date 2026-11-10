@@ -1,0 +1,58 @@
+{
+ "boy:air": {
+  "text": "air",
+  "voice": "boy",
+  "file": "boy-air.wav",
+  "seed": 1,
+  "heard": "Air.",
+  "ok": true
+ },
+ "girl:air": {
+  "text": "air",
+  "voice": "girl",
+  "file": "girl-air.wav",
+  "seed": 2,
+  "heard": "Air!",
+  "ok": true
+ },
+ "boy:dry": {
+  "text": "dry",
+  "voice": "boy",
+  "file": "boy-dry.wav",
+  "seed": 1,
+  "heard": "Dry",
+  "ok": true
+ },
+ "girl:dry": {
+  "text": "dry",
+  "voice": "girl",
+  "file": "girl-dry.wav",
+  "seed": 2,
+  "heard": "Dry!",
+  "ok": true
+ },
+ "boy:forest": {
+  "text": "forest",
+  "voice": "boy",
+  "file": "boy-forest.wav",
+  "seed": 1,
+  "heard": "FOREST",
+  "ok": true
+ },
+ "girl:forest": {
+  "text": "forest",
+  "voice": "girl",
+  "file": "girl-forest.wav",
+  "seed": 1,
+  "heard": "FOREST",
+  "ok": true
+ },
+ "boy:grass": {
+  "text": "grass",
+  "voice": "boy",
+  "file": "boy-grass.wav",
+  "seed": 1,
+  "heard": "GRASS",
+  "ok": true
+ }
+}
