@@ -54,5 +54,37 @@
   "seed": 1,
   "heard": "GRASS",
   "ok": true
+ },
+ "girl:grass": {
+  "text": "grass",
+  "voice": "girl",
+  "file": "girl-grass.wav",
+  "seed": 1,
+  "heard": "GRASS!",
+  "ok": true
+ },
+ "boy:mountain": {
+  "text": "mountain",
+  "voice": "boy",
+  "file": "boy-mountain.wav",
+  "seed": 1,
+  "heard": "Mountain",
+  "ok": true
+ },
+ "girl:mountain": {
+  "text": "mountain",
+  "voice": "girl",
+  "file": "girl-mountain.wav",
+  "seed": 1,
+  "heard": "Mountain",
+  "ok": true
+ },
+ "boy:nature": {
+  "text": "nature",
+  "voice": "boy",
+  "file": "boy-nature.wav",
+  "seed": 1,
+  "heard": "Nature",
+  "ok": true
  }
 }
