@@ -65,6 +65,9 @@ h1 .he{font-size:30px;margin-top:4px}
 /* New name: one big box in the class code's look. */
 .namebox{width:600px;max-width:90vw;height:110px;border-radius:22px;background:#fff;border:4px solid var(--line);text-align:center;font:600 60px var(--head);color:var(--river-d);caret-color:var(--river);outline:none;padding:0 18px}
 .namebox:focus{border-color:var(--river)}
+/* "I am new": the sun of the lesson's lit board row, so a kid with no name yet finds it first. */
+.new{font-size:24px;padding:8px 26px;border-radius:999px;background:var(--sun);box-shadow:0 5px 0 #d9a21a}
+.new:active{transform:translateY(3px);box-shadow:0 2px 0 #d9a21a}
 @media (prefers-reduced-motion:reduce){.big-pick{animation:none}}
 </style>
 </head>
@@ -83,7 +86,7 @@ h1 .he{font-size:30px;margin-top:4px}
   <h1>Tap your name<span class="he">לחצו על השם שלכם</span></h1>
   <div class="names" id="names"></div>
   <p class="msg" id="names-msg"></p>
-  <div class="row"><button class="btn soft" id="not-class" type="button">Not your class? <span class="he" style="display:inline;color:inherit">לא הכיתה שלכם?</span></button><button class="btn soft" id="i-am-new" type="button" hidden>I am new <span class="he" style="display:inline;color:inherit">אני חדש</span></button></div>
+  <div class="row"><button class="btn soft" id="not-class" type="button">Not your class? <span class="he" style="display:inline;color:inherit">לא הכיתה שלכם?</span></button><button class="btn new" id="i-am-new" type="button" hidden>I am new <span class="he" style="display:inline;color:inherit">אני חדש</span></button></div>
 </section>
 
 <section class="screen" id="s-join" hidden>

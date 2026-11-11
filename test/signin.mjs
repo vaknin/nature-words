@@ -391,16 +391,35 @@ async function teacherSection() {
     await page.type('#new-name', name);
     await page.type('#new-kids', [...kids, 'Avigailalexandra'].join('\n'));
     ok(/Longer than 15 letters: Avigailalexandra/.test(await textOf(page, '#new-msg')), `${at}: a 16-letter name is caught before sending`);
-    await page.$eval('#new-kids', (t, v) => { t.value = v; t.dispatchEvent(new Event('input')); }, kids.join('\n'));
-    ok((await textOf(page, '#new-msg')) === '', `${at}: the fixed list has no warning`);
+    // Left empty: kids join themselves.
+    await page.$eval('#new-kids', t => { t.value = ''; t.dispatchEvent(new Event('input')); });
+    ok((await textOf(page, '#new-msg')) === '', `${at}: an empty list has no warning`);
     await checkLayout(page, `${at} teacher new class`);
     await page.tap('#new-make');
     await shown(page, 'v-class', 'screen');
     code = await textOf(page, '#class-code');
     const listed = (await teach('GET', '/api/classes')).data.find(c => c.code === code);
-    ok(listed && listed.name === name && listed.kids === kids.length, `${at}: the class made through the page is on the server (${code}, ${kids.length} kids)`);
-    await timed('screen', page.waitForFunction(n => document.querySelectorAll('#kids tr').length === n, { timeout: SCREEN_MS }, kids.length));
+    ok(listed && listed.name === name && listed.kids === 0, `${at}: the empty class made through the page is on the server (${code})`);
+    ok((await textOf(page, '#class-link')) === `${base}/?class=${code}`, `${at}: the home link holds ?class=${code}`);
+    ok(/closed/.test(await textOf(page, '#join-state')), `${at}: joining starts closed`);
+    await page.tap('#join-toggle');
+    await timed('screen', page.waitForFunction(() => /open, .* left/.test(document.getElementById('join-state').innerText), { timeout: SCREEN_MS }));
+    ok((await api('GET', '/api/roster/' + code)).data.join_open === true, `${at}: Open joining opens it on the server`);
+    // Two kids join by the API; both rows show waiting without a reload.
+    const tickets = {};
+    for (const n of ['Noa K.', 'Bobo']) tickets[n] = (await api('POST', '/api/join', { code, name: n })).data.ticket;
+    await timed('refresh', page.waitForFunction(() => [...document.querySelectorAll('#kids tr')].filter(r => /waiting for OK/.test(r.innerText)).length === 2, { timeout: REFRESH_WAIT_MS }));
+    ok(true, `${at}: two new names show waiting for OK without a reload`);
     await checkLayout(page, `${at} teacher class`);
+    const noaId = await pendingId(code, 'Noa K.'), boboId = await pendingId(code, 'Bobo');
+    await page.tap(`#kids button[data-approve="${noaId}"]`);
+    await timed('screen', page.waitForFunction(id => /No animal yet/.test(document.querySelector(`#kids tr[data-kid="${id}"]`)?.innerText || ''), { timeout: SCREEN_MS }, noaId));
+    ok((await api('GET', '/api/join/' + tickets['Noa K.'])).data.status === 'approved', `${at}: Approve turns Noa K. into No animal yet`);
+    await page.tap(`#kids button[data-reject="${boboId}"]`);
+    await shown(page, 'dialog', 'screen');
+    await page.tap('#dialog-yes');
+    await timed('screen', page.waitForFunction(id => !document.querySelector(`#kids tr[data-kid="${id}"]`), { timeout: SCREEN_MS }, boboId));
+    ok((await api('GET', '/api/join/' + tickets['Bobo'])).status === 404, `${at}: Reject removes Bobo and its ticket answers 404`);
 
     await page.tap('#show-proj');
     await shown(page, 'projector', 'screen');
@@ -412,7 +431,7 @@ async function teacherSection() {
     await timed('screen', page.waitForFunction(() => document.getElementById('projector').hidden, { timeout: SCREEN_MS }));
 
     // One kid picks an animal, then gets it wrong through the API.
-    const kid = (await kidsOf(code)).find(k => k.name === 'Omer');
+    const kid = (await kidsOf(code)).find(k => k.name === 'Noa K.');
     const right = 3, wrong = 4;
     ok((await api('POST', '/api/pick', { code, student: kid.id, picture: right })).status === 200, 'the kid picks an animal (API)');
     const signin = pic => api('POST', '/api/signin', { code, student: kid.id, picture: pic });
