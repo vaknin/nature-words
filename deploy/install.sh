@@ -11,6 +11,11 @@ cargo install -q --locked --path "$here/../server" --root "$HOME/.local"
 www="$HOME/.local/share/lesson-server/www/nature-words"
 mkdir -p "$www"
 install -m644 "$here/../index.html" "$www/index.html"
+# The kid sign-in (the server's root) and the teacher page (/teacher/), from server/www, beside nature-words/.
+root="$HOME/.local/share/lesson-server/www"
+mkdir -p "$root/teacher"
+install -m644 "$here/../server/www/index.html" "$root/index.html"
+install -m644 "$here/../server/www/teacher/index.html" "$root/teacher/index.html"
 mkdir -p "$HOME/.config/systemd/user"
 units="lesson-server.service lesson-tunnel.service lesson-tunnel-url.service"
 for u in $units; do install -m644 "$here/$u" "$HOME/.config/systemd/user/$u"; done

@@ -9,6 +9,7 @@
 //!   GET  /api/me, POST /api/me      the kid's own record (Authorization: Bearer TOKEN); POST /api/signout
 //! Teacher (header X-Teacher-Key, the key in ~/.config/lesson-server/teacher.key, made on first run, mode 600):
 //!   GET/POST /api/classes, DELETE /api/classes/CODE, POST /api/classes/CODE/students,
+//!   GET /api/classes/CODE/students (each kid's id, name, picked, locked, wait_s; never the picture),
 //!   POST /api/students/ID/reset (new picture), POST /api/students/ID/unlock, DELETE /api/students/ID
 //! Race boards: POST /TOPIC and GET /TOPIC/json?poll=1&since=12h, ntfy-shaped (see board.rs). Polling only.
 //! GET anything else: a file from the pages folder. Listens on 127.0.0.1 only; the world reaches it through the
@@ -267,6 +268,10 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
                 Err(_) => err(500, "could not save"),
             }
         }
+        ("GET", ["classes", code, "students"]) => match app.db().students(code, now) {
+            Some(v) => ok(v),
+            None => err(404, "no such class"),
+        },
         ("DELETE", ["classes", code]) => {
             if app.db().delete_class(code) { ok(json!({"ok": true})) } else { err(404, "no such class") }
         }
@@ -465,7 +470,9 @@ fn main() {
     let key = teacher_key(&key_path).unwrap_or_else(|e| panic!("teacher key {}: {e}", key_path.display()));
     let db = Db::open(&db_path).unwrap_or_else(|e| panic!("database {}: {e}", db_path.display()));
     let app = Arc::new(App::new(db, Store::open(Some(board_path), now_s()), key, Some(www.clone())));
-    let addr = format!("127.0.0.1:{PORT}");
+    // LESSON_PORT lets a test server run beside the live one on PORT.
+    let port: u16 = std::env::var("LESSON_PORT").ok().map(|p| p.parse().unwrap_or_else(|_| panic!("LESSON_PORT {p:?} is not a port"))).unwrap_or(PORT);
+    let addr = format!("127.0.0.1:{port}");
     let listener = TcpListener::bind(&addr).unwrap_or_else(|e| panic!("bind {addr}: {e}"));
     eprintln!("lesson-server on {addr}: records in {}, pages from {}", db_path.display(), www.display());
     run(listener, app);

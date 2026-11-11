@@ -259,3 +259,47 @@ fn real_socket_round_trip() {
     assert!(ask(post("nw-s", "hello")).starts_with("HTTP/1.1 200"));
     assert!(ask(get("nw-s", "12h")).contains("\"message\":\"hello\""));
 }
+
+#[test]
+fn teacher_sees_kids_state() {
+    let a = app();
+    let (code, noa) = class(&a);
+    try_pic(&a, &code, noa, 5, NOW, "/api/pick");
+    let path = format!("/api/classes/{code}/students");
+    // A pause shows its seconds left.
+    let mut t = NOW;
+    for _ in 0..PAUSES_S[0].0 {
+        try_pic(&a, &code, noa, 6, t, "/api/signin");
+    }
+    let r = body_of(&http(&a, &teacher("GET", &path, ""), t + 10));
+    let kid = |r: &Value, id: i64| r["students"].as_array().unwrap().iter().find(|s| s["id"] == id).unwrap().clone();
+    assert_eq!(kid(&r, noa)["wait_s"], PAUSES_S[0].1 - 10);
+    assert_eq!(kid(&r, noa)["locked"], false);
+    // Wrong tries up to the lock.
+    let mut wrong = PAUSES_S[0].0;
+    while wrong < LOCK_AFTER_WRONG {
+        t += 3600;
+        try_pic(&a, &code, noa, 6, t, "/api/signin");
+        wrong += 1;
+    }
+    let out = http(&a, &teacher("GET", &path, ""), t);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let r = body_of(&out);
+    assert!(!r.to_string().contains("picture"), "{r}");
+    assert_eq!(r["class"], "5A");
+    let names: Vec<&str> = r["students"].as_array().unwrap().iter().map(|s| s["name"].as_str().unwrap()).collect();
+    assert_eq!(names, ["Noa K.", "Omer"], "A-Z");
+    let n = kid(&r, noa);
+    assert_eq!((n["locked"].clone(), n["picked"].clone()), (json!(true), json!(true)));
+    let omer = &r["students"][1];
+    assert_eq!((omer["locked"].clone(), omer["picked"].clone(), omer["wait_s"].clone()), (json!(false), json!(false), json!(0)));
+    // The teacher key is needed, and an unknown code is 404.
+    assert!(http(&a, &req("GET", &path, "", ""), t).starts_with("HTTP/1.1 401"));
+    let wrong_code = if code == "000000" { "000001" } else { "000000" };
+    assert!(http(&a, &teacher("GET", &format!("/api/classes/{wrong_code}/students"), ""), t).starts_with("HTTP/1.1 404"));
+    // Unlocked, it reads open again.
+    assert!(http(&a, &teacher("POST", &format!("/api/students/{noa}/unlock"), ""), t).starts_with("HTTP/1.1 200"));
+    let r = body_of(&http(&a, &teacher("GET", &path, ""), t));
+    assert_eq!(kid(&r, noa)["locked"], false);
+    assert_eq!(kid(&r, noa)["wait_s"], 0);
+}

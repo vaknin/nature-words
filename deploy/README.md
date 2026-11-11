@@ -3,6 +3,17 @@
 `sh deploy/install.sh` builds and installs it; run it again after any change. `sh deploy/signin-proof.sh URL`
 signs a kid in through the public address end to end (on a throwaway class it deletes after).
 
+## Pages
+
+- `/` the kid sign-in (design A): class code, tap your name, tap your secret animal (from `server/www`).
+- `/teacher/` the teacher page: classes, new class, the code on the projector, each kid's Locked or Waiting badge
+  with Unlock and New animal. It asks for the teacher key once.
+- `/nature-words/` the lesson.
+
+Test both pages in a real browser against the live address (throwaway classes, deleted after):
+`cd test && npm ci && node signin.mjs all "$(cat ~/.local/state/lesson-server/url)"`
+(or `node signin.mjs all --local ../server/target/debug/lesson-server` for a local throwaway server).
+
 ## What runs (user systemd units)
 
 | Unit | What | Port |

@@ -138,6 +138,23 @@ impl Db {
         Some(json!({"class": name, "grid": GRID_SIZE, "students": kids}))
     }
 
+    /// Teacher: the class's name and, per kid A-Z, id, name, picked, locked and wait_s (seconds left of a pause,
+    /// 0 when none). Never the picture.
+    pub fn students(&self, code: &str, now: u64) -> Option<Value> {
+        let (id, name): (i64, String) = self.conn.query_row("SELECT id, name FROM classes WHERE code=?1", [code], |r| Ok((r.get(0)?, r.get(1)?))).optional().ok()??;
+        let mut st = self.conn.prepare("SELECT id, name, picture IS NOT NULL, locked, paused_until FROM students WHERE class_id=?1 ORDER BY name COLLATE NOCASE").ok()?;
+        let kids: Vec<Value> = st
+            .query_map([id], |r| {
+                let until = r.get::<_, i64>(4)?.max(0) as u64;
+                Ok(json!({"id": r.get::<_, i64>(0)?, "name": r.get::<_, String>(1)?, "picked": r.get::<_, bool>(2)?,
+                          "locked": r.get::<_, bool>(3)?, "wait_s": until.saturating_sub(now)}))
+            })
+            .ok()?
+            .filter_map(Result::ok)
+            .collect();
+        Some(json!({"code": code, "class": name, "students": kids}))
+    }
+
     /// The kid's id, only when they are in the class with this code.
     fn kid_in(&self, code: &str, kid: i64) -> Option<i64> {
         self.conn
