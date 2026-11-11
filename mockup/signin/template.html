@@ -84,6 +84,49 @@ footer{max-width:1200px;margin:32px auto;padding:0 24px 40px;font-size:13px;opac
 .note-card .ic.big-ic{width:48px;height:48px;color:var(--a1)}
 .note-card p{margin:4px 0}
 
+/* ---------- Live demo: a taken name pops out (research/kid-ux.md, Taken name) ---------- */
+.names{list-style:none;padding:0;margin:12px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.names li{position:relative}
+.name{width:100%;padding:12px 10px;border:var(--line);border-radius:calc(var(--r) * .6);background:var(--bg);font-weight:500;font-size:18px;box-shadow:var(--shadow)}
+.name:hover{background:var(--a3);color:#1d1b2e}
+.name:disabled{cursor:default}
+/* The pop: 250 ms, M3 medium1 and NN/g's figure for leaving; emphasized-accelerate, cubic-bezier(.3,0,.8,.15). */
+.names li.pop{animation:pop-out 250ms cubic-bezier(.3,0,.8,.15) forwards;pointer-events:none;z-index:2}
+.names li.pop .name{animation:pop-squash 250ms cubic-bezier(.3,0,.8,.15) forwards}
+.names li.pop::before{content:"POP!";position:absolute;inset:-18px -6px;display:grid;place-items:center;font:700 26px/1 var(--hf),sans-serif;color:#1d1b2e;background:var(--a3);
+  clip-path:polygon(50% 0,61% 30%,95% 12%,74% 42%,100% 55%,70% 64%,82% 98%,52% 74%,24% 100%,30% 66%,0 60%,26% 44%,8% 10%,40% 28%);animation:pop-burst 250ms cubic-bezier(.3,0,.8,.15) forwards}
+@keyframes pop-out{0%,55%{opacity:1}100%{opacity:0}}
+@keyframes pop-squash{0%{transform:scale(1)}30%{transform:scale(1.15,.88)}100%{transform:scale(0) rotate(-10deg)}}
+@keyframes pop-burst{0%{transform:scale(.2) rotate(-20deg);opacity:0}35%{transform:scale(1.05) rotate(4deg);opacity:1}100%{transform:scale(1.25) rotate(8deg);opacity:1}}
+/* ---------- Live demo: make your secret buddy (research/kid-ux.md, Secret picture) ---------- */
+.prompt{display:flex;align-items:center;gap:10px;margin:8px 0 12px;font-size:18px}
+.prompt [lang=he]{margin-left:auto;opacity:.8}
+.stepno{font-size:13px;padding:2px 8px;border-radius:999px;background:var(--ink);color:var(--bg)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tile{display:grid;justify-items:center;gap:2px;padding:8px 4px;border:var(--line);border-radius:calc(var(--r) * .6);background:var(--bg);font-size:12px;animation:tile-in 300ms cubic-bezier(.05,.7,.1,1) backwards;animation-delay:calc(var(--i,0) * 18ms)}
+.tile .ic{width:40px;height:40px;color:var(--ink)}
+.tile:active{transform:scale(.94)}
+@keyframes tile-in{from{transform:scale(.4);opacity:0}}
+.paint{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.buddy{width:150px;height:150px;color:var(--ink);transition:color .15s}
+.buddy.bounce{animation:squash 450ms cubic-bezier(.2,0,0,1)}
+@keyframes squash{0%{transform:none}25%{transform:scale(1.25,.75) translateY(20px)}50%{transform:scale(.85,1.2) translateY(-24px)}75%{transform:scale(1.06,.95)}100%{transform:none}}
+.colours{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.colour{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:8px 10px;border:var(--line);border-radius:calc(var(--r) * .6);background:var(--bg);font-weight:500;text-align:left}
+.colour i{width:26px;height:26px;border-radius:50%;background:var(--c);border:2px solid #0003}
+.reveal{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center;min-height:300px;animation:tile-in 350ms cubic-bezier(.05,.7,.1,1)}
+.reveal>.ic{width:120px;height:120px;color:var(--a1)}
+.say{font-size:24px;margin:0 0 6px}
+.say b{font-size:34px}
+.go{margin-top:10px;display:inline-flex;gap:8px;align-items:center;padding:10px 18px;border-radius:999px;border:var(--line);background:var(--a1);color:#fff;font-weight:700;font-size:16px;box-shadow:var(--shadow)}
+.miss{color:var(--a1)}
+[data-lang=C] .tile .ic,[data-lang=C] .buddy{color:var(--a2)}
+[data-lang=C] .name:hover{color:#16122e}
+@media (prefers-reduced-motion: reduce){
+  .names li.pop,.names li.pop .name,.names li.pop::before,.tile,.buddy.bounce,.reveal{animation:none!important}
+  html{scroll-behavior:auto}
+}
+
 /* ---------- A: Sticker Pop ---------- */
 [data-lang=A]{--bg:#fff6ea;--ink:#2a1f4d;--card:#fff;--a1:#ff5d5d;--a2:#7a4dff;--a3:#ffc93c;--a4:#16b8a6;--line:3px solid #2a1f4d;--shadow:5px 5px 0 #2a1f4d;--r:20px;--hf:Fredoka;--bf:Rubik}
 [data-lang=A] h2{font-weight:700}
@@ -173,8 +216,20 @@ footer{max-width:1200px;margin:32px auto;padding:0 24px 40px;font-size:13px;opac
     <div class="frame"><div class="screen big">{{icon A check}}<span class="hd">You're in, Noa!</span><span lang="he" dir="rtl">נכנסת!</span></div><div class="cap"><span class="num">4</span><b>Happy confirm</b>, then the lesson</div></div>
   </div>
   <div class="row r2">
-    <div class="card demo-card"><h3>{{icon A user}}Try it: tap a name</h3><div data-demo="names"></div></div>
-    <div class="card demo-card"><h3>{{icon A sparkle}}Try it: make a secret buddy</h3><div data-demo="pick"></div></div>
+    <div class="card demo-card"><h3>{{icon A user}}Try it: tap a name</h3><div data-demo="names"><p class="small">Pretend a kid on another laptop just took a name: tap it. It stops working at once and pops out of every screen.</p><ul class="names">
+{{names}}
+</ul><button type="button" class="reset" data-reset>{{icon A refresh}}Bring them back</button></div></div>
+    <div class="card demo-card"><h3>{{icon A sparkle}}Try it: make a secret buddy</h3><div data-demo="pick">
+<p class="prompt"><span class="stepno" data-stepno>1/4</span><b data-say>Pick your buddy</b><span lang="he" dir="rtl" data-say-he>בחרו חבר</span></p>
+<div class="tiles" data-tiles>
+{{tiles A}}
+</div>
+<div class="paint" data-paint hidden><svg class="buddy" aria-hidden="true"><use href=""/></svg><div class="colours">
+{{colours}}
+</div></div>
+<div class="reveal" data-reveal hidden><svg class="buddy" aria-hidden="true"><use href=""/></svg><div><p class="hd say">Your secret buddy:<br><b data-buddy-name></b></p><p>Shh, keep it secret. <span lang="he" dir="rtl">שקט, זה סוד!</span></p><button type="button" class="go" data-again>{{icon A refresh}}Do it once more</button></div></div>
+<div class="reveal" data-done hidden>{{icon A check}}<div><p class="hd say">Saved!</p><p>Next lesson: tap your name, then your buddy. <span lang="he" dir="rtl">נשמר!</span></p><button type="button" class="go" data-restart>{{icon A play}}Start over</button></div></div>
+</div></div>
   </div>
   <div class="row r2">
     <div class="card note-card" data-guest>{{icon A play}}<div><h3>Guests can play</h3><p>No name? Tap "Play as guest" and do every stage of the lesson.</p><p class="small">Only signed-in kids go on the leaderboard. A guest sees their own score and one calm line: "Sign in next lesson to join the board."</p></div></div>
@@ -213,8 +268,20 @@ footer{max-width:1200px;margin:32px auto;padding:0 24px 40px;font-size:13px;opac
     <div class="frame"><div class="screen big">{{icon B check}}<span class="hd">You're in, Noa!</span><span lang="he" dir="rtl">נכנסת!</span></div><div class="cap"><span class="num">4</span><b>Happy confirm</b>, then the lesson</div></div>
   </div>
   <div class="row r2">
-    <div class="card demo-card"><h3>{{icon B user}}Try it: tap a name</h3><div data-demo="names"></div></div>
-    <div class="card demo-card"><h3>{{icon B sparkle}}Try it: make a secret buddy</h3><div data-demo="pick"></div></div>
+    <div class="card demo-card"><h3>{{icon B user}}Try it: tap a name</h3><div data-demo="names"><p class="small">Pretend a kid on another laptop just took a name: tap it. It stops working at once and pops out of every screen.</p><ul class="names">
+{{names}}
+</ul><button type="button" class="reset" data-reset>{{icon B refresh}}Bring them back</button></div></div>
+    <div class="card demo-card"><h3>{{icon B sparkle}}Try it: make a secret buddy</h3><div data-demo="pick">
+<p class="prompt"><span class="stepno" data-stepno>1/4</span><b data-say>Pick your buddy</b><span lang="he" dir="rtl" data-say-he>בחרו חבר</span></p>
+<div class="tiles" data-tiles>
+{{tiles B}}
+</div>
+<div class="paint" data-paint hidden><svg class="buddy" aria-hidden="true"><use href=""/></svg><div class="colours">
+{{colours}}
+</div></div>
+<div class="reveal" data-reveal hidden><svg class="buddy" aria-hidden="true"><use href=""/></svg><div><p class="hd say">Your secret buddy:<br><b data-buddy-name></b></p><p>Shh, keep it secret. <span lang="he" dir="rtl">שקט, זה סוד!</span></p><button type="button" class="go" data-again>{{icon B refresh}}Do it once more</button></div></div>
+<div class="reveal" data-done hidden>{{icon B check}}<div><p class="hd say">Saved!</p><p>Next lesson: tap your name, then your buddy. <span lang="he" dir="rtl">נשמר!</span></p><button type="button" class="go" data-restart>{{icon B play}}Start over</button></div></div>
+</div></div>
   </div>
   <div class="row r2">
     <div class="card note-card" data-guest>{{icon B play}}<div><h3>Guests can play</h3><p>No name? Tap "Play as guest" and do every stage of the lesson.</p><p class="small">Only signed-in kids go on the leaderboard. A guest sees their own score and one calm line: "Sign in next lesson to join the board."</p></div></div>
@@ -253,8 +320,20 @@ footer{max-width:1200px;margin:32px auto;padding:0 24px 40px;font-size:13px;opac
     <div class="frame"><div class="screen big">{{icon C check}}<span class="hd" style="font-size:24px">You're in, Noa!</span><span lang="he" dir="rtl">נכנסת!</span></div><div class="cap"><span class="num">4</span><b>Happy confirm</b>, then the lesson</div></div>
   </div>
   <div class="row r2">
-    <div class="card demo-card"><h3>{{icon C user}}Try it: tap a name</h3><div data-demo="names"></div></div>
-    <div class="card demo-card"><h3>{{icon C sparkle}}Try it: make a secret buddy</h3><div data-demo="pick"></div></div>
+    <div class="card demo-card"><h3>{{icon C user}}Try it: tap a name</h3><div data-demo="names"><p class="small">Pretend a kid on another laptop just took a name: tap it. It stops working at once and pops out of every screen.</p><ul class="names">
+{{names}}
+</ul><button type="button" class="reset" data-reset>{{icon C refresh}}Bring them back</button></div></div>
+    <div class="card demo-card"><h3>{{icon C sparkle}}Try it: make a secret buddy</h3><div data-demo="pick">
+<p class="prompt"><span class="stepno" data-stepno>1/4</span><b data-say>Pick your buddy</b><span lang="he" dir="rtl" data-say-he>בחרו חבר</span></p>
+<div class="tiles" data-tiles>
+{{tiles C}}
+</div>
+<div class="paint" data-paint hidden><svg class="buddy" aria-hidden="true"><use href=""/></svg><div class="colours">
+{{colours}}
+</div></div>
+<div class="reveal" data-reveal hidden><svg class="buddy" aria-hidden="true"><use href=""/></svg><div><p class="hd say">Your secret buddy:<br><b data-buddy-name></b></p><p>Shh, keep it secret. <span lang="he" dir="rtl">שקט, זה סוד!</span></p><button type="button" class="go" data-again>{{icon C refresh}}Do it once more</button></div></div>
+<div class="reveal" data-done hidden>{{icon C check}}<div><p class="hd say">Saved!</p><p>Next lesson: tap your name, then your buddy. <span lang="he" dir="rtl">נשמר!</span></p><button type="button" class="go" data-restart>{{icon C play}}Start over</button></div></div>
+</div></div>
   </div>
   <div class="row r2">
     <div class="card note-card" data-guest>{{icon C play}}<div><h3>Guests can play</h3><p>No name? Tap "Play as guest" and do every stage of the lesson.</p><p class="small">Only signed-in kids go on the leaderboard. A guest sees their own score and one calm line: "Sign in next lesson to join the board."</p></div></div>
@@ -268,6 +347,90 @@ footer{max-width:1200px;margin:32px auto;padding:0 24px 40px;font-size:13px;opac
 </footer>
 
 <script>
+const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+const rand = n => crypto.getRandomValues(new Uint32Array(1))[0] % n;
+
+// Taken name: disabled on the first tap, pops for 250 ms, removed on the pop's own animationend
+// (the POP! burst and the button's squash fire their own events: ignored), then the list closes up in 200 ms (M3 short4).
+// With reduced motion it is removed in the same tap, nothing moves.
+function closeUp(list, li, animate) {
+  const others = [...list.children].filter(x => x !== li);
+  const before = new Map(others.map(x => [x, x.getBoundingClientRect()]));
+  li.remove();
+  if (!animate) return;
+  for (const x of others) {
+    const a = before.get(x), b = x.getBoundingClientRect(), dx = a.left - b.left, dy = a.top - b.top;
+    if (dx || dy) x.animate([{ transform: `translate(${dx}px,${dy}px)` }, { transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.2,0,0,1)' });
+  }
+}
+document.querySelectorAll('[data-demo=names]').forEach(box => {
+  const list = box.querySelector('.names'), start = list.innerHTML;
+  list.addEventListener('click', e => {
+    const btn = e.target.closest('[data-name]');
+    if (!btn || btn.disabled) return;
+    btn.disabled = true;
+    const li = btn.closest('li');
+    if (reduce.matches) { closeUp(list, li, false); return; }
+    let gone = false;
+    const leave = () => { if (!gone) { gone = true; closeUp(list, li, true); } };
+    li.addEventListener('animationend', ev => { if (ev.target === li && !ev.pseudoElement) leave(); });
+    li.classList.add('pop');
+    setTimeout(leave, 600); // only if the browser never ends the pop (a hidden tab)
+  });
+  box.querySelector('[data-reset]').addEventListener('click', () => { list.innerHTML = start; });
+});
+
+// Secret buddy: pick an animal, paint it one of 6 colours, see it, then do it once more from a reshuffled grid.
+document.querySelectorAll('[data-demo=pick]').forEach(box => {
+  const set = box.closest('[data-lang]').dataset.lang;
+  const $ = s => box.querySelector(s);
+  const tiles = $('[data-tiles]'), views = { tiles, paint: $('[data-paint]'), reveal: $('[data-reveal]'), done: $('[data-done]') };
+  let phase = 'first', pic = null, secret = null;
+  const show = v => { for (const [k, el] of Object.entries(views)) el.hidden = k !== v; };
+  const say = (n, en, he, miss) => { $('[data-stepno]').textContent = n + '/4'; const s = $('[data-say]'); s.textContent = en; s.classList.toggle('miss', !!miss); $('[data-say-he]').textContent = he; };
+  const shuffle = () => {
+    const t = [...tiles.children];
+    for (let i = t.length - 1; i > 0; i--) { const j = rand(i + 1); [t[i], t[j]] = [t[j], t[i]]; }
+    t.forEach((x, i) => { x.style.setProperty('--i', i); x.style.animation = 'none'; tiles.append(x); });
+    tiles.offsetWidth; t.forEach(x => { x.style.animation = ''; });
+  };
+  const pickView = miss => {
+    shuffle(); show('tiles');
+    if (miss) say(4, 'Not quite. Pick your buddy again', 'לא בדיוק, נסו שוב', true);
+    else if (phase === 'again') say(4, 'Once more: pick your buddy', 'עוד פעם: בחרו חבר');
+    else say(1, 'Pick your buddy', 'בחרו חבר');
+  };
+  tiles.addEventListener('click', e => {
+    const t = e.target.closest('[data-pic]'); if (!t) return;
+    pic = t;
+    const b = views.paint.querySelector('.buddy'); b.style.color = ''; b.classList.remove('bounce');
+    b.querySelector('use').setAttribute('href', `#${set}-${t.dataset.pic}`);
+    show('paint');
+    if (phase === 'again') say(4, 'And its colour', 'ואיזה צבע'); else say(2, 'Paint it', 'צבעו אותו');
+  });
+  views.paint.addEventListener('click', e => {
+    const c = e.target.closest('[data-colour]'); if (!c) return;
+    const b = views.paint.querySelector('.buddy');
+    b.style.color = c.style.getPropertyValue('--c');
+    const next = () => {
+      if (phase === 'first') {
+        secret = { pic: pic.dataset.pic, colour: c.dataset.colour };
+        const r = views.reveal.querySelector('.buddy'); r.style.color = b.style.color; r.querySelector('use').setAttribute('href', `#${set}-${secret.pic}`);
+        $('[data-buddy-name]').textContent = c.dataset.en + ' ' + pic.dataset.en;
+        show('reveal'); say(3, 'Ta-da!', 'הנה הוא!');
+      } else if (pic.dataset.pic === secret.pic && c.dataset.colour === secret.colour) {
+        show('done'); say(4, 'You remembered it', 'זכרתם!');
+      } else pickView(true);
+    };
+    if (reduce.matches) return next();
+    b.classList.remove('bounce'); b.offsetWidth; b.classList.add('bounce');
+    b.addEventListener('animationend', next, { once: true });
+  });
+  $('[data-again]').addEventListener('click', () => { phase = 'again'; pickView(); });
+  $('[data-restart]').addEventListener('click', () => { phase = 'first'; secret = null; pickView(); });
+  pickView();
+});
+
 // Full screen: the button toggles it; F11 works too (the hint says so).
 document.getElementById('fs').addEventListener('click', () => {
   if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
