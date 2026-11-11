@@ -548,7 +548,9 @@ document.querySelectorAll('[data-demo=names]').forEach(box => {
     const leave = () => { if (!gone) { gone = true; closeUp(list, li, true); } };
     li.addEventListener('animationend', ev => { if (ev.target === li && !ev.pseudoElement) leave(); });
     li.classList.add('pop');
-    setTimeout(leave, 600); // only if the browser never ends the pop (a hidden tab)
+    // Backstop only if the browser never ends the pop (a hidden tab): headless runs measured the end 271-347 ms after
+    // the tap (test/mockup.mjs), so 600 ms never cuts a pop short.
+    setTimeout(leave, 600);
   });
   box.querySelector('[data-reset]').addEventListener('click', () => { list.innerHTML = start; });
 });
