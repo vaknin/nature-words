@@ -15,7 +15,8 @@ install -m644 "$here/../index.html" "$www/index.html"
 root="$HOME/.local/share/lesson-server/www"
 mkdir -p "$root/teacher"
 install -m644 "$here/../server/www/index.html" "$root/index.html"
-install -m644 "$here/../server/www/teacher/index.html" "$root/teacher/index.html"
+# The whole teacher app (Kitah): the page, its manifest, service worker and icons.
+install -m644 "$here/../server/www/teacher/"* "$root/teacher/"
 mkdir -p "$HOME/.config/systemd/user"
 units="lesson-server.service lesson-tunnel.service lesson-tunnel-url.service"
 for u in $units; do install -m644 "$here/$u" "$HOME/.config/systemd/user/$u"; done

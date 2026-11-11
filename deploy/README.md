@@ -10,6 +10,15 @@ signs a kid in through the public address end to end (on a throwaway class it de
   with Unlock and New animal. It asks for the teacher key once.
 - `/nature-words/` the lesson.
 
+### The Kitah app (the teacher page, installed)
+
+`/teacher/` is also an installable web app named Kitah. On Android Chrome open `/teacher/`, open the menu, tap
+**Install app**; it then opens standalone (no address bar) from its own green K icon. Its service worker serves the
+teacher page network-first (a cached copy when offline) and never caches or answers `/api`, so classes and kids are
+always live. Prove it installable with Chrome's own check (headless, a phone-size window):
+`cd test && npm ci && node signin.mjs app "$(cat ~/.local/state/lesson-server/url)"`
+(or `node signin.mjs app --local ../server/target/debug/lesson-server`).
+
 Test both pages in a real browser against the live address (throwaway classes, deleted after):
 `cd test && npm ci && node signin.mjs all "$(cat ~/.local/state/lesson-server/url)"`
 (or `node signin.mjs all --local ../server/target/debug/lesson-server` for a local throwaway server).

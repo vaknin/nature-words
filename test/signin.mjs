@@ -1,5 +1,7 @@
 // Sign-in test: the kid sign-in page (the server's root) and the teacher page (/teacher/), in a real browser.
-// Run: cd test && npm ci && node signin.mjs kid|teacher|all (--local BIN | URL)
+// The app section checks the teacher page is an installable app (Kitah) by Chrome's own installability check;
+// all runs kid and teacher, app runs on its own.
+// Run: cd test && npm ci && node signin.mjs kid|teacher|app|all (--local BIN | URL)
 //   --local BIN  starts BIN on a free port with a throwaway database, board log, teacher key and pages from server/www
 //   URL          uses that server (the live one: the address in ~/.local/state/lesson-server/url) and the teacher key
 //                in ~/.config/lesson-server/teacher.key
@@ -36,8 +38,14 @@ const LOAD_MS = 15000;
 // The teacher page refreshes its kids every 5 s (its REFRESH_MS); a badge shows within one refresh plus one answer.
 // Slowest seen locally 4.96 s (one refresh, as expected); 15 s is three refreshes.
 const REFRESH_WAIT_MS = 15000;
+// The teacher app's service worker, from page load to installed, active and in control of the page: slowest seen
+// 28 ms locally (3 runs). Through the tunnel it is one more small fetch (sw.js, under 2 KB), like a screen change
+// (slowest live 2.46 s above), so it gets the same 8 s, 3 times that.
+const SW_MS = SCREEN_MS;
+// His phone: 412x915 is the common Android phone viewport (Chrome DevTools' Galaxy and Pixel presets), touch on.
+const PHONE = { width: 412, height: 915, isMobile: true, hasTouch: true };
 const section = process.argv[2];
-if (!['kid', 'teacher', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|all (--local BIN | URL)'); process.exit(2); }
+if (!['kid', 'teacher', 'app', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|app|all (--local BIN | URL)'); process.exit(2); }
 let base, key, child = null, tmp = null;
 let failures = 0;
 const fail = m => { failures++; console.log('  FAIL', m); };
@@ -95,7 +103,7 @@ async function browserPage(vp, errors) {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage'] });
   const page = await browser.newPage();
   // Touch emulated: the school laptops have touch screens, so every press here is a tap.
-  await page.setViewport({ ...vp, hasTouch: true });
+  await page.setViewport({ hasTouch: true, ...vp });
   page.on('pageerror', e => errors.push(e.message));
   page.on('console', m => { if (m.type() === 'error' && !/Failed to load resource/.test(m.text())) errors.push(m.text()); });
   return { browser, page };
@@ -345,6 +353,51 @@ async function teacherSection() {
   }
 }
 
+// The teacher page as an installable app (Kitah), on a phone: Chrome's own install check through the DevTools protocol
+// (what Lighthouse's PWA audit wrapped before Lighthouse 12 dropped it), and the service worker leaving /api alone.
+async function appSection() {
+  console.log('\n== teacher app (Kitah)');
+  const at = `${PHONE.width}x${PHONE.height} phone`;
+  const errors = [];
+  const { browser, page } = await browserPage(PHONE, errors);
+  try {
+    await timed('page load', page.goto(base + '/teacher/', { waitUntil: 'load', timeout: LOAD_MS }));
+    await timed('service worker', page.waitForFunction(() => navigator.serviceWorker.ready.then(() => true), { timeout: SW_MS }));
+    // The first load ran before the worker existed; clients.claim() takes it over, a reload makes sure.
+    if (!(await page.evaluate(() => !!navigator.serviceWorker.controller))) await timed('page load', page.reload({ waitUntil: 'load', timeout: LOAD_MS }));
+    await timed('service worker', page.waitForFunction(() => !!navigator.serviceWorker.controller, { timeout: SW_MS }));
+    ok(await page.evaluate(() => navigator.serviceWorker.controller.scriptURL.endsWith('/teacher/sw.js')), `${at}: the teacher page is controlled by its service worker`);
+
+    const cdp = await page.createCDPSession();
+    const inst = await cdp.send('Page.getInstallabilityErrors');
+    const errs = (inst.installabilityErrors || []).map(e => e.errorId + (e.errorArguments || []).map(a => ` ${a.name}=${a.value}`).join(''));
+    ok(errs.length === 0, `${at}: Chrome's installability check finds no errors${errs.length ? ': ' + errs.join(', ') : ''}`);
+    const man = await cdp.send('Page.getAppManifest');
+    let parsed = {};
+    try { parsed = JSON.parse(man.data || '{}'); } catch {}
+    ok(man.url === base + '/teacher/manifest.webmanifest' && (man.errors || []).length === 0, `${at}: the manifest loads with no errors${(man.errors || []).length ? ': ' + man.errors.map(e => e.message).join(', ') : ''}`);
+    ok(parsed.name === 'Kitah' && parsed.display === 'standalone', `${at}: the manifest names the app Kitah and opens it standalone`);
+
+    // The page itself came through the worker (proof the check below can see it), /api never does.
+    const seen = {};
+    page.on('response', r => { const u = new URL(r.url()); seen[u.pathname] = r.fromServiceWorker(); });
+    await timed('page load', page.reload({ waitUntil: 'load', timeout: LOAD_MS }));
+    ok(seen['/teacher/'] === true, `${at}: the page itself is answered by the service worker (network-first)`);
+    const [api] = await timed('screen', Promise.all([
+      page.waitForResponse(r => new URL(r.url()).pathname === '/api/classes', { timeout: SCREEN_MS }),
+      page.evaluate(() => fetch('/api/classes').then(r => r.status)),
+    ]));
+    ok(api.fromServiceWorker() === false, `${at}: /api/classes went to the server, not the service worker (status ${api.status()})`);
+    ok(errors.length === 0, `${at}: no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+  } catch (e) {
+    fail(`app ${at}: ${e.message.split('\n')[0]}`);
+    mkdirSync(path.join(here, 'shots'), { recursive: true });
+    await page.screenshot({ path: path.join(here, 'shots', `signin-app-${at.replace(' ', '-')}.png`) }).catch(() => {});
+  } finally {
+    await browser.close();
+  }
+}
+
 // ---------- Main ----------
 try {
   const local = process.argv.indexOf('--local');
@@ -357,6 +410,7 @@ try {
   console.log('server', base);
   if (section === 'kid' || section === 'all') await kidSection();
   if (section === 'teacher' || section === 'all') await teacherSection();
+  if (section === 'app') await appSection();
 } catch (e) {
   fail(e.message);
 } finally {

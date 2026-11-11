@@ -1,0 +1,16 @@
+{
+  "name": "Kitah",
+  "short_name": "Kitah",
+  "description": "The teacher's classes, sign-in and projector remote.",
+  "id": "/teacher/",
+  "start_url": "/teacher/",
+  "scope": "/teacher/",
+  "display": "standalone",
+  "theme_color": "#1f9d63",
+  "background_color": "#f4f8fb",
+  "icons": [
+    { "src": "/teacher/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/teacher/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/teacher/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

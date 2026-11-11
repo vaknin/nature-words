@@ -416,3 +416,57 @@ fn remote_long_poll_wakes() {
     assert!(got.duration_since(sent) < Duration::from_secs(1), "woke after {:?}", got.duration_since(sent));
     assert_eq!(body_of(&out)["cmds"], json!([{"cmd": "next", "seq": 1}]));
 }
+
+// ---------- The installable teacher app (Kitah) ----------
+
+#[test]
+fn pwa_content_types() {
+    let d = std::env::temp_dir().join(format!("lesson-pwa-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&d);
+    fs::create_dir_all(d.join("teacher")).unwrap();
+    fs::write(d.join("teacher/manifest.webmanifest"), "{}").unwrap();
+    fs::write(d.join("teacher/sw.js"), "//").unwrap();
+    fs::write(d.join("teacher/icon-192.png"), "png").unwrap();
+    let a = App::new(Db::memory(), Store::open(None, NOW), KEY.into(), Some(d.clone()));
+    for (p, t) in [("manifest.webmanifest", "application/manifest+json"), ("sw.js", "text/javascript"), ("icon-192.png", "image/png")] {
+        let out = http(&a, &format!("GET /teacher/{p} HTTP/1.1\r\n\r\n"), NOW);
+        assert!(out.starts_with("HTTP/1.1 200") && out.contains(&format!("Content-Type: {t}")), "{p}: {out}");
+    }
+    let _ = fs::remove_dir_all(&d);
+}
+
+/// A PNG's width and height from its IHDR chunk: the 8-byte signature, the chunk's length and "IHDR", then two
+/// big-endian u32s (PNG spec, section 11.2.2).
+fn png_size(b: &[u8]) -> (u32, u32) {
+    assert!(b.len() >= 24 && b[..8] == *b"\x89PNG\r\n\x1a\n" && &b[12..16] == b"IHDR", "not a PNG");
+    let be = |i: usize| u32::from_be_bytes([b[i], b[i + 1], b[i + 2], b[i + 3]]);
+    (be(16), be(20))
+}
+
+#[test]
+fn pwa_manifest_installable() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("www/teacher");
+    let m: Value = serde_json::from_str(&fs::read_to_string(dir.join("manifest.webmanifest")).unwrap()).unwrap();
+    assert_eq!(m["name"], "Kitah");
+    assert_eq!(m["display"], "standalone");
+    let (start, scope) = (m["start_url"].as_str().unwrap(), m["scope"].as_str().unwrap());
+    assert!(start.starts_with(scope), "start_url {start} outside scope {scope}");
+    let icons = m["icons"].as_array().unwrap();
+    // Chrome's install criteria (web.dev/articles/install-criteria): a 192 px and a 512 px icon.
+    for need in ["192x192", "512x512"] {
+        assert!(icons.iter().any(|i| i["sizes"] == need && i["purpose"].as_str().unwrap_or("any").split(' ').any(|p| p == "any")), "no {need} icon for any purpose");
+    }
+    for i in icons {
+        let src = i["src"].as_str().unwrap();
+        let file = dir.join(src.strip_prefix(scope).unwrap_or_else(|| panic!("{src} is not under {scope}")));
+        let (w, h) = png_size(&fs::read(&file).unwrap_or_else(|e| panic!("{src}: {e}")));
+        assert_eq!(format!("{w}x{h}"), i["sizes"].as_str().unwrap(), "{src}");
+    }
+}
+
+#[test]
+fn pwa_sw_skips_api() {
+    let sw = fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("www/teacher/sw.js")).unwrap();
+    assert!(sw.contains("url.pathname.startsWith('/api/')") && sw.contains("url.pathname === '/api'"), "sw.js must leave /api to the network");
+    assert!(sw.contains("!url.pathname.startsWith(SCOPE)") && sw.contains("const SCOPE = '/teacher/'"), "sw.js must leave pages outside /teacher/ alone");
+}

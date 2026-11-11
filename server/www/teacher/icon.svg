@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Kitah: the teacher page's own colours (forest #1f9d63, background #f4f8fb). The K stays inside the centre circle
+       of radius 40% (the maskable safe zone), so the same drawing serves the maskable icon on a full green square
+       (its farthest point is 176 px from the centre of 512, the zone's edge 205 px). The PNGs come from this file:
+       headless Chromium draws it at 512 px (ImageMagick's own SVG reader drops the strokes), ImageMagick scales it
+       to 192 px and lays the maskable one on full green. -->
+  <rect width="512" height="512" rx="112" fill="#1f9d63"/>
+  <path d="M184 140L184 372" fill="none" stroke="#f4f8fb" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M330 140L190 262L334 372" fill="none" stroke="#f4f8fb" stroke-width="56" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -358,6 +358,8 @@ fn ctype(p: &Path) -> &'static str {
         "css" => "text/css",
         "js" | "mjs" => "text/javascript",
         "json" => "application/json",
+        // The installable teacher app's manifest, in the type the web app manifest spec registers.
+        "webmanifest" => "application/manifest+json",
         "svg" => "image/svg+xml",
         "png" => "image/png",
         "jpg" | "jpeg" => "image/jpeg",
