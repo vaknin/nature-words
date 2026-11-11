@@ -979,3 +979,38 @@ fn kahoot_race_uses_approved_name() {
     assert!(http(&a, &post("nw-k", r#"{"reset":1,"t":1}"#), NOW).starts_with("HTTP/1.1 200"));
     assert!(http(&a, &race(&token, "bad topic!", 2, 5), NOW).starts_with("HTTP/1.1 400"));
 }
+
+#[test]
+fn kahoot_duplicate_refused() {
+    let a = app();
+    let code = empty_class(&a);
+    // A name waiting for the teacher: the same name again (any case, with or without the dot) is taken.
+    assert!(join(&a, &code, "Noa B.", NOW).starts_with("HTTP/1.1 200"));
+    for again in ["Noa B.", "noa b", "NOA B"] {
+        let out = join(&a, &code, again, NOW);
+        assert!(out.starts_with("HTTP/1.1 409"), "{again} while pending: {out}");
+    }
+    // Approved: still taken.
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    let id = r["students"][0]["id"].as_i64().unwrap();
+    assert!(http(&a, &teacher("POST", &format!("/api/students/{id}/approve"), ""), NOW).starts_with("HTTP/1.1 200"));
+    let out = join(&a, &code, "Noa B.", NOW);
+    assert!(out.starts_with("HTTP/1.1 409"), "after approval: {out}");
+    // Only one Noa B. in the class, and another class may have its own.
+    assert_eq!(roster_names(&a, &code, NOW), ["Noa B."]);
+    let other = empty_class(&a);
+    assert!(join(&a, &other, "Noa B.", NOW).starts_with("HTTP/1.1 200"));
+}
+
+#[test]
+fn race_anonymous_entry_refused() {
+    let a = app();
+    // A board line with a free-typed name, posted straight to the open board, is refused and never shown.
+    for body in [r#"{"n":"Anyone","s":12,"p":1,"t":1}"#, r#"{"n":"","s":1}"#, r#"{"s":3,"n":"X"}"#] {
+        let out = http(&a, &post("nw-anon", body), NOW);
+        assert!(out.starts_with("HTTP/1.1 403"), "{body}: {out}");
+    }
+    assert!(!http(&a, &get("nw-anon", "12h"), NOW).contains("Anyone"));
+    // The teacher's reset marker still goes through.
+    assert!(http(&a, &post("nw-anon", r#"{"reset":1,"t":1}"#), NOW).starts_with("HTTP/1.1 200"));
+}

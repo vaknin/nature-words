@@ -5,7 +5,8 @@ signs a kid in through the public address end to end (on a throwaway class it de
 
 ## Pages
 
-- `/` the kid sign-in (design A): class code, tap your name, tap your secret animal (from `server/www`).
+- `/` the kid sign-in (design A): class code, tap your name, tap your secret animal (from `server/www`); a new kid
+  taps I am new and waits for the teacher's OK (see "Joining" below).
 - `/teacher/` the teacher page: classes, new class, the code on the projector, each kid's Locked or Waiting badge
   with Unlock and New animal. Only the teacher gets in (see "Teacher sign-in" below): through Cloudflare Access
   once it is on, by the teacher key until then.
@@ -23,6 +24,30 @@ always live. Prove it installable with Chrome's own check (headless, a phone-siz
 Test both pages in a real browser against the live address (throwaway classes, deleted after):
 `cd test && npm ci && node signin.mjs all "$(cat ~/.local/state/lesson-server/url)"`
 (or `node signin.mjs all --local ../server/target/debug/lesson-server` for a local throwaway server).
+
+## Joining (a new kid's first sign-in, Kahoot style)
+
+A kid's first sign-in is the only time a name is typed, and only the teacher can let it in:
+
+1. The teacher opens joining for one lesson (45 minutes, the session length): on the class screen, or
+   `POST /api/classes/CODE/join` with `{"open": true}` (`{"open": false}` closes it). Teacher only.
+2. The kid taps **I am new** and types a first name, or a first name and family initial (letters only, tidied to
+   "Noa B."): `POST /api/join` with `{code, name}` returns a ticket. 403 while joining is closed; 409 when that name
+   is already approved or waiting in the class (add the family initial), or the class is full.
+3. The kid's page waits on `GET /api/join/TICKET`: pending, then approved with the kid's id; 404 once rejected.
+4. The teacher sees each waiting name first in the kids' list and taps Approve or Reject:
+   `POST /api/students/ID/approve` or `POST /api/students/ID/reject` (a waiting name only). Teacher only, so the
+   Access token while Access is on and the teacher key while it is off.
+5. The approved kid picks a secret animal; that name is the kid's name from then on.
+
+Sign-in from home: the class code (or the class home link) and the secret animal work at any time, from any
+place, joining open or not. Only adding a new name needs joining open. A forgotten animal is the teacher's New
+animal button (the kid picks a new one next visit); Unlock clears the pause after wrong tries.
+
+Race names: the boards show only the approved name. The lesson page posts a signed-in kid's score through
+`POST /api/race` with `{topic, place, score}` (the session token as Bearer), and the server writes the line under
+the approved name; a kid with no sign-in gets a Sign in button instead of a name box. A board line with a name (`n`)
+posted straight to `POST /TOPIC` is refused 403; the teacher's reset marker still goes through.
 
 ## Phone remote
 
