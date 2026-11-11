@@ -286,6 +286,9 @@ input{user-select:text;-webkit-user-select:text}
 .tbar .ib.wide{width:auto;padding:0 16px;gap:8px;display:inline-flex;font-family:var(--head);font-weight:600;font-size:17px;color:var(--muted)}
 
 /* ---------- teacher (projector) ---------- */
+.qrfull{position:fixed;inset:0;z-index:9999;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vmin;cursor:pointer}
+.qrfull .qrsvg{width:min(82vmin,900px);height:min(82vmin,900px)}
+.qrfull .qrcap{font-family:var(--head);font-size:clamp(22px,4vmin,44px);font-weight:600;color:var(--muted);margin:0}
 .tbar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;box-shadow:0 1px 0 var(--line)}
 .tbar .num{display:grid;place-items:center;min-width:44px;height:44px;border-radius:999px;background:var(--river);color:#fff;font-family:var(--head);font-weight:600;font-size:24px}
 .tbar .name{flex:1;font-family:var(--head);font-size:28px;font-weight:600}
@@ -1141,12 +1144,12 @@ function teacher(i) {
   const st = LESSON.stages; cur = Math.max(0, Math.min(st.length - 1, i));
   stopSound(); if (ctrl.stop) ctrl.stop();
   app.innerHTML = `<div class="tbar"><span class="num">${cur + 1}</span><span class="name">${st[cur].name}</span><span class="min">${st[cur].min} min</span>
-    <button class="ib btn" data-prev aria-label="Previous">${ICON.prev}</button><button class="ib btn" data-next aria-label="Next">${ICON.next}</button><button class="ib btn" data-fs aria-label="Full screen">${ICON.fs}</button><button class="ib wide btn" data-reset title="Empty the three race boards for the whole class">↺ Reset boards</button></div>
+    <button class="ib btn" data-prev aria-label="Previous">${ICON.prev}</button><button class="ib btn" data-next aria-label="Next">${ICON.next}</button><button class="ib btn" data-fs aria-label="Full screen">${ICON.fs}</button><button class="ib wide btn" data-qr title="Show a QR code of the class link, full screen (Q)">▦ QR</button><button class="ib wide btn" data-reset title="Empty the three race boards for the whole class">↺ Reset boards</button></div>
     <div class="prog">${st.map((s, k) => `<button class="${k === cur ? "cur" : k < cur ? "done" : ""}" aria-label="Stage ${k + 1}"></button>`).join("")}</div>
     <div class="tscreen" data-stage="${cur + 1}" data-game="${st[cur].game}"></div><div class="keys"></div>`;
   ctrl = STAGE_GAMES[st[cur].game]($(".tscreen", app), st[cur]) || {};
-  $(".keys", app).textContent = (ctrl.keys ? ctrl.keys + " · " : "") + `1-${st.length}: stage · ←/→ · F: full screen`;
-  $("[data-reset]", app).onclick = resetBoards;
+  $(".keys", app).textContent = (ctrl.keys ? ctrl.keys + " · " : "") + `1-${st.length}: stage · ←/→ · F: full screen · Q: QR code`;
+  $("[data-reset]", app).onclick = resetBoards; $("[data-qr]", app).onclick = showQR;
   $("[data-prev]", app).onclick = prev; $("[data-next]", app).onclick = next; $("[data-fs]", app).onclick = toggleFS;
   $$(".prog button", app).forEach((b, k) => b.onclick = () => teacher(k));
   history.replaceState(null, "", "#teacher-" + (cur + 1));
@@ -1161,6 +1164,15 @@ async function resetBoards() {
   toast(`<span style="font-size:40px">${ok ? "✅" : "📴"}</span><span><small>Race boards</small><b>${ok ? "Reset for the class" : "No internet: not reset"}</b></span>`);
   if (btn) btn.disabled = false;
 }
+// The class link as a QR code, full screen on the projector: kids scan it to open the start quiz. Click or Esc closes.
+const QR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" class="qrsvg" shape-rendering="crispEdges"><path fill="#fff" d="M0 0h33v33h-33z"/><path class="qrline" stroke="#000" d="M2 2.5h7m1 0h2m1 0h1m2 0h1m1 0h5m1 0h7m-29 1h1m5 0h1m1 0h3m1 0h3m2 0h1m2 0h1m1 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m6 0h2m3 0h1m1 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m1 0h4m1 0h1m1 0h1m1 0h1m1 0h1m2 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h2m2 0h4m2 0h2m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m2 0h1m4 0h1m1 0h4m2 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-21 1h2m2 0h1m2 0h1m1 0h4m-21 1h1m1 0h2m1 0h3m2 0h2m1 0h1m3 0h1m1 0h1m2 0h1m2 0h1m1 0h2m-29 1h2m1 0h1m5 0h1m2 0h1m3 0h9m3 0h1m-28 1h1m4 0h2m2 0h3m1 0h1m1 0h1m1 0h1m3 0h3m1 0h2m-27 1h5m5 0h1m1 0h1m1 0h1m2 0h7m3 0h1m-29 1h3m1 0h1m1 0h6m5 0h1m2 0h1m4 0h2m-25 1h1m1 0h1m2 0h2m4 0h4m2 0h1m2 0h1m3 0h3m-29 1h1m4 0h2m2 0h2m1 0h1m1 0h1m2 0h3m1 0h1m1 0h2m1 0h3m-29 1h6m1 0h1m1 0h1m3 0h1m2 0h1m1 0h1m2 0h2m4 0h1m-27 1h4m1 0h1m1 0h4m4 0h1m1 0h3m2 0h3m1 0h1m-27 1h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m4 0h1m2 0h1m1 0h3m-28 1h1m2 0h1m2 0h3m1 0h1m1 0h1m2 0h2m1 0h1m3 0h3m1 0h1m-18 1h4m3 0h3m3 0h2m2 0h1m-26 1h1m1 0h1m1 0h2m1 0h1m2 0h3m1 0h12m-19 1h2m3 0h2m4 0h2m3 0h5m-29 1h7m1 0h1m1 0h1m2 0h1m2 0h5m1 0h1m1 0h2m1 0h1m-28 1h1m5 0h1m1 0h1m1 0h2m8 0h1m3 0h2m-26 1h1m1 0h3m1 0h1m3 0h3m1 0h2m1 0h1m2 0h5m1 0h1m-27 1h1m1 0h3m1 0h1m1 0h5m1 0h8m1 0h3m2 0h1m-29 1h1m1 0h3m1 0h1m1 0h1m4 0h1m2 0h1m1 0h3m2 0h1m2 0h1m1 0h1m-29 1h1m5 0h1m5 0h1m1 0h1m5 0h1m4 0h1m1 0h1m-28 1h7m1 0h1m1 0h1m5 0h1m1 0h5m2 0h1m1 0h1"/></svg>`;
+function showQR() {
+  if ($(".qrfull")) return hideQR();
+  const d = document.createElement("div"); d.className = "qrfull"; d.setAttribute("role", "dialog"); d.setAttribute("aria-label", "QR code of the class link");
+  d.innerHTML = QR_SVG + `<p class="qrcap">Scan to start · vaknin.github.io/nature-words</p>`;
+  d.onclick = hideQR; document.body.appendChild(d);
+}
+function hideQR() { const d = $(".qrfull"); if (d) d.remove(); }
 function next() { if (ctrl.next && ctrl.next()) return; if (cur < LESSON.stages.length - 1) teacher(cur + 1); }
 function prev() { if (ctrl.prev && ctrl.prev()) return; if (cur > 0) teacher(cur - 1); }
 // The page knows it is full screen (the start page hides its Full screen button and hint).
@@ -1172,6 +1184,8 @@ addEventListener("keydown", e => {
   if (!/^#teacher/.test(location.hash)) return;
   const k = e.key;
   if ([" ", "Enter", "ArrowLeft", "ArrowRight"].includes(k)) e.preventDefault();
+  if ($(".qrfull") && (k === "Escape" || k === "q" || k === "Q" || k === " " || k === "Enter")) return hideQR();
+  if (k === "q" || k === "Q") return showQR();
   if (k === "f" || k === "F") return toggleFS();
   if (/^[1-9]$/.test(k) && +k <= LESSON.stages.length) return teacher(+k - 1);
   if (k === "ArrowRight") return next();
