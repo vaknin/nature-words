@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en" translate="no" class="notranslate">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kitah sign-in: three looks to choose from</title>
+<!-- Source of mockup/signin/index.html: edit this file, then run node tools/mockup-build.mjs from the repo root. -->
+<style>
+/*FONTS*/
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font:16px/1.45 Rubik,system-ui,sans-serif;color:#1d1b2e;background:#efedf3}
+button{font:inherit;color:inherit;cursor:pointer}
+[hidden]{display:none!important}
+.ic{width:1em;height:1em;display:inline-block;vertical-align:-.15em;flex:none}
+.heb{display:inline-block;font-weight:700}
+[data-lang=C] .frame .cap b{font-family:var(--bf),sans-serif}
+/* ---------- The page around the three looks ---------- */
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:16px;padding:10px 24px;background:#1d1b2e;color:#fff}
+.top h1{margin:0;font:700 20px/1.2 Rubik,sans-serif}
+.top nav{display:flex;gap:8px;margin-left:auto}
+.top nav a{color:#fff;text-decoration:none;padding:6px 12px;border-radius:999px;border:1px solid #fff4;font-weight:500}
+.top nav a:hover{background:#fff2}
+.fs{display:flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;border:0;background:#ffd84d;color:#1d1b2e;font-weight:700}
+.fs .ic{width:20px;height:20px}
+.fs-hint{font-size:13px;opacity:.8;max-width:190px;line-height:1.25}
+.intro{max-width:1200px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:1.25fr 1fr;gap:24px;align-items:start}
+.his-words{margin:0;padding:16px 20px;background:#fff;border-left:6px solid #1d1b2e;border-radius:12px;font-size:14px;line-height:1.5}
+.his-words p{margin:0 0 10px}
+.his-words cite{display:block;font-size:12px;opacity:.65;font-style:normal}
+.how{background:#fff;border-radius:12px;padding:16px 20px}
+.how h2{margin:0 0 8px;font-size:18px}
+.how ul{margin:0;padding-left:20px}
+.how li{margin:4px 0}
+footer{max-width:1200px;margin:32px auto;padding:0 24px 40px;font-size:13px;opacity:.75}
+
+/* ---------- One look: every part reads its colours and type from these variables ---------- */
+.look{--bg:#fff;--ink:#000;--card:#fff;--a1:red;--a2:blue;--a3:gold;--line:3px solid var(--ink);--shadow:4px 4px 0 var(--ink);--r:18px;--hf:Rubik;--bf:Rubik;
+  background:var(--bg);color:var(--ink);font-family:var(--bf),Rubik,sans-serif;padding:40px 0 48px;scroll-margin-top:52px}
+.look>.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+.look h2,.look h3,.look .hd{font-family:var(--hf),sans-serif;margin:0}
+.look h2{font-size:44px;line-height:1}
+.look h3{font-size:22px;margin-bottom:10px}
+.head{display:flex;align-items:flex-end;gap:24px;flex-wrap:wrap;margin-bottom:24px}
+.head .tag{font-size:18px;max-width:520px;opacity:.85}
+.letter{display:inline-grid;place-items:center;width:56px;height:56px;border-radius:var(--r);background:var(--a1);color:var(--bg);font:700 32px/1 var(--hf),sans-serif;margin-right:8px;vertical-align:middle}
+.card{background:var(--card);border:var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.row{display:grid;gap:20px;margin-top:20px}
+.r3{grid-template-columns:repeat(3,1fr)}
+.r2{grid-template-columns:1fr 1fr}
+.r4{grid-template-columns:repeat(4,1fr)}
+.palette{display:flex;gap:8px;margin:10px 0}
+.palette i{width:44px;height:44px;border-radius:12px;border:2px solid #0002}
+.small{font-size:14px;opacity:.85}
+.strip{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;list-style:none;padding:0;margin:10px 0 0}
+.strip li{display:grid;justify-items:center;font-size:11px;gap:2px}
+.strip .ic{width:30px;height:30px;color:var(--a2)}
+/* Logo ideas */
+.logos{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.logo{margin:0;display:grid;gap:8px;justify-items:center;text-align:center}
+.logo .mark{height:120px;width:100%;display:grid;place-items:center;border-radius:14px;background:var(--bg)}
+.logo figcaption{font-size:13px;opacity:.85}
+/* The 4-frame class flow: small laptop screens */
+.frame{display:grid;gap:8px}
+.frame .screen{aspect-ratio:16/10;border-radius:12px;border:var(--line);background:var(--bg);display:grid;place-items:center;align-content:center;gap:6px;padding:10px;text-align:center;overflow:hidden;position:relative}
+.frame .cap{font-size:14px}
+.frame .cap b{font-family:var(--hf),sans-serif}
+.num{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font-size:14px;font-weight:700;margin-right:6px}
+.code{font:700 34px/1 var(--hf),sans-serif;letter-spacing:.08em;color:var(--a1)}
+.mini-names{display:grid;grid-template-columns:1fr 1fr;gap:5px;width:90%}
+.mini-names span{border:2px solid var(--ink);border-radius:8px;font-size:12px;padding:2px}
+.mini-names span.gone{opacity:.25;transform:scale(.8);text-decoration:line-through}
+.mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:70%}
+.mini-grid .ic{width:100%;height:26px;color:var(--a2)}
+.big .ic{width:56px;height:56px;color:var(--a1)}
+/* Live demos */
+.demo-card h3{display:flex;align-items:center;gap:8px}
+.demo-card .ic{color:var(--a1)}
+.reset{margin-left:auto;font-size:13px;padding:4px 10px;border-radius:999px;border:2px solid var(--ink);background:transparent;display:inline-flex;gap:6px;align-items:center}
+[data-demo]{min-height:300px}
+/* Guest and idea cards */
+.note-card{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}
+.note-card .ic.big-ic{width:48px;height:48px;color:var(--a1)}
+.note-card p{margin:4px 0}
+
+/* ---------- A: Sticker Pop ---------- */
+[data-lang=A]{--bg:#fff6ea;--ink:#2a1f4d;--card:#fff;--a1:#ff5d5d;--a2:#7a4dff;--a3:#ffc93c;--a4:#16b8a6;--line:3px solid #2a1f4d;--shadow:5px 5px 0 #2a1f4d;--r:20px;--hf:Fredoka;--bf:Rubik}
+[data-lang=A] h2{font-weight:700}
+[data-lang=A] h3,[data-lang=A] .hd{font-weight:700}
+[data-lang=A] .card:nth-of-type(odd){transform:rotate(-.4deg)}
+.logoA1{font:700 54px/1 Fredoka,sans-serif;color:#ff5d5d;-webkit-text-stroke:3px #2a1f4d;paint-order:stroke fill;text-shadow:4px 4px 0 #2a1f4d;display:flex;align-items:center;gap:2px}
+.logoA1 .ic{width:46px;height:46px;color:#16b8a6;transform:rotate(-14deg);filter:drop-shadow(2px 2px 0 #2a1f4d)}
+.logoA2{width:104px;height:104px;border-radius:50%;background:#ffc93c;border:4px solid #2a1f4d;box-shadow:0 0 0 6px #fff,0 0 0 9px #2a1f4d;display:grid;place-items:center;align-content:center;color:#2a1f4d;font:700 16px/1 Fredoka,sans-serif}
+.logoA2 .ic{width:52px;height:52px;color:#7a4dff}
+
+/* ---------- B: Field Trip ---------- */
+[data-lang=B]{--bg:#f3efe2;--ink:#173b2f;--card:#fffdf6;--a1:#2f8f5b;--a2:#2d6fb8;--a3:#e3793a;--a4:#e8c547;--line:2px dashed #173b2f;--shadow:none;--r:10px;--hf:"Secular One";--bf:"Varela Round"}
+[data-lang=B] .card{border-style:solid;border-color:#173b2f33;border-width:2px;box-shadow:0 2px 0 #173b2f22}
+[data-lang=B] h2{letter-spacing:.01em}
+.logoB1{width:112px;height:112px;border-radius:50%;border:3px solid #2f8f5b;outline:2px dashed #2f8f5b;outline-offset:4px;display:grid;place-items:center;align-content:center;color:#2f8f5b;font:400 20px/1 "Secular One",sans-serif;transform:rotate(-8deg)}
+.logoB1 .ic{width:40px;height:40px}
+.logoB2{display:flex;align-items:center;gap:10px;padding:10px 22px 10px 14px;background:#173b2f;color:#f3efe2;border-radius:10px 40px 40px 10px;font:400 36px/1 "Secular One",sans-serif}
+.logoB2 .ic{width:38px;height:38px;color:#e8c547}
+
+/* ---------- C: Arcade Night ---------- */
+[data-lang=C]{--bg:#16122e;--ink:#f3f0ff;--card:#221c45;--a1:#ff4fa3;--a2:#38e1e8;--a3:#c4f542;--a4:#ffb347;--line:2px solid #3b3370;--shadow:0 0 0 1px #000,0 8px 24px #0006;--r:14px;--hf:Karantina;--bf:Rubik}
+[data-lang=C] h2{font-size:64px;font-weight:700;color:#ff4fa3;text-shadow:0 0 18px #ff4fa388}
+[data-lang=C] h3{font-size:30px;font-weight:700}
+[data-lang=C] .letter{color:#16122e}
+[data-lang=C] .code{text-shadow:0 0 12px #ff4fa3aa;font-size:44px}
+.logoC1{font:700 72px/1 Karantina,sans-serif;color:#38e1e8;text-shadow:0 0 6px #38e1e8,0 0 22px #38e1e899;display:flex;align-items:center;gap:8px;letter-spacing:.04em}
+.logoC1 .ic{width:44px;height:44px;color:#c4f542;filter:drop-shadow(0 0 6px #c4f542)}
+.logoC2{width:100px;height:112px;clip-path:polygon(50% 0,100% 18%,100% 70%,50% 100%,0 70%,0 18%);background:linear-gradient(160deg,#ff4fa3,#7b3cff);display:grid;place-items:center;align-content:center;color:#fff;font:700 22px/1 Karantina,sans-serif}
+.logoC2 .ic{width:56px;height:56px}
+</style>
+</head>
+<body>
+<!--SPRITES-->
+<header class="top">
+  <h1>Kitah sign-in: three looks</h1>
+  <nav aria-label="Looks"><a href="#look-A">A Sticker Pop</a><a href="#look-B">B Field Trip</a><a href="#look-C">C Arcade Night</a></nav>
+  <button type="button" class="fs" id="fs">{{icon A fullscreen}}<span>Full screen</span></button>
+  <span class="fs-hint">Best in full screen: press this button or F11. Esc leaves it.</span>
+</header>
+
+<div class="intro">
+  <blockquote class="his-words">
+    <p>1)the secret animals don't look really good. perhaps find an open-source list or something that we can use, because currently it's quite terrible. the design itself is not appealing towards 5th-graders, the emojis are horrible, use icons and glyphs rather than emojis. the whole design (ux&amp;ui) is lacking, unprofessional. the thread should research best-practices and design principles first. not too childish, not too mature. choosing your password is the fun part, it's supposed to be an experience, fun. yet secure. also we need to disable attempting to login to an already-logged in account, so after a name is taken in the login screen, it disappears from the available names list immediately, pops-out, perhaps with a cute animation of fading or something like that, like a comic</p>
+    <p>2)I'm not really sure I like that part: "The Classroom post carries the class link (…/?c=482913), so at home the kid skips the code and lands on the names."<br>are we certain we only want to use classroom? I'm not sure I want that. to simplify the design, for now let's drop signing-in after class, for now it'll be class-only, kind of like an MVP, only with 5th-grade, one class. not for multiple students.</p>
+    <p>I don't like the "Kitah" logo. always consult with me before choosing a design language, icons or logos so we can iterate and brainstorm and choose a language together.</p>
+    <cite>Your words, the brief for this page</cite>
+  </blockquote>
+  <div class="how">
+    <h2>Nothing is picked yet: you choose</h2>
+    <ul>
+      <li>Three looks below, each with its own colours, letters, icon set and two logo ideas. Mixing is fine: say "B's colours with C's animals".</li>
+      <li>Every look shows the same class-only flow: the code on the projector, tap your name, make your secret buddy, you're in.</li>
+      <li>Try the two live parts in each look: tap a name and watch it pop out of the list; then make a secret buddy.</li>
+      <li>Secret buddy = an animal plus one of 6 colours: 96 choices instead of 16, so a guesser's chance in 6 tries drops from 37.5% to 6.25%, for one extra tap.</li>
+      <li>No emoji anywhere: every picture is a glyph from an open-source icon set, credited at the bottom.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ======================= A: Sticker Pop ======================= -->
+<section class="look" id="look-A" data-lang="A" data-palette="#fff6ea #2a1f4d #ff5d5d #7a4dff #ffc93c #16b8a6" data-icons="Phosphor Icons 2.1.1, duotone, MIT License" data-fonts="Fredoka + Rubik">
+<div class="wrap">
+  <div class="head">
+    <h2><span class="letter">A</span>Sticker Pop</h2>
+    <p class="tag">Thick outlines and offset shadows, like stickers on a laptop lid. Bright but not primary colours, round heavy headings.</p>
+  </div>
+  <div class="row r3">
+    <div class="card">
+      <h3>Colours, letters, icons</h3>
+      <div class="palette"><i style="background:#fff6ea"></i><i style="background:#2a1f4d"></i><i style="background:#ff5d5d"></i><i style="background:#7a4dff"></i><i style="background:#ffc93c"></i><i style="background:#16b8a6"></i></div>
+      <p class="small"><b class="hd">Fredoka</b> headings, Rubik text, both with Hebrew: <span class="heb" lang="he" dir="rtl">בחרו חבר סודי</span></p>
+      <p class="small">Icons: Phosphor, duotone, MIT License. Honest count: 10 real animals, so the grid adds 6 nature glyphs.</p>
+      <ul class="strip">{{strip A}}</ul>
+    </div>
+    <div class="card" style="grid-column:span 2">
+      <h3>Two logo ideas</h3>
+      <div class="logos">
+        <figure class="logo" data-logo="A1 sticker wordmark"><div class="mark"><span class="logoA1">kitah{{icon A leaf}}</span></div><figcaption>A1: the word as a sticker, a leaf for the nature lessons.</figcaption></figure>
+        <figure class="logo" data-logo="A2 round badge"><div class="mark"><span class="logoA2">{{icon A cat}}<span lang="he" dir="rtl">כיתה</span></span></div><figcaption>A2: a round badge with a buddy and the Hebrew name.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+  <div class="row r4" data-flow>
+    <div class="frame"><div class="screen big">{{icon A projector}}<span class="small">On the board</span><span class="code">4829</span></div><div class="cap"><span class="num">1</span><b>Projector shows the class code</b></div></div>
+    <div class="frame"><div class="screen"><span class="hd">Tap your name</span><div class="mini-names"><span>Noa</span><span class="gone">Itay</span><span>Maya R.</span><span>Omer</span></div></div><div class="cap"><span class="num">2</span><b>Tap your name</b>: a taken one pops out</div></div>
+    <div class="frame"><div class="screen"><span class="hd">Pick your buddy</span><div class="mini-grid">{{icon A cat}}{{icon A dog}}{{icon A rabbit}}{{icon A cow}}{{icon A bird}}{{icon A fish}}{{icon A butterfly}}{{icon A horse}}</div></div><div class="cap"><span class="num">3</span><b>Secret buddy</b>: animal, then colour</div></div>
+    <div class="frame"><div class="screen big">{{icon A check}}<span class="hd">You're in, Noa!</span><span lang="he" dir="rtl">נכנסת!</span></div><div class="cap"><span class="num">4</span><b>Happy confirm</b>, then the lesson</div></div>
+  </div>
+  <div class="row r2">
+    <div class="card demo-card"><h3>{{icon A user}}Try it: tap a name</h3><div data-demo="names"></div></div>
+    <div class="card demo-card"><h3>{{icon A sparkle}}Try it: make a secret buddy</h3><div data-demo="pick"></div></div>
+  </div>
+  <div class="row r2">
+    <div class="card note-card" data-guest>{{icon A play}}<div><h3>Guests can play</h3><p>No name? Tap "Play as guest" and do every stage of the lesson.</p><p class="small">Only signed-in kids go on the leaderboard. A guest sees their own score and one calm line: "Sign in next lesson to join the board."</p></div></div>
+    <div class="card note-card" data-idea>{{icon A confetti}}<div><h3>Our idea: a sticker book</h3><p>Each lesson a kid finishes adds a nature sticker to their page, so there is something to collect next time.</p><p class="small">Fits this look best; no extra sign-in needed.</p></div></div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= B: Field Trip ======================= -->
+<section class="look" id="look-B" data-lang="B" data-palette="#f3efe2 #173b2f #2f8f5b #2d6fb8 #e3793a #e8c547" data-icons="Tabler Icons 3.51.0, outline, MIT License" data-fonts="Secular One + Varela Round">
+<div class="wrap">
+  <div class="head">
+    <h2><span class="letter">B</span>Field Trip</h2>
+    <p class="tag">A nature explorer's notebook: paper colours, line icons, stamps. Calm and grown-up, still friendly.</p>
+  </div>
+  <div class="row r3">
+    <div class="card">
+      <h3>Colours, letters, icons</h3>
+      <div class="palette"><i style="background:#f3efe2"></i><i style="background:#173b2f"></i><i style="background:#2f8f5b"></i><i style="background:#2d6fb8"></i><i style="background:#e3793a"></i><i style="background:#e8c547"></i></div>
+      <p class="small"><b class="hd">Secular One</b> headings, Varela Round text, both with Hebrew: <span class="heb" lang="he" dir="rtl">בחרו חבר סודי</span></p>
+      <p class="small">Icons: Tabler, outline, MIT License. Honest count: 12 animals, so the grid adds 4 plants.</p>
+      <ul class="strip">{{strip B}}</ul>
+    </div>
+    <div class="card" style="grid-column:span 2">
+      <h3>Two logo ideas</h3>
+      <div class="logos">
+        <figure class="logo" data-logo="B1 field stamp"><div class="mark"><span class="logoB1">{{icon B seedling}}KITAH</span></div><figcaption>B1: a ranger's stamp, the kind you get at each stop of a trail.</figcaption></figure>
+        <figure class="logo" data-logo="B2 trail tag"><div class="mark"><span class="logoB2">{{icon B leaf}}kitah</span></div><figcaption>B2: a trail tag, plain and calm, works small on a phone.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+  <div class="row r4" data-flow>
+    <div class="frame"><div class="screen big">{{icon B projector}}<span class="small">On the board</span><span class="code">4829</span></div><div class="cap"><span class="num">1</span><b>Projector shows the class code</b></div></div>
+    <div class="frame"><div class="screen"><span class="hd">Tap your name</span><div class="mini-names"><span>Noa</span><span class="gone">Itay</span><span>Maya R.</span><span>Omer</span></div></div><div class="cap"><span class="num">2</span><b>Tap your name</b>: a taken one pops out</div></div>
+    <div class="frame"><div class="screen"><span class="hd">Pick your buddy</span><div class="mini-grid">{{icon B cat}}{{icon B dog}}{{icon B pig}}{{icon B horse}}{{icon B deer}}{{icon B fish}}{{icon B butterfly}}{{icon B snail}}</div></div><div class="cap"><span class="num">3</span><b>Secret buddy</b>: animal, then colour</div></div>
+    <div class="frame"><div class="screen big">{{icon B check}}<span class="hd">You're in, Noa!</span><span lang="he" dir="rtl">נכנסת!</span></div><div class="cap"><span class="num">4</span><b>Happy confirm</b>, then the lesson</div></div>
+  </div>
+  <div class="row r2">
+    <div class="card demo-card"><h3>{{icon B user}}Try it: tap a name</h3><div data-demo="names"></div></div>
+    <div class="card demo-card"><h3>{{icon B sparkle}}Try it: make a secret buddy</h3><div data-demo="pick"></div></div>
+  </div>
+  <div class="row r2">
+    <div class="card note-card" data-guest>{{icon B play}}<div><h3>Guests can play</h3><p>No name? Tap "Play as guest" and do every stage of the lesson.</p><p class="small">Only signed-in kids go on the leaderboard. A guest sees their own score and one calm line: "Sign in next lesson to join the board."</p></div></div>
+    <div class="card note-card" data-idea>{{icon B projector}}<div><h3>Our idea: the class trail map</h3><p>The projector shows today's lesson as a trail; each stage the class finishes gets a stamp, so everyone sees how far the class got together.</p><p class="small">Shared progress, no one's low score on show.</p></div></div>
+  </div>
+</div>
+</section>
+
+<!-- ======================= C: Arcade Night ======================= -->
+<section class="look" id="look-C" data-lang="C" data-palette="#16122e #f3f0ff #ff4fa3 #38e1e8 #c4f542 #ffb347" data-icons="game-icons.net, CC BY 3.0 (credit each author)" data-fonts="Karantina + Rubik">
+<div class="wrap">
+  <div class="head">
+    <h2><span class="letter">C</span>Arcade Night</h2>
+    <p class="tag">A game's start screen: dark background, neon colours, bold animal silhouettes. The most "game", the least "school".</p>
+  </div>
+  <div class="row r3">
+    <div class="card">
+      <h3>Colours, letters, icons</h3>
+      <div class="palette"><i style="background:#16122e"></i><i style="background:#f3f0ff"></i><i style="background:#ff4fa3"></i><i style="background:#38e1e8"></i><i style="background:#c4f542"></i><i style="background:#ffb347"></i></div>
+      <p class="small"><b class="hd" style="font-size:22px">Karantina</b> headings, Rubik text, both with Hebrew: <span class="heb" lang="he" dir="rtl">בחרו חבר סודי</span></p>
+      <p class="small">Icons: game-icons.net, CC BY 3.0 (each author credited). The only set with 16 real animals.</p>
+      <ul class="strip">{{strip C}}</ul>
+    </div>
+    <div class="card" style="grid-column:span 2">
+      <h3>Two logo ideas</h3>
+      <div class="logos">
+        <figure class="logo" data-logo="C1 neon marquee"><div class="mark"><span class="logoC1">{{icon C trophy}}KITAH</span></div><figcaption>C1: a neon arcade sign, the trophy for the race.</figcaption></figure>
+        <figure class="logo" data-logo="C2 player shield"><div class="mark"><span class="logoC2">{{icon C fox}}<span lang="he" dir="rtl">כיתה</span></span></div><figcaption>C2: a player shield with a buddy, like a game's badge.</figcaption></figure>
+      </div>
+    </div>
+  </div>
+  <div class="row r4" data-flow>
+    <div class="frame"><div class="screen big">{{icon C projector}}<span class="small">On the board</span><span class="code">4829</span></div><div class="cap"><span class="num">1</span><b>Projector shows the class code</b></div></div>
+    <div class="frame"><div class="screen"><span class="hd" style="font-size:22px">Tap your name</span><div class="mini-names"><span>Noa</span><span class="gone">Itay</span><span>Maya R.</span><span>Omer</span></div></div><div class="cap"><span class="num">2</span><b>Tap your name</b>: a taken one pops out</div></div>
+    <div class="frame"><div class="screen"><span class="hd" style="font-size:22px">Pick your buddy</span><div class="mini-grid">{{icon C cat}}{{icon C fox}}{{icon C panda}}{{icon C frog}}{{icon C pig}}{{icon C owl}}{{icon C lion}}{{icon C koala}}</div></div><div class="cap"><span class="num">3</span><b>Secret buddy</b>: animal, then colour</div></div>
+    <div class="frame"><div class="screen big">{{icon C check}}<span class="hd" style="font-size:24px">You're in, Noa!</span><span lang="he" dir="rtl">נכנסת!</span></div><div class="cap"><span class="num">4</span><b>Happy confirm</b>, then the lesson</div></div>
+  </div>
+  <div class="row r2">
+    <div class="card demo-card"><h3>{{icon C user}}Try it: tap a name</h3><div data-demo="names"></div></div>
+    <div class="card demo-card"><h3>{{icon C sparkle}}Try it: make a secret buddy</h3><div data-demo="pick"></div></div>
+  </div>
+  <div class="row r2">
+    <div class="card note-card" data-guest>{{icon C play}}<div><h3>Guests can play</h3><p>No name? Tap "Play as guest" and do every stage of the lesson.</p><p class="small">Only signed-in kids go on the leaderboard. A guest sees their own score and one calm line: "Sign in next lesson to join the board."</p></div></div>
+    <div class="card note-card" data-idea>{{icon C trophy}}<div><h3>Our idea: a player card</h3><p>After sign-in each kid gets a player card with their name and a level that grows lesson by lesson; the secret buddy never shows on it.</p><p class="small">Gives the race a reason to come back, without showing anyone's rank.</p></div></div>
+  </div>
+</div>
+</section>
+
+<footer>
+  <p>Icons: <b>Phosphor Icons</b> 2.1.1 (MIT License), <b>Tabler Icons</b> 3.51.0 (MIT License), and <b>game-icons.net</b> under CC BY 3.0, by {{gi-credit}}. Fonts: Fredoka, Rubik, Secular One, Varela Round and Karantina, SIL Open Font License 1.1. Everything is inside this one page: it loads nothing from the internet.</p>
+</footer>
+
+<script>
+// Full screen: the button toggles it; F11 works too (the hint says so).
+document.getElementById('fs').addEventListener('click', () => {
+  if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {});
+});
+</script>
+</body>
+</html>
