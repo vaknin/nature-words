@@ -1,14 +1,18 @@
 // Sign-in test: the kid sign-in page (the server's root) and the teacher page (/teacher/), in a real browser.
 // The app section checks the teacher page is an installable app (Kitah) by Chrome's own installability check;
-// all runs kid and teacher, app runs on its own.
-// Run: cd test && npm ci && node signin.mjs kid|teacher|app|all (--local BIN | URL)
+// The access section checks the teacher sign-in by Cloudflare Access: it starts BIN with an access.json and a key set
+// of its own, mints Cloudflare-shaped tokens itself, and stands in for Cloudflare by adding the token header to every
+// browser request; then it restarts BIN without the config and checks the teacher key works again.
+// all runs kid and teacher; app and access run on their own (access only with --local).
+// Run: cd test && npm ci && node signin.mjs kid|teacher|app|access|all (--local BIN | URL)
 //   --local BIN  starts BIN on a free port with a throwaway database, board log, teacher key and pages from server/www
 //   URL          uses that server (the live one: the address in ~/.local/state/lesson-server/url) and the teacher key
 //                in ~/.config/lesson-server/teacher.key
 // Every class it makes is a throwaway one, deleted at the end whether the test passed or not. Exits non-zero on any miss.
 import puppeteer from 'puppeteer-core';
 import { spawn, execFileSync } from 'child_process';
-import { mkdtempSync, readFileSync, rmSync, existsSync, mkdirSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { generateKeyPairSync, sign as rsaSign } from 'crypto';
 import { createServer } from 'net';
 import { fileURLToPath } from 'url';
 import os from 'os';
@@ -45,8 +49,8 @@ const SW_MS = SCREEN_MS;
 // His phone: 412x915 is the common Android phone viewport (Chrome DevTools' Galaxy and Pixel presets), touch on.
 const PHONE = { width: 412, height: 915, isMobile: true, hasTouch: true };
 const section = process.argv[2];
-if (!['kid', 'teacher', 'app', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|app|all (--local BIN | URL)'); process.exit(2); }
-let base, key, child = null, tmp = null;
+if (!['kid', 'teacher', 'app', 'access', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|app|access|all (--local BIN | URL)'); process.exit(2); }
+let base, key, child = null, tmp = null, startLog = '';
 let failures = 0;
 const fail = m => { failures++; console.log('  FAIL', m); };
 const ok = (c, m) => { if (c) console.log('  ok  ', m); else fail(m); };
@@ -55,15 +59,17 @@ const timed = async (what, p) => { const t = Date.now(); try { return await p; }
 
 const freePort = () => new Promise((res, rej) => { const s = createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); s.on('error', rej); });
 
-async function startLocal(bin) {
+// LESSON_ACCESS points at a file that isn't there unless `access` gives one, so a test server never picks up the live
+// server's own access.json: Access is off unless the access section turns it on.
+async function startLocal(bin, access) {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'signin-test-'));
   const port = await freePort();
   child = spawn(path.resolve(bin), [], {
     stdio: ['ignore', 'ignore', 'pipe'],
-    env: { ...process.env, LESSON_PORT: String(port), LESSON_DB: path.join(tmp, 'lesson.db'), LESSON_BOARD: path.join(tmp, 'board.log'), LESSON_TEACHER_KEY: path.join(tmp, 'teacher.key'), LESSON_WWW: path.join(here, '..', 'server', 'www') },
+    env: { ...process.env, LESSON_PORT: String(port), LESSON_DB: path.join(tmp, 'lesson.db'), LESSON_BOARD: path.join(tmp, 'board.log'), LESSON_TEACHER_KEY: path.join(tmp, 'teacher.key'), LESSON_WWW: path.join(here, '..', 'server', 'www'), LESSON_ACCESS: access || path.join(tmp, 'no-access.json') },
   });
   let log = '';
-  child.stderr.on('data', d => log += d);
+  child.stderr.on('data', d => { log += d; startLog = log; });
   base = `http://127.0.0.1:${port}`;
   const t0 = Date.now();
   while (Date.now() - t0 < START_MS) {
@@ -398,16 +404,141 @@ async function appSection() {
   }
 }
 
+// ---------- Cloudflare Access: the teacher by Google sign-in only (local only) ----------
+// The test plays Cloudflare: its own RSA key set is the team's (in the certs file access.json names), it mints RS256
+// tokens in Cloudflare's shape, and the browser sends one in Cf-Access-Jwt-Assertion on every request, as Cloudflare
+// adds it at the edge. The page's own requests bypass its service worker here: a worker's fetches don't carry the
+// test's extra header, while behind Cloudflare the edge adds it to those too.
+const TEAM = 'kitah-test', AUD = 'aud-of-the-test-app', EMAIL = 'teacher@example.com';
+const b64url = b => Buffer.from(b).toString('base64url');
+let teamKey = null;
+function mint(email) {
+  const now = Math.floor(Date.now() / 1000);
+  const head = b64url(JSON.stringify({ alg: 'RS256', kid: 'test-1', typ: 'JWT' }));
+  // An hour, Cloudflare's shortest session choice besides "no duration"; the run takes well under that.
+  const body = b64url(JSON.stringify({ iss: `https://${TEAM}.cloudflareaccess.com`, aud: [AUD], email, sub: 'x', iat: now, nbf: now, exp: now + 3600 }));
+  return `${head}.${body}.${b64url(rsaSign('sha256', Buffer.from(`${head}.${body}`), teamKey))}`;
+}
+
+async function accessSection(bin) {
+  console.log('\n== teacher sign-in by Cloudflare Access');
+  const cfg = mkdtempSync(path.join(os.tmpdir(), 'signin-access-'));
+  const { publicKey, privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 });
+  teamKey = privateKey;
+  writeFileSync(path.join(cfg, 'certs.json'), JSON.stringify({ keys: [{ ...publicKey.export({ format: 'jwk' }), kid: 'test-1', alg: 'RS256', use: 'sig' }] }));
+  writeFileSync(path.join(cfg, 'access.json'), JSON.stringify({ team: TEAM, aud: AUD, email: EMAIL, certs: path.join(cfg, 'certs.json') }), { mode: 0o600 });
+  const vp = PHONE, at = `${vp.width}x${vp.height} phone`;
+  const name = 'test ' + Math.random().toString(16).slice(2, 6);
+  const good = mint(EMAIL), other = mint('someone.else@example.com');
+  const asTeacher = (method, p, body) => api(method, p, body, { 'Cf-Access-Jwt-Assertion': good });
+  let code = null;
+  try {
+    await startLocal(bin, path.join(cfg, 'access.json'));
+    ok(/Access on/.test(startLog), `the start line says Access is on: ${startLog.trim().split('\n').pop()}`);
+    const page401 = await fetch(base + '/teacher/', { signal: AbortSignal.timeout(SCREEN_MS) });
+    ok(page401.status === 401, `/teacher/ with no token answers ${page401.status}`);
+    const man = await fetch(base + '/teacher/manifest.webmanifest', { signal: AbortSignal.timeout(SCREEN_MS) });
+    ok(man.status === 200, `/teacher/manifest.webmanifest with no token answers ${man.status} (Install still works)`);
+    ok((await teach('GET', '/api/classes')).status === 401, 'the teacher key alone gets 401 from /api/classes');
+    ok((await api('GET', '/api/classes', null, { 'Cf-Access-Jwt-Assertion': other })).status === 401, 'another email\'s token gets 401');
+
+    const errors = [];
+    const { browser, page } = await browserPage(vp, errors);
+    try {
+      const cdp = await page.createCDPSession();
+      await cdp.send('Network.enable');
+      await cdp.send('Network.setBypassServiceWorker', { bypass: true });
+      // Every time the key box is shown is counted, from the first moment of every page load.
+      await page.evaluateOnNewDocument(() => {
+        window.__keyShown = 0;
+        addEventListener('DOMContentLoaded', () => {
+          const k = document.getElementById('v-key');
+          const look = () => { if (!k.hidden) window.__keyShown++; };
+          new MutationObserver(look).observe(k, { attributes: true, attributeFilter: ['hidden'] });
+          look();
+        });
+      });
+      await page.setExtraHTTPHeaders({ 'Cf-Access-Jwt-Assertion': good });
+      await timed('page load', page.goto(base + '/teacher/', { waitUntil: 'load', timeout: LOAD_MS }));
+      await shown(page, 'v-classes', 'screen');
+      ok((await page.evaluate(() => window.__keyShown)) === 0, `${at}: with a good token the page opens on the classes, no key screen`);
+      ok((await textOf(page, '#forget')).trim() === 'Sign out', `${at}: the key button reads Sign out`);
+      await checkLayout(page, `${at} access classes`);
+
+      await page.tap('#new-class');
+      await shown(page, 'v-new', 'screen');
+      await page.type('#new-name', name);
+      await page.type('#new-kids', 'Noa K.\nOmer');
+      await page.tap('#new-make');
+      await shown(page, 'v-class', 'screen');
+      code = await textOf(page, '#class-code');
+      const listed = (await asTeacher('GET', '/api/classes')).data.find(c => c.code === code);
+      ok(listed && listed.name === name, `${at}: a class made through the page is on the server (${code})`);
+
+      await page.setExtraHTTPHeaders({ 'Cf-Access-Jwt-Assertion': other });
+      // The kids' list refreshes every 5 s (the page's REFRESH_MS): the ended screen comes within one refresh.
+      await timed('refresh', page.waitForFunction(() => !document.getElementById('v-ended').hidden, { timeout: REFRESH_WAIT_MS }));
+      ok(true, `${at}: with another email's token, the next refresh shows "Your sign-in ended"`);
+      await checkLayout(page, `${at} access ended`);
+      ok((await page.evaluate(() => window.__keyShown)) === 0, `${at}: the key box never showed`);
+
+      await page.setExtraHTTPHeaders({ 'Cf-Access-Jwt-Assertion': good });
+      await page.tap('#sign-in-again');
+      await timed('page load', page.waitForNavigation({ waitUntil: 'load', timeout: LOAD_MS }));
+      await shown(page, 'v-classes', 'screen');
+      ok((await page.evaluate(() => window.__keyShown)) === 0, `${at}: "Sign in again" reloads into the classes`);
+      // Deleted by the page's own request (same origin, with its X-Kitah-App header), as its buttons send them.
+      const del = await page.evaluate(c => api('DELETE', '/api/classes/' + c).then(r => r.status), code);
+      ok(del === 200 && !(await asTeacher('GET', '/api/classes')).data.some(c => c.code === code), `${at}: the class is deleted through the page (${del})`);
+      if (del === 200) code = null;
+      ok(errors.length === 0, `${at}: no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+    } catch (e) {
+      fail(`access ${at}: ${e.message.split('\n')[0]}`);
+      mkdirSync(path.join(here, 'shots'), { recursive: true });
+      await page.screenshot({ path: path.join(here, 'shots', `signin-access-${at.replace(' ', '-')}.png`) }).catch(() => {});
+    } finally {
+      await browser.close();
+      if (code) ok((await asTeacher('DELETE', '/api/classes/' + code)).status === 200, 'the throwaway class is deleted');
+    }
+
+    // The same binary without the config: the key, as before.
+    child.kill();
+    rmSync(tmp, { recursive: true, force: true });
+    await startLocal(bin);
+    ok(/Access off/.test(startLog), `restarted without access.json, the start line says Access is off`);
+    const errors2 = [];
+    const { browser: b2, page: p2 } = await browserPage(vp, errors2);
+    try {
+      await timed('page load', p2.goto(base + '/teacher/', { waitUntil: 'load', timeout: LOAD_MS }));
+      await shown(p2, 'v-key', 'screen');
+      await p2.type('#key', key);
+      await p2.keyboard.press('Enter');
+      await shown(p2, 'v-classes', 'screen');
+      ok((await textOf(p2, '#forget')).trim() === 'Forget key', `${at}: Access off, the key screen opens and the key still works`);
+      ok(errors2.length === 0, `${at}: no page errors${errors2.length ? ': ' + errors2.slice(0, 3).join(' | ') : ''}`);
+    } catch (e) {
+      fail(`access off ${at}: ${e.message.split('\n')[0]}`);
+    } finally {
+      await b2.close();
+    }
+  } finally {
+    rmSync(cfg, { recursive: true, force: true });
+  }
+}
+
 // ---------- Main ----------
 try {
   const local = process.argv.indexOf('--local');
-  if (local > 0) await startLocal(process.argv[local + 1]);
+  if (section === 'access') {
+    if (local < 0) throw new Error('access runs only with --local BIN: it starts the server with a key set of its own');
+    await accessSection(process.argv[local + 1]);
+  } else if (local > 0) await startLocal(process.argv[local + 1]);
   else {
     base = (process.argv[3] || '').replace(/\/+$/, '');
     if (!/^https?:\/\//.test(base)) throw new Error('give --local BIN or the server address');
     key = readFileSync(path.join(os.homedir(), '.config/lesson-server/teacher.key'), 'utf8').trim();
   }
-  console.log('server', base);
+  if (section !== 'access') console.log('server', base);
   if (section === 'kid' || section === 'all') await kidSection();
   if (section === 'teacher' || section === 'all') await teacherSection();
   if (section === 'app') await appSection();

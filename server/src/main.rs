@@ -7,7 +7,11 @@
 //!   POST /api/pick   {code,student,picture}  first sign-in: sets the picture once, returns a session token
 //!   POST /api/signin {code,student,picture}  returns a session token; wrong tries pause, then lock
 //!   GET  /api/me, POST /api/me      the kid's own record (Authorization: Bearer TOKEN); POST /api/signout
-//! Teacher (header X-Teacher-Key, the key in ~/.config/lesson-server/teacher.key, made on first run, mode 600):
+//! Teacher: with ~/.config/lesson-server/access.json (LESSON_ACCESS overrides the path), only a Cloudflare Access
+//! token for his one email (access.rs), from the Cf-Access-Jwt-Assertion header, or the CF_Authorization cookie
+//! together with X-Kitah-App; the teacher key is then refused. Without that file, header X-Teacher-Key, the key in
+//! ~/.config/lesson-server/teacher.key (made on first run, mode 600). GET /api/auth {access, teacher} says which.
+//! Teacher routes:
 //!   GET/POST /api/classes, DELETE /api/classes/CODE, POST /api/classes/CODE/students,
 //!   GET /api/classes/CODE/students (each kid's id, name, picked, locked, wait_s; never the picture),
 //!   POST /api/students/ID/reset (new picture), POST /api/students/ID/unlock, DELETE /api/students/ID
@@ -18,6 +22,7 @@
 //! GET anything else: a file from the pages folder. Listens on 127.0.0.1 only; the world reaches it through the
 //! Cloudflare tunnel (the server is behind CGNAT, no open ports).
 
+mod access;
 mod board;
 mod db;
 mod publish;
@@ -83,6 +88,8 @@ pub struct App {
     pub db: Mutex<Db>,
     pub board: Mutex<Store>,
     pub teacher_key: String,
+    /// Cloudflare Access (access.json): when set, only its signed token is the teacher, never the key.
+    pub access: Option<access::Access>,
     /// The lesson pages folder; None serves no pages.
     pub www: Option<PathBuf>,
     /// Projector screens and their phone remotes, memory only.
@@ -93,7 +100,22 @@ pub struct App {
 
 impl App {
     pub fn new(db: Db, board: Store, teacher_key: String, www: Option<PathBuf>) -> App {
-        App { db: Mutex::new(db), board: Mutex::new(board), teacher_key, www, misses: Mutex::new(HashMap::new()), remote: remote::Remote::new() }
+        App { db: Mutex::new(db), board: Mutex::new(board), teacher_key, access: None, www, misses: Mutex::new(HashMap::new()), remote: remote::Remote::new() }
+    }
+    pub fn with_access(mut self, a: Option<access::Access>) -> App {
+        self.access = a;
+        self
+    }
+    /// Is this request the teacher's? With Access on: a good Access token (the header Cloudflare adds, or the cookie
+    /// with the Kitah app's own header); the teacher key is refused. With Access off: the teacher key.
+    fn is_teacher(&self, rq: &Req, now: u64) -> bool {
+        match &self.access {
+            Some(a) => {
+                let token = rq.header("cf-access-jwt-assertion").or_else(|| rq.header("x-kitah-app").and(rq.header("cookie")).and_then(access::cookie_token));
+                token.is_some_and(|t| a.verify(t, now).is_ok())
+            }
+            None => rq.header("x-teacher-key").is_some_and(|k| same(k.trim(), &self.teacher_key)),
+        }
     }
     fn db(&self) -> std::sync::MutexGuard<'_, Db> {
         self.db.lock().unwrap_or_else(|e| e.into_inner())
@@ -187,7 +209,7 @@ pub fn route(app: &App, rq: &Req, now: u64) -> Resp {
             let mut s = app.board.lock().unwrap_or_else(|e| e.into_inner());
             Resp { status: 200, ctype: "application/x-ndjson", body: s.read(topic, since, now).into_bytes() }
         }
-        ("GET" | "HEAD", _) => page(app, path),
+        ("GET" | "HEAD", _) => page(app, rq, path, now),
         _ => err(404, "not found"),
     }
 }
@@ -199,13 +221,15 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
             Err(_) => return err(400, "body is not JSON"),
         }
     };
-    let teacher = rq.header("x-teacher-key").is_some_and(|k| same(k.trim(), &app.teacher_key));
+    let teacher = app.is_teacher(rq, now);
     let kid_session = || rq.header("authorization").and_then(|v| v.strip_prefix("Bearer ")).and_then(|t| app.db().session(t.trim(), now));
     let pick = |b: &Value| -> Option<(String, i64, u32)> {
         Some((b.get("code")?.as_str()?.to_string(), b.get("student")?.as_i64()?, u32::try_from(b.get("picture")?.as_u64()?).ok()?))
     };
     match (rq.method, parts) {
         ("GET", ["roster", code]) => roster(app, rq, code, now),
+        // The teacher page asks for the key only while Access is off.
+        ("GET", ["auth"]) => ok(json!({"access": app.access.is_some(), "teacher": teacher})),
         ("POST", ["pick"]) => {
             let Some((code, kid, pic)) = pick(&body) else { return err(400, "needs code, student and picture") };
             match app.db().first_pick(&code, kid, pic, now) {
@@ -264,7 +288,12 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
             }
             ok(json!({"ok": true}))
         }
-        _ if !teacher => err(401, "teacher key needed"),
+        // Every route below is the teacher's. A browser sends Origin on cross-site requests, and Cloudflare adds its
+        // token header to any request carrying the Access cookie (a form post from another site included), so a
+        // request from a page on another host is refused before any of them runs. cloudflared passes the public
+        // Host through unchanged, so the teacher's own page always matches.
+        _ if foreign_origin(rq) => err(403, "not from this site"),
+        _ if !teacher => err(401, "teacher sign-in needed"),
         ("POST", ["screens", "pair"]) => match body.get("code").and_then(Value::as_str) {
             Some(code) => screen(app.remote.pair(code.trim(), now)),
             None => err(400, "needs the code"),
@@ -322,6 +351,14 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
     }
 }
 
+/// Does the request carry an Origin whose host (with port) is not its Host header? No Origin is not foreign: curl
+/// and same-origin GETs send none, and a browser always sends one on a cross-site POST, PUT or DELETE.
+fn foreign_origin(rq: &Req) -> bool {
+    let Some(origin) = rq.header("origin") else { return false };
+    let host = origin.split_once("://").map_or("", |(_, h)| h).split('/').next().unwrap_or("");
+    !rq.header("host").is_some_and(|h| !host.is_empty() && h.trim().eq_ignore_ascii_case(host))
+}
+
 fn screen(o: remote::Out) -> Resp {
     match o {
         remote::Out::Ok(v) => ok(v),
@@ -371,8 +408,10 @@ fn ctype(p: &Path) -> &'static str {
     }
 }
 
-/// A lesson page from the folder: plain names only, no hidden files, nothing outside it.
-fn page(app: &App, path: &str) -> Resp {
+/// A lesson page from the folder: plain names only, no hidden files, nothing outside it. With Access on, the
+/// teacher page itself needs the token, so its address alone gives nothing; the teacher app's other files (manifest,
+/// icons, service worker) stay open, since Chrome fetches the manifest without cookies and Install would break.
+fn page(app: &App, rq: &Req, path: &str, now: u64) -> Resp {
     let Some(www) = &app.www else { return err(404, "not found") };
     let rel = Path::new(path.trim_start_matches('/'));
     let plain = rel.components().all(|c| matches!(c, Component::Normal(s) if !s.to_string_lossy().starts_with('.')));
@@ -382,6 +421,10 @@ fn page(app: &App, path: &str) -> Resp {
     let mut f = www.join(rel);
     if f.is_dir() {
         f = f.join("index.html");
+    }
+    // Compared as a path (components), so /teacher, /teacher/ and /teacher//index.html are all this one file.
+    if app.access.is_some() && f == www.join("teacher").join("index.html") && !app.is_teacher(rq, now) {
+        return err(401, "sign in through Cloudflare Access");
     }
     match std::fs::read(&f) {
         Ok(b) => Resp { status: 200, ctype: ctype(&f), body: b },
@@ -395,6 +438,7 @@ fn reason(status: u16) -> &'static str {
         204 => "No Content",
         400 => "Bad Request",
         401 => "Unauthorized",
+        403 => "Forbidden",
         404 => "Not Found",
         409 => "Conflict",
         413 => "Payload Too Large",
@@ -498,13 +542,20 @@ fn main() {
     let key_path = env_path("LESSON_TEACHER_KEY", home().join(".config/lesson-server/teacher.key"));
     let www = env_path("LESSON_WWW", home().join(".local/share/lesson-server/www"));
     let key = teacher_key(&key_path).unwrap_or_else(|e| panic!("teacher key {}: {e}", key_path.display()));
+    // A missing file is Access off; a file that is there but broken refuses to start (load says why).
+    let access_path = env_path("LESSON_ACCESS", home().join(".config/lesson-server/access.json"));
+    let access = access::Access::load(&access_path).unwrap_or_else(|e| panic!("access config {e}"));
+    let teacher_line = match &access {
+        Some(a) => format!("teacher: Cloudflare Access on ({}, {}), the teacher key refused", a.team_url, a.email),
+        None => format!("teacher: Cloudflare Access off (no {}), the teacher key", access_path.display()),
+    };
     let db = Db::open(&db_path).unwrap_or_else(|e| panic!("database {}: {e}", db_path.display()));
-    let app = Arc::new(App::new(db, Store::open(Some(board_path), now_s()), key, Some(www.clone())));
+    let app = Arc::new(App::new(db, Store::open(Some(board_path), now_s()), key, Some(www.clone())).with_access(access));
     // LESSON_PORT lets a test server run beside the live one on PORT.
     let port: u16 = std::env::var("LESSON_PORT").ok().map(|p| p.parse().unwrap_or_else(|_| panic!("LESSON_PORT {p:?} is not a port"))).unwrap_or(PORT);
     let addr = format!("127.0.0.1:{port}");
     let listener = TcpListener::bind(&addr).unwrap_or_else(|e| panic!("bind {addr}: {e}"));
-    eprintln!("lesson-server on {addr}: records in {}, pages from {}", db_path.display(), www.display());
+    eprintln!("lesson-server on {addr}: records in {}, pages from {}; {teacher_line}", db_path.display(), www.display());
     run(listener, app);
 }
 

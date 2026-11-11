@@ -1,5 +1,6 @@
 use super::*;
 use std::fs;
+use std::path::PathBuf;
 
 const NOW: u64 = 1_800_000_000;
 const KEY: &str = "teacher-secret";
@@ -469,4 +470,259 @@ fn pwa_sw_skips_api() {
     let sw = fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("www/teacher/sw.js")).unwrap();
     assert!(sw.contains("url.pathname.startsWith('/api/')") && sw.contains("url.pathname === '/api'"), "sw.js must leave /api to the network");
     assert!(sw.contains("!url.pathname.startsWith(SCOPE)") && sw.contains("const SCOPE = '/teacher/'"), "sw.js must leave pages outside /teacher/ alone");
+}
+
+// ---------- Cloudflare Access: the teacher by signed token only ----------
+
+const TEAM: &str = "https://kitah-test.cloudflareaccess.com";
+const AUD: &str = "aud-tag-of-the-kitah-app";
+const EMAIL: &str = "teacher@example.com";
+
+/// Two throwaway RSA key pairs for these tests, made once per run with openssl (the team's key, and another to forge
+/// with), as PKCS#8 PEM.
+fn test_keys() -> &'static (String, String) {
+    static KEYS: std::sync::OnceLock<(String, String)> = std::sync::OnceLock::new();
+    KEYS.get_or_init(|| {
+        let make = || {
+            let o = std::process::Command::new("openssl").args(["genpkey", "-algorithm", "RSA", "-pkeyopt", "rsa_keygen_bits:2048"]).output().expect("openssl");
+            assert!(o.status.success());
+            String::from_utf8(o.stdout).unwrap()
+        };
+        (make(), make())
+    })
+}
+fn rsa_key(pem: &str) -> rsa::RsaPrivateKey {
+    use rsa::pkcs8::DecodePrivateKey;
+    rsa::RsaPrivateKey::from_pkcs8_pem(pem.trim()).unwrap()
+}
+fn b64url(b: &[u8]) -> String {
+    use base64::Engine;
+    base64::engine::general_purpose::URL_SAFE_NO_PAD.encode(b)
+}
+/// A JWT signed with `pem` as key id "k1", holding `claims`.
+fn jwt(pem: &str, claims: Value) -> String {
+    jwt_kid(pem, "k1", claims)
+}
+/// The same, naming key id `kid`.
+fn jwt_kid(pem: &str, kid: &str, claims: Value) -> String {
+    use rsa::signature::{SignatureEncoding, Signer};
+    let head = b64url(json!({"alg": "RS256", "kid": kid, "typ": "JWT"}).to_string().as_bytes());
+    let body = b64url(claims.to_string().as_bytes());
+    let sig = rsa::pkcs1v15::SigningKey::<sha2::Sha256>::new(rsa_key(pem)).sign(format!("{head}.{body}").as_bytes());
+    format!("{head}.{body}.{}", b64url(&sig.to_bytes()))
+}
+fn good_jwt(claims: Value) -> String {
+    jwt(&test_keys().0, claims)
+}
+fn claims() -> Value {
+    json!({"iss": TEAM, "aud": [AUD], "email": "Teacher@Example.com", "exp": NOW + 3600, "nbf": NOW - 60, "iat": NOW - 60, "sub": "x"})
+}
+/// An app with Access on: access.json and the team's certs (JWKS, as Cloudflare serves them) in a temp folder.
+fn access_app(tag: &str) -> (App, PathBuf) {
+    use rsa::traits::PublicKeyParts;
+    let d = std::env::temp_dir().join(format!("lesson-access-{tag}-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&d);
+    fs::create_dir_all(&d).unwrap();
+    let pk = rsa_key(&test_keys().0).to_public_key();
+    let certs = json!({"keys": [{"kid": "k1", "kty": "RSA", "alg": "RS256", "use": "sig", "e": b64url(&pk.e().to_bytes_be()), "n": b64url(&pk.n().to_bytes_be())}], "public_cert": {}, "public_certs": []});
+    fs::write(d.join("certs.json"), certs.to_string()).unwrap();
+    fs::write(d.join("access.json"), json!({"team": "kitah-test", "aud": AUD, "email": EMAIL, "certs": d.join("certs.json")}).to_string()).unwrap();
+    let access = access::Access::load(&d.join("access.json")).unwrap();
+    assert!(access.is_some());
+    (App::new(Db::memory(), Store::open(None, NOW), KEY.into(), None).with_access(access), d)
+}
+/// HMAC-SHA256 (RFC 2104, 64-byte blocks), for the key-confusion forgery below.
+fn hmac_sha256(key: &[u8], msg: &[u8]) -> Vec<u8> {
+    use sha2::{Digest, Sha256};
+    let mut k = if key.len() > 64 { Sha256::digest(key).to_vec() } else { key.to_vec() };
+    k.resize(64, 0);
+    let pad = |b: u8| k.iter().map(|x| x ^ b).collect::<Vec<u8>>();
+    let inner = Sha256::new().chain_update(pad(0x36)).chain_update(msg).finalize();
+    Sha256::new().chain_update(pad(0x5c)).chain_update(inner).finalize().to_vec()
+}
+fn with_token(method: &str, path: &str, token: &str, body: &str) -> String {
+    req(method, path, &format!("Cf-Access-Jwt-Assertion: {token}\r\n"), body)
+}
+
+#[test]
+fn access_token_allows_teacher() {
+    let (a, d) = access_app("allow");
+    let t = good_jwt(claims());
+    let out = http(&a, &with_token("POST", "/api/classes", &t, r#"{"name":"5A","students":["Noa K."]}"#), NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let code = body_of(&out)["code"].as_str().unwrap().to_string();
+    assert!(http(&a, &with_token("GET", &format!("/api/classes/{code}/students"), &t, ""), NOW).starts_with("HTTP/1.1 200"));
+    // The Kitah app's cookie works only with the app's own header (a page on another site can't send that).
+    let cookie = format!("Cookie: theme=x; CF_Authorization={t}\r\n");
+    assert!(http(&a, &req("GET", "/api/classes", &format!("{cookie}X-Kitah-App: 1\r\n"), ""), NOW).starts_with("HTTP/1.1 200"));
+    assert!(http(&a, &req("GET", "/api/classes", &cookie, ""), NOW).starts_with("HTTP/1.1 401"));
+    // An nbf a few seconds ahead is not yet good; at nbf it is.
+    let mut c = claims();
+    c["nbf"] = json!(NOW + 5);
+    assert!(http(&a, &with_token("GET", "/api/classes", &good_jwt(c.clone()), ""), NOW).starts_with("HTTP/1.1 401"));
+    assert!(http(&a, &with_token("GET", "/api/classes", &good_jwt(c), ""), NOW + 5).starts_with("HTTP/1.1 200"));
+    // A plain aud string is fine too.
+    let mut c = claims();
+    c["aud"] = json!(AUD);
+    assert!(http(&a, &with_token("GET", "/api/classes", &good_jwt(c), ""), NOW).starts_with("HTTP/1.1 200"));
+    let _ = fs::remove_dir_all(&d);
+}
+
+#[test]
+fn access_token_refuses_bad() {
+    let (a, d) = access_app("refuse");
+    let set = |k: &str, v: Value| {
+        let mut c = claims();
+        c[k] = v;
+        good_jwt(c)
+    };
+    let good = good_jwt(claims());
+    let mut tampered = good.clone();
+    tampered.insert_str(good.find('.').unwrap() + 1, "e30");
+    let mut no_email = claims();
+    no_email.as_object_mut().unwrap().remove("email");
+    // alg none, with no signature.
+    let none = format!("{}.{}.", b64url(json!({"alg": "none", "kid": "k1"}).to_string().as_bytes()), good.split('.').nth(1).unwrap());
+    // Key confusion: HS256 with the team's public key (its JWKS modulus) as the HMAC secret, which a verifier that
+    // trusts the token's alg would accept.
+    let hs256_forgery = {
+        use rsa::traits::PublicKeyParts;
+        let n = rsa_key(&test_keys().0).to_public_key().n().to_bytes_be();
+        let head = b64url(json!({"alg": "HS256", "kid": "k1", "typ": "JWT"}).to_string().as_bytes());
+        let body = b64url(claims().to_string().as_bytes());
+        let mut forged = Vec::new();
+        for secret in [n.clone(), b64url(&n).into_bytes()] {
+            forged.push(format!("{head}.{body}.{}", b64url(&hmac_sha256(&secret, format!("{head}.{body}").as_bytes()))));
+        }
+        forged
+    };
+    let bad = [
+        ("wrong signature", jwt(&test_keys().1, claims())),
+        ("tampered claims", tampered),
+        ("alg none", none),
+        ("expired", set("exp", json!(NOW))),
+        ("wrong aud", set("aud", json!(["another-app"]))),
+        ("wrong iss", set("iss", json!("https://evil.cloudflareaccess.com"))),
+        ("other email", set("email", json!("someone@example.com"))),
+        ("no email", good_jwt(no_email)),
+        ("not a token", "abc.def".to_string()),
+        ("HS256 keyed with the modulus bytes", hs256_forgery[0].clone()),
+        ("HS256 keyed with the modulus as base64url", hs256_forgery[1].clone()),
+        ("unknown key id", jwt_kid(&test_keys().0, "k9", claims())),
+    ];
+    for (why, t) in &bad {
+        let out = http(&a, &with_token("GET", "/api/classes", t, ""), NOW);
+        assert!(out.starts_with("HTTP/1.1 401"), "{why}: {out}");
+    }
+    // Missing header, and the teacher key alone: 401.
+    assert!(http(&a, &req("GET", "/api/classes", "", ""), NOW).starts_with("HTTP/1.1 401"));
+    assert!(http(&a, &teacher("GET", "/api/classes", ""), NOW).starts_with("HTTP/1.1 401"));
+    assert!(http(&a, &teacher("POST", "/api/classes", r#"{"name":"x"}"#), NOW).starts_with("HTTP/1.1 401"));
+    // The good one still works after all that.
+    assert!(http(&a, &with_token("GET", "/api/classes", &good, ""), NOW).starts_with("HTTP/1.1 200"));
+    // A broken access.json stops the server from starting open.
+    fs::write(d.join("broken.json"), r#"{"team":"x"}"#).unwrap();
+    assert!(access::Access::load(&d.join("broken.json")).is_err());
+    let _ = fs::remove_dir_all(&d);
+}
+
+#[test]
+fn access_off_uses_key() {
+    // No access.json: Access is off and the teacher key works as before.
+    let d = std::env::temp_dir().join(format!("lesson-access-off-{}", std::process::id()));
+    assert!(access::Access::load(&d.join("access.json")).unwrap().is_none());
+    let a = app();
+    assert_eq!(body_of(&http(&a, &req("GET", "/api/auth", "", ""), NOW))["access"], false);
+    assert!(http(&a, &teacher("GET", "/api/classes", ""), NOW).starts_with("HTTP/1.1 200"));
+    assert!(http(&a, &req("GET", "/api/classes", "", ""), NOW).starts_with("HTTP/1.1 401"));
+    // A token alone means nothing while Access is off.
+    assert!(http(&a, &with_token("GET", "/api/classes", &good_jwt(claims()), ""), NOW).starts_with("HTTP/1.1 401"));
+}
+
+// ---------- The teacher gate: the page itself, foreign origins, /api/auth ----------
+
+/// A temp pages folder holding the teacher page and its manifest.
+fn teacher_www(tag: &str) -> PathBuf {
+    let w = std::env::temp_dir().join(format!("lesson-gate-www-{tag}-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&w);
+    fs::create_dir_all(w.join("teacher")).unwrap();
+    fs::write(w.join("teacher/index.html"), "<h1>teacher</h1>").unwrap();
+    fs::write(w.join("teacher/manifest.webmanifest"), r#"{"name":"Kitah"}"#).unwrap();
+    w
+}
+fn auth(a: &App, headers: &str) -> Value {
+    body_of(&http(a, &req("GET", "/api/auth", headers, ""), NOW))
+}
+
+#[test]
+fn teacher_gate_page_needs_token() {
+    let (mut a, d) = access_app("gate-page");
+    let w = teacher_www("on");
+    a.www = Some(w.clone());
+    let t = good_jwt(claims());
+    for p in ["/teacher/", "/teacher", "/teacher/index.html", "/teacher//index.html"] {
+        for m in ["GET", "HEAD"] {
+            let out = http(&a, &req(m, p, "", ""), NOW);
+            assert!(out.starts_with("HTTP/1.1 401"), "{m} {p}: {out}");
+            assert!(http(&a, &with_token(m, p, &t, ""), NOW).starts_with("HTTP/1.1 200"), "{m} {p} with token");
+        }
+    }
+    let out = http(&a, &with_token("GET", "/teacher/", &t, ""), NOW);
+    assert!(out.contains("<h1>teacher</h1>"));
+    // Another email's token is no better than none.
+    let mut c = claims();
+    c["email"] = json!("someone@example.com");
+    assert!(http(&a, &with_token("GET", "/teacher/", &good_jwt(c), ""), NOW).starts_with("HTTP/1.1 401"));
+    // The app's manifest stays open, so Chrome (which fetches it without cookies) can still install the app.
+    let out = http(&a, &req("GET", "/teacher/manifest.webmanifest", "", ""), NOW);
+    assert!(out.starts_with("HTTP/1.1 200") && out.contains("application/manifest+json"), "{out}");
+    // Access off: the page opens without a token, as today.
+    let mut off = app();
+    off.www = Some(w.clone());
+    assert!(http(&off, &req("GET", "/teacher/", "", ""), NOW).starts_with("HTTP/1.1 200"));
+    let _ = fs::remove_dir_all(&d);
+    let _ = fs::remove_dir_all(&w);
+}
+
+#[test]
+fn teacher_gate_foreign_origin_refused() {
+    let (a, d) = access_app("gate-origin");
+    let t = good_jwt(claims());
+    let hdr = |origin: &str| format!("Cf-Access-Jwt-Assertion: {t}\r\nOrigin: {origin}\r\n");
+    let body = r#"{"name":"5A","students":["Noa K."]}"#;
+    for evil in ["https://evil.example", "null", "http://x.evil.example", "http://evil.example/http://x"] {
+        let out = http(&a, &req("POST", "/api/classes", &hdr(evil), body), NOW);
+        assert!(out.starts_with("HTTP/1.1 403 Forbidden"), "{evil}: {out}");
+    }
+    let n = |a: &App| a.db().classes().as_array().map_or(0, Vec::len);
+    assert_eq!(n(&a), 0, "a refused request made no class");
+    // From the request's own host (the tests' Host is x): accepted.
+    let out = http(&a, &req("POST", "/api/classes", &hdr("http://x"), body), NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    assert_eq!(n(&a), 1);
+    // The key path is held to the same rule while Access is off.
+    let off = app();
+    let key = |origin: &str| format!("X-Teacher-Key: {KEY}\r\nOrigin: {origin}\r\n");
+    assert!(http(&off, &req("POST", "/api/classes", &key("https://evil.example"), body), NOW).starts_with("HTTP/1.1 403"));
+    assert_eq!(n(&off), 0);
+    assert!(http(&off, &req("POST", "/api/classes", &key("http://x"), body), NOW).starts_with("HTTP/1.1 200"));
+    // Kid routes are not the teacher's and keep working from anywhere (the lesson page posts from its own host).
+    assert!(!http(&off, &req("GET", "/api/roster/123456", "Origin: https://evil.example\r\n", ""), NOW).starts_with("HTTP/1.1 403"));
+    let _ = fs::remove_dir_all(&d);
+}
+
+#[test]
+fn teacher_gate_auth_reports() {
+    let (a, d) = access_app("gate-auth");
+    let t = good_jwt(claims());
+    assert_eq!(auth(&a, &format!("Cf-Access-Jwt-Assertion: {t}\r\n")), json!({"access": true, "teacher": true}));
+    assert_eq!(auth(&a, &format!("Cookie: CF_Authorization={t}\r\nX-Kitah-App: 1\r\n")), json!({"access": true, "teacher": true}));
+    assert_eq!(auth(&a, &format!("Cookie: CF_Authorization={t}\r\n")), json!({"access": true, "teacher": false}));
+    assert_eq!(auth(&a, ""), json!({"access": true, "teacher": false}));
+    assert_eq!(auth(&a, &format!("X-Teacher-Key: {KEY}\r\n")), json!({"access": true, "teacher": false}));
+    let off = app();
+    assert_eq!(auth(&off, &format!("X-Teacher-Key: {KEY}\r\n")), json!({"access": false, "teacher": true}));
+    assert_eq!(auth(&off, ""), json!({"access": false, "teacher": false}));
+    assert_eq!(auth(&off, &format!("Cf-Access-Jwt-Assertion: {t}\r\n")), json!({"access": false, "teacher": false}));
+    let _ = fs::remove_dir_all(&d);
 }

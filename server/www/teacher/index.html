@@ -105,6 +105,15 @@ td.act .btn{margin-left:8px;font-size:17px}
   </div>
 </section>
 
+<section id="v-ended" hidden>
+  <div class="top"><h1>Teacher</h1></div>
+  <div class="card">
+    <h2>Your sign-in ended</h2>
+    <p class="muted">Sign in again with your Google account to see your classes.</p>
+    <p><button class="btn main" id="sign-in-again" type="button">Sign in again</button></p>
+  </div>
+</section>
+
 <section id="v-classes" hidden>
   <div class="top"><h1>Your classes</h1><button class="btn main" id="new-class" type="button">New class</button><button class="btn blue" id="open-remote" type="button">Projector remote</button><button class="btn soft" id="forget" type="button">Forget key</button></div>
   <p class="msg" id="classes-msg"></p>
@@ -189,14 +198,19 @@ const REFRESH_MS = 5000;
 const KEY = 'lesson-teacher-key';
 const $ = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-let key = localStorage.getItem(KEY) || '', current = null, timer = 0;
+// Cloudflare Access: when the server says it is on, Cloudflare's Google sign-in is the teacher's only way in, and this
+// page never asks for the key. The last answer is kept, so with no network the page still never offers the key box.
+const ACCESS = 'lesson-teacher-access';
+let key = localStorage.getItem(KEY) || '', current = null, timer = 0, access = localStorage.getItem(ACCESS) === '1';
 
 async function api(method, path, body) {
+  // X-Kitah-App: the server counts the Access cookie only with this header, which a page on another site can't send.
+  const headers = { 'X-Kitah-App': '1', ...(key && !access ? { 'X-Teacher-Key': key } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) };
   try {
-    const r = await fetch(path, { method, headers: { 'X-Teacher-Key': key, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(FETCH_MS), cache: 'no-store' });
+    const r = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(FETCH_MS), cache: 'no-store' });
     let data = null;
     try { data = await r.json(); } catch {}
-    if (r.status === 401) { askKey('This key does not work. Check it and type it again.'); }
+    if (r.status === 401) { if (access) ended(); else askKey('This key does not work. Check it and type it again.'); }
     return { status: r.status, data };
   } catch { return { status: 0, data: null }; }
 }
@@ -222,7 +236,21 @@ $('key-form').onsubmit = async e => {
   if (r.status === 200) { localStorage.setItem(KEY, key); showClasses(r.data); }
   else if (r.status !== 401) $('key-msg').textContent = NO_NET;
 };
-$('forget').onclick = () => { localStorage.removeItem(KEY); key = ''; askKey(); };
+$('forget').onclick = () => {
+  // With Access on this is Sign out: Cloudflare ends the session, and the next visit asks Google again.
+  if (access) { location.href = '/cdn-cgi/access/logout'; return; }
+  localStorage.removeItem(KEY); key = ''; askKey();
+};
+
+// ---------- Access: Cloudflare's sign-in ended ----------
+function ended() { view('v-ended'); }
+// A reload goes back through Cloudflare, which asks Google again.
+$('sign-in-again').onclick = () => location.reload();
+function useAccess(on) {
+  access = on;
+  localStorage.setItem(ACCESS, on ? '1' : '0');
+  $('forget').textContent = on ? 'Sign out' : 'Forget key';
+}
 
 // ---------- Classes ----------
 async function showClasses(list) {
@@ -388,7 +416,16 @@ $('remote-ctl').onclick = async e => {
 };
 document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('v-remote').hidden) remoteRefresh(); });
 
-if (key) showClasses(); else askKey();
+(async () => {
+  useAccess(access);
+  const r = await api('GET', '/api/auth');
+  if (r.status === 200 && r.data) {
+    useAccess(!!r.data.access);
+    if (access) return r.data.teacher ? showClasses() : ended();
+  }
+  // Access off (or no answer): the key, as before; with no network the classes view says so.
+  if (access || key) showClasses(); else askKey();
+})();
 </script>
 </body>
 </html>
