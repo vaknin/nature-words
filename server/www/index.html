@@ -62,6 +62,9 @@ h1 .he{font-size:30px;margin-top:4px}
 .again{font-size:26px;padding:14px 30px;border-radius:999px}
 .count{font:600 120px var(--head);color:var(--river-d);margin:0;line-height:1}
 .hi{font-size:84px}
+/* New name: one big box in the class code's look. */
+.namebox{width:600px;max-width:90vw;height:110px;border-radius:22px;background:#fff;border:4px solid var(--line);text-align:center;font:600 60px var(--head);color:var(--river-d);caret-color:var(--river);outline:none;padding:0 18px}
+.namebox:focus{border-color:var(--river)}
 @media (prefers-reduced-motion:reduce){.big-pick{animation:none}}
 </style>
 </head>
@@ -80,7 +83,21 @@ h1 .he{font-size:30px;margin-top:4px}
   <h1>Tap your name<span class="he">לחצו על השם שלכם</span></h1>
   <div class="names" id="names"></div>
   <p class="msg" id="names-msg"></p>
-  <button class="btn soft" id="not-class" type="button">Not your class? <span class="he" style="display:inline;color:inherit">לא הכיתה שלכם?</span></button>
+  <div class="row"><button class="btn soft" id="not-class" type="button">Not your class? <span class="he" style="display:inline;color:inherit">לא הכיתה שלכם?</span></button><button class="btn soft" id="i-am-new" type="button" hidden>I am new <span class="he" style="display:inline;color:inherit">אני חדש</span></button></div>
+</section>
+
+<section class="screen" id="s-join" hidden>
+  <h1>Type your first name<span class="he">הקלידו את השם הפרטי שלכם</span></h1>
+  <p class="hint" style="text-align:center">Same name as a friend? Add your family initial: Noa B.<span class="he">יש עוד מישהו עם אותו שם? הוסיפו את האות הראשונה של שם המשפחה: נועה ב.</span></p>
+  <form id="join-form" autocomplete="off"><input class="namebox" id="join-name" maxlength="15" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="send" dir="auto" aria-label="your first name"></form>
+  <p class="msg" id="join-msg"></p>
+  <div class="row"><button class="btn soft" id="join-back" type="button">← Back to names</button><button class="btn go" id="join-send" type="button">Send</button></div>
+</section>
+
+<section class="screen" id="s-pending" hidden>
+  <h1>Waiting for your teacher to say OK<span class="he">מחכים שהמורה יאשר</span></h1>
+  <span class="pill" id="pending-name" dir="auto"></span>
+  <p class="hint" style="text-align:center">Keep this page open.<span class="he">השאירו את הדף פתוח.</span></p>
 </section>
 
 <section class="screen" id="s-grid" hidden>
@@ -156,7 +173,15 @@ const HI_MS = 1500;
 // only counts down the wait_s the server sends.
 
 const $ = id => document.getElementById(id);
-const CLASS_KEY = 'lesson-class', SESSION_KEY = 'lesson-session';
+// A new name, checked here before it is sent: the server's own rule (kid_name in the server), one word of 1 to 12
+// letters (its KID_WORD_MAX, the lesson skill's race-name cap), optionally a space and one letter for the family
+// initial, with or without a dot. \p{Alphabetic} is the same letter test as the server's char::is_alphabetic.
+const KID_WORD_MAX = 12;
+const NAME_RULE = new RegExp(`^\\p{Alphabetic}{1,${KID_WORD_MAX}}(?: \\p{Alphabetic}\\.?)?$`, 'u');
+// A waiting name asks every 5 s whether the teacher said OK: the teacher page's own REFRESH_MS, so a new name shows
+// there, and an approval shows here, each within one refresh.
+const POLL_MS = 5000;
+const CLASS_KEY = 'lesson-class', SESSION_KEY = 'lesson-session', JOIN_KEY = 'lesson-join';
 let cls = null, kid = null, chosen = -1, busy = false, ticker = 0;
 
 function show(id) {
@@ -270,8 +295,68 @@ function namesScreen(en, he) {
     while ((b.scrollWidth > b.clientWidth || b.scrollHeight > b.clientHeight) && size > 14) b.style.fontSize = (--size) + 'px';
   }
   g.onclick = e => { const b = e.target.closest('button[data-i]'); if (b) { kid = kids[+b.dataset.i]; gridScreen(); } };
+  $('i-am-new').hidden = !cls.join_open;
+  if (!kids.length && !cls.join_open && !en) say($('names-msg'), 'No names yet. Ask your teacher.', 'עוד אין שמות. בקשו עזרה מהמורה.');
 }
-$('not-class').onclick = () => { localStorage.removeItem(CLASS_KEY); cls = null; codeScreen(); };
+$('not-class').onclick = () => { localStorage.removeItem(CLASS_KEY); localStorage.removeItem(JOIN_KEY); cls = null; codeScreen(); };
+
+// ---------- 2b. A new name: the kid types it, the teacher says OK (Kahoot style) ----------
+function joinScreen(en, he) {
+  show('s-join');
+  say($('join-msg'), en, he);
+  $('join-name').value = '';
+  $('join-name').focus();
+}
+$('i-am-new').onclick = () => joinScreen();
+$('join-back').onclick = () => backToNames();
+$('join-name').oninput = () => say($('join-msg'));
+$('join-form').addEventListener('submit', e => { e.preventDefault(); sendJoin(); });
+$('join-send').onclick = sendJoin;
+async function sendJoin() {
+  const name = $('join-name').value.trim().split(/\s+/).join(' ');
+  if (!NAME_RULE.test(name)) return say($('join-msg'), 'Only your first name, or first name and family initial, like Noa B. Letters only.', 'רק השם הפרטי, או שם פרטי ואות של שם המשפחה, כמו נועה ב. רק אותיות.');
+  if (busy) return;
+  busy = true; $('join-send').disabled = true;
+  const r = await api('POST', '/api/join', { code: cls.code, name });
+  busy = false; $('join-send').disabled = false;
+  if (r.status === 200) {
+    const j = { code: cls.code, ticket: r.data.ticket, name: r.data.name };
+    localStorage.setItem(JOIN_KEY, JSON.stringify(j));
+    return pendingScreen(j);
+  }
+  if (r.status === 409 && /full/.test(r.data.error || '')) return say($('join-msg'), 'The class is full. Ask your teacher.', 'הכיתה מלאה. בקשו עזרה מהמורה.');
+  if (r.status === 409) return say($('join-msg'), 'This name is taken. Add your family initial, like Noa B.', 'השם הזה תפוס. הוסיפו את האות הראשונה של שם המשפחה, כמו נועה ב.');
+  if (r.status === 403) return say($('join-msg'), 'New names are closed now. Ask your teacher.', 'אי אפשר להוסיף שמות עכשיו. בקשו עזרה מהמורה.');
+  if (r.status === 400) return say($('join-msg'), 'Only your first name, or first name and family initial, like Noa B. Letters only.', 'רק השם הפרטי, או שם פרטי ואות של שם המשפחה, כמו נועה ב. רק אותיות.');
+  if (r.status === 404) { localStorage.removeItem(CLASS_KEY); return codeScreen('No class with this code. Look at the board and try again.', 'אין כיתה עם הקוד הזה. הסתכלו על הלוח ונסו שוב.'); }
+  if (r.status === 429) return say($('join-msg'), `Too many tries. Wait ${r.data.wait_s || 0} seconds.`, `יותר מדי ניסיונות. חכו ${r.data.wait_s || 0} שניות.`);
+  say($('join-msg'), ...NO_NET);
+}
+// Waits for the teacher, also across a reload (the ticket is kept on this laptop). OK: straight to picking the
+// animal as that kid. No: back to typing a name.
+function pendingScreen(j) {
+  show('s-pending');
+  $('pending-name').textContent = j.name;
+  let asking = false;
+  const poll = async () => {
+    if (asking) return;
+    asking = true;
+    const r = await api('GET', '/api/join/' + encodeURIComponent(j.ticket));
+    asking = false;
+    if ($('s-pending').hidden) return;
+    if (r.status === 200 && r.data.status === 'approved') {
+      localStorage.removeItem(JOIN_KEY);
+      kid = { id: r.data.id, name: r.data.name, picked: r.data.picked };
+      return gridScreen();
+    }
+    if (r.status === 404) {
+      localStorage.removeItem(JOIN_KEY);
+      return joinScreen('Your teacher said no. Type your name again.', 'המורה לא אישר/ה. הקלידו את השם שוב.');
+    }
+  };
+  ticker = setInterval(poll, POLL_MS);
+  poll();
+}
 const backToNames = async () => {
   // The roster is read again, so a kid who just picked shows as picked.
   const r = cls && await api('GET', '/api/roster/' + cls.code);
@@ -364,11 +449,21 @@ function hello(d) {
 }
 
 // ---------- Start: the laptop remembers its class, so the next kid starts at the names. ----------
+// The class's home link (this address + /?class=CODE, posted in Classroom) starts at its names and is remembered.
 (async () => {
+  const linked = new URLSearchParams(location.search).get('class');
+  if (linked && new RegExp(`^\\d{${boxes.length}}$`).test(linked)) localStorage.setItem(CLASS_KEY, linked);
   const code = localStorage.getItem(CLASS_KEY);
   if (!code) return codeScreen();
   const r = await api('GET', '/api/roster/' + code);
-  if (r.status === 200) { cls = { code, ...r.data }; return namesScreen(); }
+  if (r.status === 200) {
+    cls = { code, ...r.data };
+    // A name still waiting for the teacher keeps waiting after a reload.
+    let j = null;
+    try { j = JSON.parse(localStorage.getItem(JOIN_KEY) || 'null'); } catch {}
+    if (j && j.code === code && j.ticket) return pendingScreen(j);
+    return namesScreen();
+  }
   if (r.status === 404) { localStorage.removeItem(CLASS_KEY); return codeScreen(); }
   codeScreen(...NO_NET);
   fill(0, code);
