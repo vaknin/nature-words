@@ -303,3 +303,116 @@ fn teacher_sees_kids_state() {
     assert_eq!(kid(&r, noa)["locked"], false);
     assert_eq!(kid(&r, noa)["wait_s"], 0);
 }
+
+fn open_screen(a: &App, now: u64) -> (String, String) {
+    let out = http(a, &req("POST", "/api/screens", "", ""), now);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let b = body_of(&out);
+    let code = b["code"].as_str().unwrap().to_string();
+    assert_eq!(code.len(), CLASS_CODE_DIGITS);
+    (b["token"].as_str().unwrap().to_string(), code)
+}
+
+#[test]
+fn remote_pair_and_move() {
+    let mut a = app();
+    // No hold: a poll with nothing new answers at once (the hold itself is remote_long_poll_wakes).
+    a.remote.hold = Duration::ZERO;
+    let (token, code) = open_screen(&a, NOW);
+    assert_eq!(token.len(), 32, "as long as a kid's session token");
+    let pair = |code: &str, h: &str| http(&a, &req("POST", "/api/screens/pair", h, &format!(r#"{{"code":"{code}"}}"#)), NOW);
+    let key = format!("X-Teacher-Key: {KEY}\r\n");
+    // Pairing needs the teacher key; a wrong code is 404.
+    assert!(pair(&code, "").starts_with("HTTP/1.1 401"));
+    let wrong = if code == "000000" { "000001" } else { "000000" };
+    assert!(pair(wrong, &key).starts_with("HTTP/1.1 404"));
+    let out = pair(&code, &key);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let id = body_of(&out)["id"].as_str().unwrap().to_string();
+    // The code works once.
+    assert!(pair(&code, &key).starts_with("HTTP/1.1 404"));
+    // Commands need the key; a bad one is 400.
+    let cmd = |b: &str, h: &str| http(&a, &req("POST", &format!("/api/screens/{id}/cmd"), h, b), NOW);
+    assert!(cmd(r#"{"cmd":"next"}"#, "").starts_with("HTTP/1.1 401"));
+    assert!(cmd(r#"{"cmd":"next"}"#, &key).starts_with("HTTP/1.1 200"));
+    assert!(cmd(r#"{"cmd":"stage","stage":3}"#, &key).starts_with("HTTP/1.1 200"));
+    for bad in [r#"{"cmd":"jump"}"#, r#"{"cmd":"stage"}"#, r#"{"cmd":"stage","stage":0}"#, r#"{"cmd":"stage","stage":10}"#, "{}"] {
+        assert!(cmd(bad, &key).starts_with("HTTP/1.1 400"), "{bad}");
+    }
+    // The projector's poll after 0 has both, in order, and it is paired.
+    let p = body_of(&http(&a, &req("GET", &format!("/api/screens/{token}/cmds?after=0"), "", ""), NOW));
+    assert_eq!(p["paired"], true);
+    assert_eq!(p["code"], Value::Null);
+    assert_eq!(p["seq"], 2);
+    assert_eq!(p["cmds"], json!([{"cmd": "next", "seq": 1}, {"cmd": "stage", "stage": 3, "seq": 2}]));
+    let p = body_of(&http(&a, &req("GET", &format!("/api/screens/{token}/cmds?after=1"), "", ""), NOW));
+    assert_eq!(p["cmds"], json!([{"cmd": "stage", "stage": 3, "seq": 2}]));
+    // State round-trips to the phone.
+    let st = r#"{"stage":3,"of":6,"name":"Quiz time","item":null}"#;
+    assert!(http(&a, &req("POST", &format!("/api/screens/{token}/state"), "", st), NOW).starts_with("HTTP/1.1 200"));
+    assert!(http(&a, &req("POST", &format!("/api/screens/{token}/state"), "", "{}"), NOW).starts_with("HTTP/1.1 400"));
+    assert!(http(&a, &req("GET", &format!("/api/screens/{id}"), "", ""), NOW + 4).starts_with("HTTP/1.1 401"));
+    let s = body_of(&http(&a, &teacher("GET", &format!("/api/screens/{id}"), ""), NOW + 4));
+    assert_eq!((s["state"]["stage"].clone(), s["state"]["of"].clone(), s["state"]["name"].clone()), (json!(3), json!(6), json!("Quiz time")));
+    assert_eq!(s["polled_s_ago"], 4);
+    // Unknown tokens and ids are 404, so the page opens a new screen and the phone pairs again.
+    assert!(http(&a, &req("GET", "/api/screens/nope/cmds?after=0", "", ""), NOW).starts_with("HTTP/1.1 404"));
+    assert!(http(&a, &teacher("POST", "/api/screens/nope/cmd", r#"{"cmd":"next"}"#), NOW).starts_with("HTTP/1.1 404"));
+    // Only the newest commands are kept.
+    for _ in 0..remote::REMOTE_CMDS_KEPT + 5 {
+        cmd(r#"{"cmd":"space"}"#, &key);
+    }
+    let p = body_of(&http(&a, &req("GET", &format!("/api/screens/{token}/cmds?after=0"), "", ""), NOW));
+    assert_eq!(p["cmds"].as_array().unwrap().len(), remote::REMOTE_CMDS_KEPT);
+    // A code expires: an unpaired screen gets a fresh one on its next poll, and the old one no longer pairs.
+    let (t2, c2) = open_screen(&a, NOW);
+    let later = NOW + remote::REMOTE_CODE_S;
+    assert!(http(&a, &teacher("POST", "/api/screens/pair", &format!(r#"{{"code":"{c2}"}}"#)), later).starts_with("HTTP/1.1 404"));
+    let p = body_of(&http(&a, &req("GET", &format!("/api/screens/{t2}/cmds?after=0"), "", ""), later));
+    let c3 = p["code"].as_str().unwrap().to_string();
+    assert_eq!(p["paired"], false);
+    assert!(http(&a, &teacher("POST", "/api/screens/pair", &format!(r#"{{"code":"{c3}"}}"#)), later).starts_with("HTTP/1.1 200"));
+    // A screen whose projector stopped polling is dropped.
+    assert!(http(&a, &req("GET", &format!("/api/screens/{token}/cmds?after=99"), "", ""), NOW + remote::REMOTE_SCREEN_S).starts_with("HTTP/1.1 404"));
+}
+
+#[test]
+fn remote_long_poll_wakes() {
+    let l = TcpListener::bind("127.0.0.1:0").unwrap();
+    let addr = l.local_addr().unwrap();
+    let mut a = App::new(Db::memory(), Store::open(None, now_s()), KEY.into(), None);
+    // A short hold, so the idle poll's end is seen in a second rather than REMOTE_HOLD_S.
+    let hold = Duration::from_millis(1500);
+    a.remote.hold = hold;
+    std::thread::spawn(move || run(l, Arc::new(a)));
+    let ask = move |r: String| {
+        let mut c = std::net::TcpStream::connect(addr).unwrap();
+        c.write_all(r.as_bytes()).unwrap();
+        let mut out = String::new();
+        c.read_to_string(&mut out).unwrap();
+        out
+    };
+    let b = body_of(&ask(req("POST", "/api/screens", "", "")));
+    let (token, code) = (b["token"].as_str().unwrap().to_string(), b["code"].as_str().unwrap().to_string());
+    let id = body_of(&ask(teacher("POST", "/api/screens/pair", &format!(r#"{{"code":"{code}"}}"#))))["id"].as_str().unwrap().to_string();
+    // An idle poll answers empty once the hold ends.
+    let t = std::time::Instant::now();
+    let p = body_of(&ask(req("GET", &format!("/api/screens/{token}/cmds?after=0"), "", "")));
+    let took = t.elapsed();
+    assert_eq!(p["cmds"], json!([]));
+    assert!(took >= hold && took < hold + Duration::from_secs(1), "idle poll took {took:?}");
+    // A held poll answers within 1 s of the phone's command.
+    let tk = token.clone();
+    let poller = std::thread::spawn(move || {
+        let out = ask(req("GET", &format!("/api/screens/{tk}/cmds?after=0"), "", ""));
+        (std::time::Instant::now(), out)
+    });
+    std::thread::sleep(Duration::from_millis(300));
+    // While it is held the phone sees the projector as polling now.
+    assert_eq!(body_of(&ask(teacher("GET", &format!("/api/screens/{id}"), "")))["polled_s_ago"], 0);
+    let sent = std::time::Instant::now();
+    assert!(ask(teacher("POST", &format!("/api/screens/{id}/cmd"), r#"{"cmd":"next"}"#)).starts_with("HTTP/1.1 200"));
+    let (got, out) = poller.join().unwrap();
+    assert!(got.duration_since(sent) < Duration::from_secs(1), "woke after {:?}", got.duration_since(sent));
+    assert_eq!(body_of(&out)["cmds"], json!([{"cmd": "next", "seq": 1}]));
+}
