@@ -1,0 +1,11 @@
+[Unit]
+Description=Lesson server: write the tunnel's live address to the url file and publish it as board.json
+After=lesson-tunnel.service
+
+[Service]
+ExecStart=%h/.local/bin/lesson-server publish
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

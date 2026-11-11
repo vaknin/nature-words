@@ -1,0 +1,12 @@
+[Unit]
+Description=Lesson server: kids' sign-in and records, race boards, lesson pages (127.0.0.1:8799)
+
+[Service]
+# 8799: 8797 and 8798 are held by the race-board server and its tunnel metrics (seen with ss -ltn).
+# The port is the PORT constant in the binary; records, boards and pages live under ~/.local/state and ~/.local/share.
+ExecStart=%h/.local/bin/lesson-server
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

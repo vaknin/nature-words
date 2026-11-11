@@ -1,0 +1,14 @@
+[Unit]
+Description=Lesson server: Cloudflare quick tunnel to it (the server is behind CGNAT, no open ports)
+Wants=lesson-server.service
+After=lesson-server.service network-online.target
+
+[Service]
+# No account: a quick tunnel gets a new https://X.trycloudflare.com each start; the URL watcher picks it up.
+# Metrics on 8796 (free in ss -ltn; 8798 is the race-board tunnel's): it answers /quicktunnel with the hostname.
+ExecStart=%h/.local/bin/cloudflared tunnel --no-autoupdate --metrics 127.0.0.1:8796 --url http://127.0.0.1:8799
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
