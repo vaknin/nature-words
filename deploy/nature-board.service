@@ -1,0 +1,12 @@
+[Unit]
+Description=Nature words race boards: our own board server (127.0.0.1:8797, kept 12 h in a file)
+
+[Service]
+ExecStart=%h/.local/bin/nature-board
+Environment=BOARD_ADDR=127.0.0.1:8797
+Environment=BOARD_FILE=%S/nature-board/board.log
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=default.target

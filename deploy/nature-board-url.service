@@ -1,0 +1,12 @@
+[Unit]
+Description=Nature words race boards: publish the tunnel's live URL as board.json on GitHub Pages
+After=nature-board-tunnel.service
+
+[Service]
+ExecStart=%h/.local/bin/nature-board publish
+Environment=REPO_DIR=%S/nature-board/repo
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=default.target

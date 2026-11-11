@@ -1,0 +1,14 @@
+[Unit]
+Description=Nature words race boards: Cloudflare quick tunnel to the board server (the server is behind CGNAT)
+Wants=nature-board.service
+After=nature-board.service network-online.target
+
+[Service]
+# No account: a quick tunnel gets a new https://X.trycloudflare.com each start; the URL watcher publishes it.
+# Its metrics port answers /quicktunnel with the hostname, so nothing has to parse the log.
+ExecStart=%h/.local/bin/cloudflared tunnel --no-autoupdate --metrics 127.0.0.1:8798 --url http://127.0.0.1:8797
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target

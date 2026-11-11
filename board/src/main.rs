@@ -5,6 +5,8 @@
 //! CORS is open (the page lives on GitHub Pages, another site). Messages live 12 hours and are kept in a file, so a
 //! restart keeps the boards. Plain std, no crates: one small job, nothing to update.
 
+mod publish;
+
 use std::collections::VecDeque;
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, BufRead, BufReader, Read, Write};
@@ -302,6 +304,9 @@ pub fn serve<R: Read, W: Write>(rd: R, wr: &mut W, store: &Mutex<Store>, now: u6
 }
 
 fn main() {
+    if std::env::args().nth(1).as_deref() == Some("publish") {
+        return publish::main();
+    }
     let addr = std::env::var("BOARD_ADDR").unwrap_or_else(|_| "127.0.0.1:8797".into());
     let file = std::env::var_os("BOARD_FILE").map(PathBuf::from).unwrap_or_else(|| {
         let state = std::env::var_os("XDG_STATE_HOME")
