@@ -3,15 +3,16 @@
 // The access section checks the teacher sign-in by Cloudflare Access: it starts BIN with an access.json and a key set
 // of its own, mints Cloudflare-shaped tokens itself, and stands in for Cloudflare by adding the token header to every
 // browser request; then it restarts BIN without the config and checks the teacher key works again.
-// all runs kid and teacher; app and access run on their own (access only with --local).
-// Run: cd test && npm ci && node signin.mjs kid|teacher|app|access|all (--local BIN | URL)
+// all runs kid, teacher and race; app and access run on their own (access only with --local).
+// Run: cd test && npm ci && node signin.mjs kid|teacher|race|app|access|all (--local BIN | URL)
 //   --local BIN  starts BIN on a free port with a throwaway database, board log, teacher key and pages from server/www
+//                (for race: a temp copy of server/www plus this lesson's index.html as nature-words/)
 //   URL          uses that server (the live one: the address in ~/.local/state/lesson-server/url) and the teacher key
 //                in ~/.config/lesson-server/teacher.key
 // Every class it makes is a throwaway one, deleted at the end whether the test passed or not. Exits non-zero on any miss.
 import puppeteer from 'puppeteer-core';
 import { spawn, execFileSync } from 'child_process';
-import { mkdtempSync, readFileSync, rmSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, existsSync, mkdirSync, writeFileSync, cpSync, copyFileSync } from 'fs';
 import { generateKeyPairSync, sign as rsaSign } from 'crypto';
 import { createServer } from 'net';
 import { fileURLToPath } from 'url';
@@ -50,7 +51,7 @@ const SW_MS = SCREEN_MS;
 // His phone: 412x915 is the common Android phone viewport (Chrome DevTools' Galaxy and Pixel presets), touch on.
 const PHONE = { width: 412, height: 915, isMobile: true, hasTouch: true };
 const section = process.argv[2];
-if (!['kid', 'teacher', 'app', 'access', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|app|access|all (--local BIN | URL)'); process.exit(2); }
+if (!['kid', 'teacher', 'race', 'app', 'access', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|race|app|access|all (--local BIN | URL)'); process.exit(2); }
 let base, key, child = null, tmp = null, startLog = '';
 let failures = 0;
 const fail = m => { failures++; console.log('  FAIL', m); };
@@ -64,10 +65,19 @@ const freePort = () => new Promise((res, rej) => { const s = createServer(); s.l
 // server's own access.json: Access is off unless the access section turns it on.
 async function startLocal(bin, access) {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'signin-test-'));
+  let www = path.join(here, '..', 'server', 'www');
+  if (section === 'race' || section === 'all') {
+    // The lesson page served beside the sign-in page, as on our server: the same origin holds the kid's sign-in.
+    const pages = path.join(tmp, 'www');
+    cpSync(www, pages, { recursive: true });
+    mkdirSync(path.join(pages, 'nature-words'), { recursive: true });
+    copyFileSync(path.join(here, '..', 'index.html'), path.join(pages, 'nature-words', 'index.html'));
+    www = pages;
+  }
   const port = await freePort();
   child = spawn(path.resolve(bin), [], {
     stdio: ['ignore', 'ignore', 'pipe'],
-    env: { ...process.env, LESSON_PORT: String(port), LESSON_DB: path.join(tmp, 'lesson.db'), LESSON_BOARD: path.join(tmp, 'board.log'), LESSON_TEACHER_KEY: path.join(tmp, 'teacher.key'), LESSON_WWW: path.join(here, '..', 'server', 'www'), LESSON_ACCESS: access || path.join(tmp, 'no-access.json') },
+    env: { ...process.env, LESSON_PORT: String(port), LESSON_DB: path.join(tmp, 'lesson.db'), LESSON_BOARD: path.join(tmp, 'board.log'), LESSON_TEACHER_KEY: path.join(tmp, 'teacher.key'), LESSON_WWW: www, LESSON_ACCESS: access || path.join(tmp, 'no-access.json') },
   });
   let log = '';
   child.stderr.on('data', d => { log += d; startLog = log; });
@@ -643,6 +653,87 @@ async function accessSection(bin) {
   }
 }
 
+// ---------- Race board: names come only from sign-in ----------
+// A short race (6 s, as the design screenshots use) on a test topic of its own, never the class board.
+const RACE_S = 6;
+// The race's 3 s countdown, its 6 s, then the end card's two board reads (the page's own 4 s timeout each): 25 s.
+const RACE_END_MS = 25000;
+async function playRace(page, topic) {
+  await page.evaluateOnNewDocument(t => { window.NW_BOARD_TOPIC = t; }, topic);
+  await timed('page load', page.goto(`${base}/nature-words/`, { waitUntil: 'load', timeout: LOAD_MS }));
+  // A kid who has done River's Last check, so River's race is open.
+  await page.evaluate(() => localStorage.setItem('nature-trails-' + new Date().toISOString().slice(0, 10), JSON.stringify({ trail: 1, game: 4, checked: 4, revealAt: Date.now() })));
+  await page.goto(`${base}/nature-words/#level-1`, { waitUntil: 'load', timeout: LOAD_MS });
+  await page.evaluate(s => { LESSON.race.seconds = s; race(trailOf(1)); }, RACE_S);
+  const t0 = Date.now();
+  while (Date.now() - t0 < RACE_END_MS && !(await page.$('[data-again]'))) {
+    const ans = await page.$eval('.stage', e => e.dataset.type === 'race' ? e.dataset.answer : '').catch(() => '');
+    const h = ans && await page.$(`.choice[data-w="${ans}"]:not(.ok)`);
+    if (h) await h.tap().catch(() => {});
+    await new Promise(r => setTimeout(r, 200));
+  }
+  ok(await page.$('[data-raceend]'), 'the race ends');
+  ok(!(await page.$('[data-raceend] input')), 'the race end has no name box');
+}
+
+async function raceSection() {
+  console.log('-- race: an approved, signed-in kid and a kid with no sign-in');
+  const code = await makeEmptyClass('race test ' + Math.random().toString(16).slice(2, 6));
+  const topic = 'nw-signin-' + Math.random().toString(16).slice(2, 14), name = 'Noa B.';
+  try {
+    await joinApproved(code, name);
+    const kid = (await kidsOf(code)).find(k => k.name === name);
+    const t = await api('POST', '/api/pick', { code, student: kid.id, picture: 3 });
+    ok(t.status === 200, `${name} is approved and picks an animal (API)`);
+    const sess = { token: t.data.token, name, id: kid.id, expires: Date.now() + t.data.expires_s * 1000 };
+    {
+      const errors = [];
+      const { browser, page } = await browserPage(SIZES[0], errors);
+      try {
+        // The sign-in page stores the sign-in on its origin before the lesson opens; here it is stored the same way.
+        await page.goto(`${base}/`, { waitUntil: 'load', timeout: LOAD_MS });
+        await page.evaluate(v => localStorage.setItem('lesson-session', JSON.stringify(v)), sess);
+        await playRace(page, topic);
+        await page.waitForSelector('.board li.me', { timeout: SCREEN_MS }).catch(() => {});
+        ok((await page.$eval('.board li.me', e => e.innerText).catch(() => '')).includes(name), `his approved name ${name} is lit on the board`);
+        ok((await page.$eval('[data-asname]', e => e.innerText).catch(() => '')).includes(name), `the card says he is on the board as ${name}`);
+        ok(!(await page.$('[data-signin]')), 'a signed-in kid is not asked to sign in');
+        const r = await fetch(`${base}/${topic}/json?poll=1&since=12h`, { signal: AbortSignal.timeout(SCREEN_MS) });
+        const lines = (await r.text()).split('\n').filter(Boolean).map(l => { try { return JSON.parse(JSON.parse(l).message); } catch { return {}; } });
+        ok(lines.some(m => m.n === name && m.s > 0 && m.p === 1), `the board read through the API carries ${name} (${JSON.stringify(lines)})`);
+        ok(errors.length === 0, `no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+      } catch (e) {
+        fail(`race signed in: ${e.message.split('\n')[0]}`);
+      } finally {
+        mkdirSync(path.join(here, 'shots'), { recursive: true });
+        await page.screenshot({ path: path.join(here, 'shots', 'signin-race-signed-in.png') }).catch(() => {});
+        await browser.close();
+      }
+    }
+    {
+      const errors = [];
+      const { browser, page } = await browserPage(SIZES[1], errors);
+      try {
+        // No sign-in: the boards are read as on any other copy of the page (pointed at this server, never ntfy.sh).
+        await page.evaluateOnNewDocument(u => { window.NW_BOARD_URL = u; }, base + '/');
+        await playRace(page, topic + 'x');
+        await page.waitForSelector('[data-signin]', { timeout: SCREEN_MS }).catch(() => {});
+        const href = await page.$eval('[data-signin]', a => a.getAttribute('href')).catch(() => '');
+        ok(href.startsWith('/?next=') && decodeURIComponent(href).includes('/nature-words/'), `no sign-in: a Sign in button back to this page (${href})`);
+        ok(!(await page.$('.board li.me')), 'no sign-in: no row of his on the board');
+        ok(errors.length === 0, `no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+      } catch (e) {
+        fail(`race no sign-in: ${e.message.split('\n')[0]}`);
+      } finally {
+        await page.screenshot({ path: path.join(here, 'shots', 'signin-race-no-signin.png') }).catch(() => {});
+        await browser.close();
+      }
+    }
+  } finally {
+    ok((await teach('DELETE', '/api/classes/' + code)).status === 200, 'the throwaway class is deleted');
+  }
+}
+
 // ---------- Main ----------
 try {
   const local = process.argv.indexOf('--local');
@@ -658,6 +749,7 @@ try {
   if (section !== 'access') console.log('server', base);
   if (section === 'kid' || section === 'all') await kidSection();
   if (section === 'teacher' || section === 'all') await teacherSection();
+  if (section === 'race' || section === 'all') await raceSection();
   if (section === 'app') await appSection();
 } catch (e) {
   fail(e.message);

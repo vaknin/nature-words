@@ -179,16 +179,15 @@ async function screens() {
   await tap('[data-flag]'); await shot('last-check');
   await setStore({ trail: 1, game: 4, checked: 3, revealAt: Date.now(), points: 240, best: 0 }); await open('#level-1');
   await shot('end-river-race-card', 1800);
-  // A short race for the screenshots (6 s instead of 30): the countdown, the race, a name for the board, the board.
+  // A short race for the screenshots (6 s instead of 30): the countdown, the race, then (no sign-in on this page) the
+  // Sign in button where a name box used to be.
   await page.evaluate(() => { LESSON.race.seconds = 6; });
   await tap('[data-race]'); await shot('race-countdown', 300);
   await sleep(2600); await shot('race-running', 100);
   for (let g = 0; g < 40 && !(await page.$('[data-raceend]')); g++) { await answer(); await sleep(250); }
-  await page.waitForSelector('[data-name]', { timeout: 8000 }).catch(() => fail('screens: no name entry after a top-5 race'));
-  await shot('race-name-entry', 700);
-  await page.type('[data-name]', 'Gal'); await tap('[data-save]');
-  await page.waitForSelector('.board li.me', { timeout: 8000 }).catch(() => fail('screens: no lit row on the board'));
-  await shot('race-board-new-row', 900);
+  await page.waitForSelector('[data-signin]', { timeout: 8000 }).catch(() => fail('screens: no Sign in button after a top-5 race'));
+  if (await page.$('[data-raceend] input')) fail('screens: the race end still has a box to type a name');
+  await shot('race-signin', 700);
   // Mountain's board is full of high scores: a short race that does not make the top 5 shows the board, no name.
   await setStore({ trail: 3, game: 4, checked: 4, revealAt: Date.now(), points: 300 }); await open('#level-3');
   await page.evaluate(() => { LESSON.race.seconds = 4; });

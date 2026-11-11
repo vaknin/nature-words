@@ -231,17 +231,15 @@ async function run(name, vp) {
         await sleep(150);
       }
       ok(await page.$('[data-raceend]'), 'the race never ended');
-      // A top-5 score (any score on an empty test board) asks for a first name, then lights up his row.
-      await page.waitForSelector('[data-name], [data-again]', { timeout: 8000 }).catch(() => {});
-      ok(await page.$('[data-name]'), `${name}: race board: a first score did not ask for a name`);
-      await shot('race-name');
-      if (await page.$('[data-name]')) {
-        await page.$eval('[data-name]', e => { e.value = ''; });
-        await page.type('[data-name]', name === 'laptop' ? 'Noa' : 'Itai');
-        await click('[data-save]');
-        await page.waitForSelector('.board li.me', { timeout: 8000 }).catch(() => {});
-        ok(await page.$eval('.board li.me', e => e.textContent).catch(() => '').then(t => t.includes(name === 'laptop' ? 'Noa' : 'Itai')), `${name}: race board: his row is not lit on the board`);
-        ok(await page.$('[data-again]'), `${name}: race board: no Try again after the name`);
+      // A top-5 score (any score on an empty test board) with no sign-in offers Sign in, never a name box: names on
+      // a board come only from the sign-in (the signin.mjs race section plays the signed-in side).
+      await page.waitForSelector('[data-signin], [data-again]', { timeout: 8000 }).catch(() => {});
+      ok(await page.$('[data-signin]'), `${name}: race board: a first score with no sign-in did not offer Sign in`);
+      ok(!(await page.$('[data-raceend] input')), `${name}: race board: the end card still has a box to type in`);
+      await shot('race-signin');
+      if (await page.$('[data-signin]')) {
+        ok(await page.$eval('[data-signin]', a => a.getAttribute('href')).then(h => h.startsWith('/?next=')), `${name}: race board: Sign in does not lead to the sign-in page`);
+        ok(await page.$('[data-again]'), `${name}: race board: no Try again beside Sign in`);
         if (offline) ok(await page.$('[data-offline]'), `${name}: race board: offline, the board does not say it is this laptop's own`);
         else ok(!(await page.$('[data-offline]')), `${name}: race board: online, yet the board says offline`);
       }
@@ -273,42 +271,35 @@ async function run(name, vp) {
   await browser.close();
 }
 
-// Race board: two laptops of the class (two browser contexts, nothing shared but the board) race River on one test
-// topic; each enters a first name; the second laptop's board must show both.
+// Race board: the board is read, not typed into. Two names already on a test topic (one with a family initial, the
+// shape the sign-in approves); a laptop with no sign-in races River, sees both on its board and the Sign in button.
 async function raceBoard() {
-  console.log('\n== race board (two laptops)');
+  console.log('\n== race board (read, no sign-in)');
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--autoplay-policy=no-user-gesture-required'] });
-  const topic = testTopic(), names = ['Maya', 'Omer'];
-  const one = async (k) => {
-    const ctx = await browser.createBrowserContext(), page = await ctx.newPage();
-    await page.setViewport({ ...SIZES.laptop, hasTouch: true });
-    await page.evaluateOnNewDocument(t => { window.NW_BOARD_TOPIC = t; }, topic);
-    await page.goto(BASE, { waitUntil: 'load' });
-    // A kid who has done River's Last check: the end screen with the race card.
-    await page.evaluate(() => localStorage.setItem('nature-trails-' + new Date().toISOString().slice(0, 10), JSON.stringify({ trail: 1, game: 4, checked: 4, revealAt: Date.now() })));
-    await page.goto(BASE + '#level-1', { waitUntil: 'load' });
-    await page.waitForSelector('[data-race]', { timeout: 5000 });
-    await (await page.$('[data-race]')).tap();
-    for (let guard = 0; guard < 300 && !(await page.$('[data-raceend]')); guard++) {
-      const ans = await page.$eval('.stage', e => e.dataset.type === 'race' ? e.dataset.answer : '').catch(() => '');
-      const h = ans && await page.$(`.choice[data-w="${ans}"]:not(.ok)`);
-      if (h) await h.tap().catch(() => {});
-      await sleep(200);
-    }
-    await page.waitForSelector('[data-name]', { timeout: 8000 }).catch(() => {});
-    if (!(await page.$('[data-name]'))) { fail(`race board: laptop ${k + 1} was not asked for a name (${JSON.stringify(await page.$eval('[data-raceend]', e => e.innerText).catch(() => 'no end card'))})`); await ctx.close(); return []; }
-    // The second laptop saves after the first one's score is on the board.
-    if (k === 1) await sleep(5000);
-    await page.type('[data-name]', names[k]); await (await page.$('[data-save]')).tap();
-    await page.waitForSelector('.board li.me', { timeout: 8000 }).catch(() => {});
-    await sleep(300);
-    const rows = await page.$$eval('.board li', ls => ls.map(l => l.textContent.trim()));
-    await page.screenshot({ path: path.join(SHOTS, `race-board-laptop${k + 1}.png`) });
-    return rows;
-  };
-  const [a, b] = await Promise.all([one(0), one(1)]);
-  console.log('  laptop 1 board:', JSON.stringify(a), '\n  laptop 2 board:', JSON.stringify(b));
-  ok(b.some(r => r.includes('Maya')) && b.some(r => r.includes('Omer')), `race board: the second laptop's board does not show both names (${JSON.stringify(b)})`);
+  const topic = testTopic(), names = ['Maya L.', 'Omer'];
+  for (const [k, n] of names.entries()) await fetch('https://ntfy.sh/' + topic, { method: 'POST', body: JSON.stringify({ n, s: 90 - k, p: 1, t: Date.now() }) }).catch(() => {});
+  const page = await browser.newPage();
+  await page.setViewport({ ...SIZES.laptop, hasTouch: true });
+  await page.evaluateOnNewDocument(t => { window.NW_BOARD_TOPIC = t; }, topic);
+  await page.goto(BASE, { waitUntil: 'load' });
+  // A kid who has done River's Last check: the end screen with the race card.
+  await page.evaluate(() => localStorage.setItem('nature-trails-' + new Date().toISOString().slice(0, 10), JSON.stringify({ trail: 1, game: 4, checked: 4, revealAt: Date.now() })));
+  await page.goto(BASE + '#level-1', { waitUntil: 'load' });
+  await page.waitForSelector('[data-race]', { timeout: 5000 });
+  await (await page.$('[data-race]')).tap();
+  for (let guard = 0; guard < 300 && !(await page.$('[data-raceend]')); guard++) {
+    const ans = await page.$eval('.stage', e => e.dataset.type === 'race' ? e.dataset.answer : '').catch(() => '');
+    const h = ans && await page.$(`.choice[data-w="${ans}"]:not(.ok)`);
+    if (h) await h.tap().catch(() => {});
+    await sleep(200);
+  }
+  await page.waitForSelector('[data-signin]', { timeout: 8000 }).catch(() => {});
+  ok(await page.$('[data-signin]'), `race board: a top-5 score with no sign-in did not offer Sign in (${JSON.stringify(await page.$eval('[data-raceend]', e => e.innerText).catch(() => 'no end card'))})`);
+  ok(!(await page.$('[data-raceend] input')), 'race board: the end card still has a box to type in');
+  const rows = await page.$$eval('.board li', ls => ls.map(l => l.textContent.trim()));
+  await page.screenshot({ path: path.join(SHOTS, 'race-board-read.png') });
+  console.log('  board:', JSON.stringify(rows));
+  ok(names.every(n => rows.some(r => r.includes(n))), `race board: the board does not show both names as written (${JSON.stringify(rows)})`);
   await browser.close();
 }
 
