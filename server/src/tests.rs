@@ -1,6 +1,5 @@
-use super::*;
+// Included into main.rs at the crate root (see there), so main's own names and imports are already in scope.
 use std::fs;
-use std::path::PathBuf;
 
 const NOW: u64 = 1_800_000_000;
 const KEY: &str = "teacher-secret";

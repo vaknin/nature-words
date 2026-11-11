@@ -693,5 +693,7 @@ pub fn run(listener: TcpListener, app: Arc<App>) {
     }
 }
 
+// The tests sit at the crate root (not in a tests module), so each runs by its bare name with --exact, as the task
+// checks call them.
 #[cfg(test)]
-mod tests;
+include!("tests.rs");
