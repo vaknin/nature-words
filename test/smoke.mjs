@@ -2,7 +2,9 @@
 // plays the start quiz and every trail game to its end, screenshots each, at two laptop sizes.
 // Run: cd test && npm install && timeout 300 node smoke.mjs [URL]   (default: the live site)
 import puppeteer from 'puppeteer-core';
-import { mkdirSync, rmSync } from 'fs';
+import { mkdirSync, rmSync, mkdtempSync, existsSync } from 'fs';
+import { spawn } from 'child_process';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -17,8 +19,9 @@ const SIZES = { laptop: { width: 1366, height: 768 }, small: { width: 1280, heig
 const MAX_STAGES = 6, MIN_MIN = 40, MAX_MIN = 45;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-// Race boards: the test never touches the class's board. Each run gets a fresh test topic of its own on ntfy.sh;
-// the small laptop's run points at a dead address instead, to see the offline board.
+// Race boards: the test never touches the class's board. Each run gets a fresh test topic of its own; the laptop run
+// reads our server through board.json (the live site) or ntfy.sh (a local page, where board.json cannot be fetched);
+// the small laptop's run points both our server and ntfy.sh at a dead address, to see the offline board.
 const testTopic = () => 'nw-smoke-' + Math.random().toString(16).slice(2, 14);
 // A closed local port (not one of Chrome's blocked ports, which log their own error).
 const DEAD = 'http://127.0.0.1:59999/';
@@ -79,7 +82,7 @@ async function run(name, vp) {
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--autoplay-policy=no-user-gesture-required'] });
   const page = await browser.newPage();
   const topic = testTopic(), offline = name === 'small';
-  await page.evaluateOnNewDocument((t, dead) => { window.NW_BOARD_TOPIC = t; if (dead) window.NW_BOARD_URL = dead; }, topic, offline ? DEAD : '');
+  await page.evaluateOnNewDocument((t, dead) => { window.NW_BOARD_TOPIC = t; if (dead) window.NW_BOARD_URL = window.NW_SERVER_URL = dead; }, topic, offline ? DEAD : '');
   // Touch emulated: the school laptops have touch screens, so every press in this test is a tap.
   await page.setViewport({ ...vp, hasTouch: true });
   // His word: never record. Count every microphone request (and MediaRecorder use) the page makes; any one fails.
@@ -93,7 +96,8 @@ async function run(name, vp) {
   let micCalls = 0;
   const errors = [];
   // Offline run: the refused board requests are the point, not errors.
-  page.on('console', m => { if (m.type() === 'error' && !(offline && (m.location()?.url || '').startsWith(DEAD))) errors.push(m.text()); });
+  // A local page cannot fetch board.json (file:// has no fetch): it falls back to ntfy.sh, which is the point too.
+  page.on('console', m => { const u = m.location()?.url || ''; if (m.type() === 'error' && !(offline && u.startsWith(DEAD)) && !u.endsWith('board.json')) errors.push(m.text()); });
   page.on('pageerror', e => errors.push(e.message));
   let n = 0;
   const shot = async what => { await sleep(150); await page.screenshot({ path: path.join(SHOTS, `${name}-${String(++n).padStart(2, '0')}-${what}.png`) }); };
@@ -273,16 +277,34 @@ async function run(name, vp) {
   await browser.close();
 }
 
+// Our board server on a free port with a fresh file: the 'own server' run reads it. The installed binary (the one the
+// class's server runs) when there is one; else built from board/ (cargo can wait minutes behind other builds here).
+async function boardServer() {
+  const port = 20000 + Math.floor(Math.random() * 20000), dir = mkdtempSync(path.join(os.tmpdir(), 'nw-board-'));
+  const bin = process.env.BOARD_BIN || path.join(os.homedir(), '.local', 'bin', 'nature-board');
+  const [cmd, args] = existsSync(bin) ? [bin, []] : ['cargo', ['run', '-q', '--manifest-path', path.join(here, '..', 'board', 'Cargo.toml')]];
+  const proc = spawn(cmd, args,
+    { env: { ...process.env, BOARD_ADDR: `127.0.0.1:${port}`, BOARD_FILE: path.join(dir, 'board.log') }, stdio: ['ignore', 'ignore', 'inherit'] });
+  const url = `http://127.0.0.1:${port}/`;
+  for (let i = 0; i < 600; i++) {
+    if (await fetch(url + 'v1/health').then(r => r.ok, () => false)) return { url, stop: () => proc.kill() };
+    await sleep(200);
+  }
+  proc.kill(); throw new Error('board server did not start');
+}
+
 // Race board: two laptops of the class (two browser contexts, nothing shared but the board) race River on one test
-// topic; each enters a first name; the second laptop's board must show both.
-async function raceBoard() {
-  console.log('\n== race board (two laptops)');
+// topic; each enters a first name; the second laptop's board must show both. 'own server': the page reads and posts
+// our board server, ntfy.sh dead, so both names can only come from our server. 'server down, ntfy answers': our
+// server's address is dead, so both names can only come from ntfy.sh.
+async function raceBoard(label, server, ntfy) {
+  console.log(`\n== race board (two laptops, ${label})`);
   const browser = await puppeteer.launch({ executablePath: CHROME, headless: true, args: ['--no-sandbox', '--disable-dev-shm-usage', '--autoplay-policy=no-user-gesture-required'] });
   const topic = testTopic(), names = ['Maya', 'Omer'];
   const one = async (k) => {
     const ctx = await browser.createBrowserContext(), page = await ctx.newPage();
     await page.setViewport({ ...SIZES.laptop, hasTouch: true });
-    await page.evaluateOnNewDocument(t => { window.NW_BOARD_TOPIC = t; }, topic);
+    await page.evaluateOnNewDocument((t, s, n) => { window.NW_BOARD_TOPIC = t; window.NW_SERVER_URL = s; if (n) window.NW_BOARD_URL = n; }, topic, server, ntfy);
     await page.goto(BASE, { waitUntil: 'load' });
     // A kid who has done River's Last check: the end screen with the race card.
     await page.evaluate(() => localStorage.setItem('nature-trails-' + new Date().toISOString().slice(0, 10), JSON.stringify({ trail: 1, game: 4, checked: 4, revealAt: Date.now() })));
@@ -303,17 +325,20 @@ async function raceBoard() {
     await page.waitForSelector('.board li.me', { timeout: 8000 }).catch(() => {});
     await sleep(300);
     const rows = await page.$$eval('.board li', ls => ls.map(l => l.textContent.trim()));
-    await page.screenshot({ path: path.join(SHOTS, `race-board-laptop${k + 1}.png`) });
+    await page.screenshot({ path: path.join(SHOTS, `race-board-${label.split(',')[0].replace(/ /g, '-')}-laptop${k + 1}.png`) });
     return rows;
   };
   const [a, b] = await Promise.all([one(0), one(1)]);
   console.log('  laptop 1 board:', JSON.stringify(a), '\n  laptop 2 board:', JSON.stringify(b));
-  ok(b.some(r => r.includes('Maya')) && b.some(r => r.includes('Omer')), `race board: the second laptop's board does not show both names (${JSON.stringify(b)})`);
+  ok(b.some(r => r.includes('Maya')) && b.some(r => r.includes('Omer')), `race board (${label}): the second laptop's board does not show both names (${JSON.stringify(b)})`);
   await browser.close();
 }
 
 // Both sizes and the race board at once: one after the other took over the check's time limit (each waits out a 30 s race).
 // SMOKE_ONLY=board runs the race board alone (to look at it quickly); the check always runs everything.
-await Promise.all(process.env.SMOKE_ONLY === 'board' ? [raceBoard()] : [...Object.entries(SIZES).map(([name, vp]) => run(name, vp)), raceBoard()]);
+const own = await boardServer();
+const boards = [raceBoard('own server', own.url, DEAD), raceBoard('server down, ntfy answers', DEAD, '')];
+await Promise.all(process.env.SMOKE_ONLY === 'board' ? boards : [...Object.entries(SIZES).map(([name, vp]) => run(name, vp)), ...boards]);
+own.stop();
 console.log(failures ? `\n${failures} failure(s)` : '\nall passed', `· shots in ${SHOTS}`);
 process.exit(failures ? 1 : 0);

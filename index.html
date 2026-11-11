@@ -440,10 +440,17 @@ const LESSON = {
     // Three countdown beeps before GO, and a tick in the last five seconds.
     countdown: 3, tickFrom: 5
   },
-  // The race boards (his word: race only, one shared top 5 per place, River, Forest and Mountain). Stored on ntfy.sh:
-  // free, no account or key, HTTPS with CORS (checked: health 200, a post read back by a poll). It keeps messages
-  // 12 hours, one school day, so the boards start empty each morning even without a reset.
+  // The race boards (his word: race only, one shared top 5 per place, River, Forest and Mountain). Stored on our own
+  // server first (his word: "I'd rather we did"), reached through a Cloudflare tunnel whose address the server
+  // publishes beside this page as board.json; ntfy.sh is the backup: free, no account or key, HTTPS with CORS
+  // (checked: health 200, a post read back by a poll). Every score goes to both, so a switch mid-lesson loses nothing.
+  // Both keep messages 12 hours, one school day, so the boards start empty each morning even without a reset.
   board: {
+    serverInfo: "board.json",
+    // Our server has no per-address limit. Measured through the tunnel: one read answers in 0.18-0.38 s (10 reads),
+    // and 30 reads at the same instant (the whole class) all answered 200, the slowest in 0.86 s. So a laptop may
+    // read every 5 s: 30 laptops make at most 6 reads a second, each done in under a second, about 5 in flight.
+    serverFreshMs: 5000,
     url: "https://ntfy.sh/", topic: "nw-29c62d00ebb25cdd", since: "12h", size: 5,
     // ntfy.sh gives each internet address 60 requests at once, then one per 5 s, and a class shares the school's one
     // address: so a laptop reads the boards at most once per 2 minutes (30 laptops in a 5-minute race window: about
@@ -896,10 +903,28 @@ function lastCheck(t) {
   ask();
 }
 const best = () => store.get().best || 0;
-/* ---------- race boards: one shared top 5 per place on ntfy.sh, this laptop's own board when it cannot reach it ---------- */
+/* ---------- race boards: one shared top 5 per place on our server, ntfy.sh as backup, this laptop's own board when neither answers ---------- */
 const B = LESSON.board;
-// The smoke test points the boards at a test topic of its own (never the class one) before the page loads.
+// The smoke test points the boards at a test topic of its own (never the class one) before the page loads, and may
+// name our server's address itself (NW_SERVER_URL) instead of reading board.json.
 const boardTopic = () => window.NW_BOARD_TOPIC || B.topic, boardUrl = () => (window.NW_BOARD_URL || B.url) + boardTopic();
+async function timed(url, opt) {
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), B.timeoutMs);
+  try { const r = await fetch(url, { ...opt, signal: ctl.signal }); if (!r.ok) throw new Error(url + " " + r.status); return r; }
+  finally { clearTimeout(to); }
+}
+// Our server's address, asked once per page: board.json sits beside the page (same site, no limit).
+let serverInfo = null, serverDownAt = 0;
+const serverBase = () => serverInfo || (serverInfo = ("NW_SERVER_URL" in window ? Promise.resolve(window.NW_SERVER_URL)
+  : timed(B.serverInfo, { cache: "no-store" }).then(r => r.json()).then(j => j.url)).then(u => u ? String(u).replace(/\/?$/, "/") : "").catch(() => ""));
+const serverUrl = async () => { const b = await serverBase(); return b && b + boardTopic(); };
+// Every score and Reset marker goes to both stores; true when at least one kept it.
+async function postBoth(body) {
+  const su = await serverUrl();
+  const sent = await Promise.all([su ? timed(su, { method: "POST", body }).then(() => true, () => false) : false,
+    timed(boardUrl(), { method: "POST", body }).then(() => true, () => false)]);
+  return sent.some(Boolean);
+}
 const LBK = () => "nature-board-" + boardTopic();
 const lb = { get: () => JSON.parse(localStorage.getItem(LBK()) || "{}"), set: o => localStorage.setItem(LBK(), JSON.stringify({ ...lb.get(), ...o })) };
 const esc = x => String(x).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
@@ -914,16 +939,19 @@ function cleanName(raw) {
 let boardLive = null;   // true after a good read, false after a failed one, null before the first
 async function boardFetch(force) {
   const c = lb.get().cache;
-  if (!force && c && Date.now() - c.at < B.freshMs) { boardLive = c.ok; return; }
+  if (!force && c && Date.now() - c.at < (c.src === "server" ? B.serverFreshMs : B.freshMs)) { boardLive = c.ok; return; }
+  const read = async u => (await timed(`${u}/json?poll=1&since=${B.since}`, { cache: "no-store" })).text();
   try {
-    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), B.timeoutMs);
-    const r = await fetch(`${boardUrl()}/json?poll=1&since=${B.since}`, { signal: ctl.signal, cache: "no-store" });
-    clearTimeout(to);
-    if (!r.ok) throw new Error("board " + r.status);
+    // Our server first; when it fails, ntfy.sh, and our server is left alone for freshMs so each read is not slowed
+    // by waiting on it again.
+    const su = Date.now() - serverDownAt > B.freshMs && await serverUrl();
+    let text = null, src = "server";
+    if (su) text = await read(su).catch(() => { serverDownAt = Date.now(); return null; });
+    if (text === null) { text = await read(boardUrl()); src = "ntfy"; }
     const msgs = (await r.text()).split("\n").filter(Boolean).map(l => {
       try { const e = JSON.parse(l); return e.event === "message" ? { ...JSON.parse(e.message), at: e.time } : null; } catch (_) { return null; }
     }).filter(Boolean);
-    lb.set({ cache: { at: Date.now(), ok: true, msgs } }); boardLive = true;
+    lb.set({ cache: { at: Date.now(), ok: true, src, msgs } }); boardLive = true;
   } catch (e) {
     // Offline or refused: keep the last boards, mark them as this laptop's, and wait freshMs before asking again.
     lb.set({ cache: { at: Date.now(), ok: false, msgs: (c && c.msgs) || [] } }); boardLive = false;
@@ -947,12 +975,9 @@ function top5(place) {
 const makesTop = (place, sc) => { const b = top5(place); return sc > 0 && (b.length < B.size || sc > b[b.length - 1].s); };
 async function boardPost(entry) {
   lb.set({ own: [...(lb.get().own || []), { ...entry, at: Date.now() / 1000 }], name: entry.n });
-  try {
-    const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), B.timeoutMs);
-    const r = await fetch(boardUrl(), { method: "POST", body: JSON.stringify(entry), signal: ctl.signal });
-    clearTimeout(to); if (!r.ok) throw new Error("post " + r.status);
-    return true;
-  } catch (e) { boardLive = false; return false; }
+  const sent = await postBoth(JSON.stringify(entry));
+  if (!sent) boardLive = false;
+  return sent;
 }
 function boardHtml(t, me) {
   const rows = top5(t.id), rank = ["🥇", "🥈", "🥉", "4", "5"];
@@ -1159,7 +1184,7 @@ async function resetBoards() {
   if (!confirm("Reset the River, Forest and Mountain race boards for the whole class?")) return;
   const btn = $("[data-reset]", app); if (btn) btn.disabled = true;
   let ok = false;
-  try { const r = await fetch(boardUrl(), { method: "POST", body: JSON.stringify({ reset: 1, t: Date.now() }) }); ok = r.ok; } catch (e) {}
+  ok = await postBoth(JSON.stringify({ reset: 1, t: Date.now() }));
   lb.set({ own: [], cache: { at: 0, ok: false, msgs: [] } });
   toast(`<span style="font-size:40px">${ok ? "✅" : "📴"}</span><span><small>Race boards</small><b>${ok ? "Reset for the class" : "No internet: not reset"}</b></span>`);
   if (btn) btn.disabled = false;
