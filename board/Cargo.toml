@@ -1,0 +1,7 @@
+[package]
+name = "nature-board"
+version = "0.1.0"
+edition = "2021"
+description = "The race boards' own server: ntfy-shaped post and poll, CORS open, kept 12 hours in a file."
+
+[dependencies]
