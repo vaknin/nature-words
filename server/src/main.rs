@@ -11,6 +11,9 @@
 //!   GET/POST /api/classes, DELETE /api/classes/CODE, POST /api/classes/CODE/students,
 //!   GET /api/classes/CODE/students (each kid's id, name, picked, locked, wait_s; never the picture),
 //!   POST /api/students/ID/reset (new picture), POST /api/students/ID/unlock, DELETE /api/students/ID
+//! Phone remote for the projector (remote.rs): POST /api/screens, GET /api/screens/TOKEN/cmds?after=SEQ (a long
+//!   poll), POST /api/screens/TOKEN/state, all without a key; with the key POST /api/screens/pair {code},
+//!   POST /api/screens/ID/cmd {cmd, stage?}, GET /api/screens/ID.
 //! Race boards: POST /TOPIC and GET /TOPIC/json?poll=1&since=12h, ntfy-shaped (see board.rs). Polling only.
 //! GET anything else: a file from the pages folder. Listens on 127.0.0.1 only; the world reaches it through the
 //! Cloudflare tunnel (the server is behind CGNAT, no open ports).
@@ -18,6 +21,7 @@
 mod board;
 mod db;
 mod publish;
+mod remote;
 
 use board::{json_escape, now_s, parse_since, valid_topic, Store, BODY_MAX};
 use db::{Db, SignIn};
@@ -69,7 +73,7 @@ const TEACHER_KEY_BYTES: usize = 32;
 const HEAD_MAX: usize = 16 * 1024;
 /// Connections served at once: a class is up to 40 laptops, each with at most a read and a post open (80);
 /// the rest is room, and it stays under the quick tunnel's cap of 200 requests in flight.
-const CONN_MAX: usize = 192;
+pub const CONN_MAX: usize = 192;
 /// The page waits 4 s for an answer; a request still sending after 10 s has nobody waiting for it.
 const IO_TIMEOUT: Duration = Duration::from_secs(10);
 
@@ -81,13 +85,15 @@ pub struct App {
     pub teacher_key: String,
     /// The lesson pages folder; None serves no pages.
     pub www: Option<PathBuf>,
+    /// Projector screens and their phone remotes, memory only.
+    pub remote: remote::Remote,
     /// Unknown-code lookups per address: (misses, window start). Memory only, never tied to a kid.
     misses: Mutex<HashMap<String, (u32, u64)>>,
 }
 
 impl App {
     pub fn new(db: Db, board: Store, teacher_key: String, www: Option<PathBuf>) -> App {
-        App { db: Mutex::new(db), board: Mutex::new(board), teacher_key, www, misses: Mutex::new(HashMap::new()) }
+        App { db: Mutex::new(db), board: Mutex::new(board), teacher_key, www, misses: Mutex::new(HashMap::new()), remote: remote::Remote::new() }
     }
     fn db(&self) -> std::sync::MutexGuard<'_, Db> {
         self.db.lock().unwrap_or_else(|e| e.into_inner())
@@ -245,6 +251,13 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
             }
             ok(db.record(kid).unwrap_or(Value::Null))
         }
+        ("POST", ["screens"]) => screen(app.remote.open(now)),
+        ("GET", ["screens", token, "cmds"]) => {
+            let after = rq.target.split_once('?').map_or("", |(_, q)| q).split('&').find_map(|kv| kv.strip_prefix("after="));
+            let Some(after) = after.map_or(Some(0), |a| a.parse::<u64>().ok()) else { return err(400, "bad after") };
+            screen(app.remote.poll(token, after, now))
+        }
+        ("POST", ["screens", token, "state"]) => screen(app.remote.report(token, &body, now)),
         ("POST", ["signout"]) => {
             if let Some(t) = rq.header("authorization").and_then(|v| v.strip_prefix("Bearer ")) {
                 let _ = app.db().conn.execute("DELETE FROM sessions WHERE token=?1", [t.trim()]);
@@ -252,6 +265,12 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
             ok(json!({"ok": true}))
         }
         _ if !teacher => err(401, "teacher key needed"),
+        ("POST", ["screens", "pair"]) => match body.get("code").and_then(Value::as_str) {
+            Some(code) => screen(app.remote.pair(code.trim(), now)),
+            None => err(400, "needs the code"),
+        },
+        ("POST", ["screens", id, "cmd"]) => screen(app.remote.command(id, &body, now)),
+        ("GET", ["screens", id]) => screen(app.remote.status(id, now)),
         ("GET", ["classes"]) => ok(app.db().classes()),
         ("POST", ["classes"]) => {
             let Some(name) = clean_name(body.get("name")) else { return err(400, "needs a class name") };
@@ -300,6 +319,15 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
             if n > 0 { ok(json!({"ok": true})) } else { err(404, "no such kid") }
         }
         _ => err(404, "not found"),
+    }
+}
+
+fn screen(o: remote::Out) -> Resp {
+    match o {
+        remote::Out::Ok(v) => ok(v),
+        remote::Out::NotFound => err(404, "no such screen: open a new one"),
+        remote::Out::Bad(m) => err(400, m),
+        remote::Out::Full => err(503, "too many screens open"),
     }
 }
 

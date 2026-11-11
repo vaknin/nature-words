@@ -66,6 +66,20 @@ td.act .btn{margin-left:8px;font-size:17px}
 #projector .close{position:absolute;top:16px;right:20px;font-size:18px;color:#8f9cb8}
 .dialog{position:fixed;inset:0;z-index:20;background:#1f2a3d66;display:grid;place-items:center}
 .dialog .card{max-width:480px}
+/* The phone remote: the same buttons and cards, sized for a thumb, and the whole view fits a phone with no scroll. */
+#v-remote .card{margin:10px 0;padding:14px 16px}
+#v-remote h1{font-size:28px}
+.rm-now{display:flex;align-items:center;gap:12px;min-height:48px}
+.rm-now .code-tag{font-size:30px;letter-spacing:0}
+.rm-now b{font-family:var(--head);font-size:22px;flex:1;line-height:1.15}
+.rm-now small{display:block;font-family:var(--body);font-weight:400;font-size:15px;color:var(--muted)}
+.rm-pad{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.rm-pad .btn{width:100%;padding:8px 12px}
+.rm-pad .big{min-height:clamp(96px,20vh,170px);font-size:30px;border-radius:28px}
+.rm-pad .wide{grid-column:1/-1;min-height:64px;font-size:24px}
+.rm-stages{display:flex;gap:8px;grid-column:1/-1}
+.rm-stages .btn{flex:1;padding:0;min-width:48px;font-size:22px}
+#pair-code{font-family:var(--head);font-size:34px;letter-spacing:8px;text-align:center}
 </style>
 </head>
 <body>
@@ -85,7 +99,7 @@ td.act .btn{margin-left:8px;font-size:17px}
 </section>
 
 <section id="v-classes" hidden>
-  <div class="top"><h1>Your classes</h1><button class="btn main" id="new-class" type="button">New class</button><button class="btn soft" id="forget" type="button">Forget key</button></div>
+  <div class="top"><h1>Your classes</h1><button class="btn main" id="new-class" type="button">New class</button><button class="btn blue" id="open-remote" type="button">Projector remote</button><button class="btn soft" id="forget" type="button">Forget key</button></div>
   <p class="msg" id="classes-msg"></p>
   <div class="classes" id="classes"></div>
   <p class="muted" id="no-classes" hidden>No classes yet. Tap "New class" to make one.</p>
@@ -112,6 +126,28 @@ td.act .btn{margin-left:8px;font-size:17px}
   </div>
   <p class="msg" id="class-msg"></p>
   <div class="card"><table><tbody id="kids"></tbody></table></div>
+</section>
+
+<section id="v-remote" hidden>
+  <div class="top"><h1>Projector remote</h1><button class="btn soft" id="remote-back" type="button">← Classes</button></div>
+  <form class="card" id="pair-form" autocomplete="off" hidden>
+    <h2>Pair with the projector</h2>
+    <p class="muted">Open the lesson's teacher view on the projector laptop, then type the six digits it shows after "Phone:".</p>
+    <input id="pair-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" aria-label="the six digits on the projector">
+    <p class="msg" id="pair-msg"></p>
+    <p><button class="btn main" id="pair-go" type="submit">Pair</button></p>
+  </form>
+  <div id="remote-ctl" hidden>
+    <div class="card rm-now"><span class="code-tag" id="rm-stage">·</span><b><span id="rm-name">Waiting for the projector…</span><small id="rm-of"></small></b></div>
+    <div class="card row" id="rm-lost" hidden><b style="flex:1">Projector not connected</b><button class="btn main" id="rm-again" type="button">Pair again</button></div>
+    <div class="rm-pad">
+      <button class="btn soft big" type="button" data-cmd="prev">← Back</button>
+      <button class="btn main big" type="button" data-cmd="next">Next →</button>
+      <button class="btn blue wide" type="button" data-cmd="space">Show / Play</button>
+      <div class="rm-stages" id="rm-stages"></div>
+      <button class="btn wide" type="button" data-cmd="qr">▦ QR</button>
+    </div>
+  </div>
 </section>
 
 </main>
@@ -278,6 +314,70 @@ $('projector').onclick = closeProj;
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('projector').hidden) closeProj(); });
 // Esc in full screen leaves full screen first: close the view with it.
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && !$('projector').hidden) $('projector').hidden = true; });
+
+// ---------- Phone remote: this phone moves the lesson on the projector, through the server ----------
+// The projector laptop never holds the key: it shows six digits, typed here once; the screen's id stays in this browser.
+const SCREEN = 'lesson-remote-screen';
+// The projector shows a change within one poll round trip (under 1 s through the tunnel, test/remote.mjs prints the
+// slowest), so asking every second keeps the stage shown here at most about two seconds behind the wall.
+const REMOTE_REFRESH_MS = 1000;
+// The projector is between polls only for a round trip, or 5 s after a failed one (the lesson page's REMOTE_RETRY_MS)
+// plus up to 10 s for its next request (FETCH_MS): longer than 15 s without a poll means it is gone.
+const REMOTE_LOST_S = 15;
+let screenId = localStorage.getItem(SCREEN) || '', stagesOf = 0;
+$('open-remote').onclick = openRemote;
+$('remote-back').onclick = () => showClasses();
+function openRemote() {
+  view('v-remote');
+  $('pair-form').hidden = !!screenId; $('remote-ctl').hidden = !screenId;
+  if (!screenId) { $('pair-code').value = ''; $('pair-msg').textContent = ''; $('pair-code').focus(); return; }
+  $('rm-lost').hidden = true;
+  remoteRefresh();
+  timer = setInterval(remoteRefresh, REMOTE_REFRESH_MS);
+}
+function pairAgain() { screenId = ''; localStorage.removeItem(SCREEN); openRemote(); }
+$('rm-again').onclick = pairAgain;
+$('pair-code').oninput = () => { $('pair-code').value = $('pair-code').value.replace(/\D/g, '').slice(0, 6); };
+$('pair-form').onsubmit = async e => {
+  e.preventDefault();
+  const code = $('pair-code').value;
+  if (code.length !== 6) { $('pair-msg').textContent = 'Type all six digits shown on the projector.'; return; }
+  $('pair-go').disabled = true;
+  const r = await api('POST', '/api/screens/pair', { code });
+  $('pair-go').disabled = false;
+  if (r.status === 200) { screenId = r.data.id; localStorage.setItem(SCREEN, screenId); openRemote(); }
+  else if (r.status === 404) $('pair-msg').textContent = 'No projector shows this code. Check the digits on the wall; a code works once.';
+  else if (r.status !== 401) $('pair-msg').textContent = NO_NET;
+};
+function lost(yes) { $('rm-lost').hidden = !yes; }
+async function remoteRefresh() {
+  const id = screenId;
+  if (!id || $('v-remote').hidden || document.hidden) return;
+  const r = await api('GET', '/api/screens/' + id);
+  if (id !== screenId || $('v-remote').hidden) return;
+  if (r.status === 404) return lost(true);
+  if (r.status !== 200) return;
+  lost(r.data.polled_s_ago > REMOTE_LOST_S);
+  const st = r.data.state;
+  if (!st) return;
+  $('rm-stage').textContent = st.stage;
+  $('rm-name').textContent = st.name || '';
+  $('rm-of').textContent = `Stage ${st.stage} of ${st.of}${st.qr ? ' · QR showing' : ''}`;
+  if (st.of !== stagesOf) {
+    stagesOf = st.of;
+    $('rm-stages').innerHTML = Array.from({ length: Math.min(st.of, 9) }, (_, i) => `<button class="btn" type="button" data-cmd="stage" data-stage="${i + 1}" aria-label="Stage ${i + 1}">${i + 1}</button>`).join('');
+  }
+  for (const b of $('rm-stages').children) b.classList.toggle('main', +b.dataset.stage === st.stage);
+}
+$('remote-ctl').onclick = async e => {
+  const b = e.target.closest('[data-cmd]');
+  if (!b || !screenId) return;
+  const body = { cmd: b.dataset.cmd, ...(b.dataset.stage ? { stage: +b.dataset.stage } : {}) };
+  const r = await api('POST', `/api/screens/${screenId}/cmd`, body);
+  if (r.status === 404) lost(true);
+  else if (r.status === 200) remoteRefresh();
+};
+document.addEventListener('visibilitychange', () => { if (!document.hidden && !$('v-remote').hidden) remoteRefresh(); });
 
 if (key) showClasses(); else askKey();
 </script>

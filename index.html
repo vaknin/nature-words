@@ -300,7 +300,7 @@ input{user-select:text;-webkit-user-select:text}
 .prog button::after{content:"";position:absolute;left:0;right:0;top:19px;height:10px;border-radius:99px;background:var(--line)}
 .prog button.done::after{background:#9cc2f5}
 .prog button.cur::after{background:var(--river)}
-.tscreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px;min-height:calc(100vh - 100px)}
+.tscreen{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:20px}
 .title{font-family:var(--head);font-size:clamp(48px,9vmin,110px);font-weight:700;margin:0;text-align:center;line-height:1.05}
 .sub{font-size:clamp(22px,4vmin,44px);font-weight:500;margin:0;text-align:center;color:var(--muted)}
 .agenda{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-family:var(--head);font-size:clamp(18px,3vmin,30px);font-weight:600}
@@ -313,6 +313,9 @@ input{user-select:text;-webkit-user-select:text}
 .wgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .wgrid div{background:#fff;border-radius:22px;padding:10px;box-shadow:var(--shadow);text-align:center;font-family:var(--head);font-weight:600;font-size:clamp(20px,3vmin,32px)}
 .wgrid svg{width:min(17vmin,150px);height:min(17vmin,150px);margin:auto}
+/* The phone remote's pairing code: a small label, not a button (the projector laptop never types it). */
+.tbar .phone{font-family:var(--head);font-weight:600;font-size:17px;color:var(--muted);white-space:nowrap;letter-spacing:1px}
+.tbar .phone.on{color:var(--forest-d);letter-spacing:0}
 .keys{position:fixed;right:14px;bottom:8px;font-size:13px;color:#98a3b5;font-weight:500;pointer-events:none}
 </style>
 </head>
@@ -1143,7 +1146,7 @@ const STAGE_GAMES = {
 function teacher(i) {
   const st = LESSON.stages; cur = Math.max(0, Math.min(st.length - 1, i));
   stopSound(); if (ctrl.stop) ctrl.stop();
-  app.innerHTML = `<div class="tbar"><span class="num">${cur + 1}</span><span class="name">${st[cur].name}</span><span class="min">${st[cur].min} min</span>
+  app.innerHTML = `<div class="tbar"><span class="num">${cur + 1}</span><span class="name">${st[cur].name}</span><span class="min">${st[cur].min} min</span><span class="phone" data-phone hidden></span>
     <button class="ib btn" data-prev aria-label="Previous">${ICON.prev}</button><button class="ib btn" data-next aria-label="Next">${ICON.next}</button><button class="ib btn" data-fs aria-label="Full screen">${ICON.fs}</button><button class="ib wide btn" data-qr title="Show a QR code of the class link, full screen (Q)">▦ QR</button><button class="ib wide btn" data-reset title="Empty the three race boards for the whole class">↺ Reset boards</button></div>
     <div class="prog">${st.map((s, k) => `<button class="${k === cur ? "cur" : k < cur ? "done" : ""}" aria-label="Stage ${k + 1}"></button>`).join("")}</div>
     <div class="tscreen" data-stage="${cur + 1}" data-game="${st[cur].game}"></div><div class="keys"></div>`;
@@ -1153,6 +1156,7 @@ function teacher(i) {
   $("[data-prev]", app).onclick = prev; $("[data-next]", app).onclick = next; $("[data-fs]", app).onclick = toggleFS;
   $$(".prog button", app).forEach((b, k) => b.onclick = () => teacher(k));
   history.replaceState(null, "", "#teacher-" + (cur + 1));
+  phoneLabel(); remoteStart();
 }
 // Reset boards posts a marker; every laptop ignores scores from before the newest marker.
 async function resetBoards() {
@@ -1192,6 +1196,106 @@ addEventListener("keydown", e => {
   if (k === "ArrowLeft") return prev();
   if (k === " " || k === "Enter") { stopSound(); return ctrl.space && ctrl.space(); }
 });
+
+/* ---------- phone remote: the teacher moves this projector from his phone, through our lesson server ----------
+   The projector opens a screen (no key: this school laptop never holds the teacher key) and shows its six-digit
+   pairing code; the phone types it once. Then this page long-polls for the phone's commands and applies each one
+   through the same functions as the keys, and reports what it shows after every change. No server: no label. */
+const RM = { base: null, token: null, seq: 0, code: null, paired: false, running: false, last: "" };
+// The hold the server asks for is 50 s (its REMOTE_HOLD_S); Cloudflare cuts any request at 100 s (error 524,
+// developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-524/), so a poll
+// still open then is dead: give up on it there and poll again.
+const REMOTE_ABORT_MS = 100000;
+// The server drops a request still unanswered after 10 s (its IO_TIMEOUT): the open, state and health requests.
+const REMOTE_FETCH_MS = 10000;
+// After a failed open or poll, try again in 5 s: the teacher page's own refresh (its REFRESH_MS), so the phone sees
+// the projector back within one of its refreshes. A restarted quick tunnel takes 9 to 41 s to answer (install.sh).
+const REMOTE_RETRY_MS = 5000;
+// The screen token lives in this tab only, so a reload keeps the same screen and the phone stays paired.
+const RMK = "nature-remote";
+const isTeacher = () => /^#teacher/.test(location.hash);
+const nap = ms => new Promise(r => setTimeout(r, ms));
+function phoneLabel() {
+  const l = $("[data-phone]", app); if (!l) return;
+  l.hidden = !RM.token || (!RM.paired && !RM.code);
+  l.textContent = RM.paired ? "Phone ✓" : "Phone: " + (RM.code || "");
+  l.classList.toggle("on", RM.paired);
+  l.title = RM.paired ? "Your phone moves this screen (kitah.co.il/teacher → Projector remote)" : "Type this code in the teacher app on your phone: Projector remote";
+}
+// Same origin when our server serves this page (/v1/health answers here), else the address in board.json beside the
+// page (the GitHub Pages copy, kept current by the server's URL watcher).
+async function remoteBase() {
+  if (!/^https?:$/.test(location.protocol)) return null;
+  try {
+    const r = await fetch("/v1/health", { cache: "no-store", signal: AbortSignal.timeout(REMOTE_FETCH_MS) });
+    if (r.ok && (await r.json().catch(() => ({}))).healthy) return location.origin;
+  } catch (e) {}
+  try {
+    const r = await fetch("board.json", { cache: "no-store", signal: AbortSignal.timeout(REMOTE_FETCH_MS) });
+    const u = r.ok && (await r.json().catch(() => ({}))).url;
+    if (u && /^https?:\/\//.test(u)) return u.replace(/\/+$/, "");
+  } catch (e) {}
+  return null;
+}
+function remoteCmd(c) {
+  ac();
+  if (c.cmd === "next") return next();
+  if (c.cmd === "prev") return prev();
+  if (c.cmd === "qr") return showQR();
+  if (c.cmd === "stage") { if (c.stage >= 1 && c.stage <= LESSON.stages.length) teacher(c.stage - 1); return; }
+  // Space, as the key: closes the QR when it is open, else the stage's own Space.
+  if (c.cmd === "space") { if ($(".qrfull")) return hideQR(); stopSound(); return ctrl.space && ctrl.space(); }
+}
+async function remoteOpen() {
+  const saved = JSON.parse(sessionStorage.getItem(RMK) || "null");
+  if (saved && saved.base === RM.base) { RM.token = saved.token; RM.seq = saved.seq; return true; }
+  try {
+    const r = await fetch(RM.base + "/api/screens", { method: "POST", cache: "no-store", signal: AbortSignal.timeout(REMOTE_FETCH_MS) });
+    if (!r.ok) return false;
+    const j = await r.json();
+    Object.assign(RM, { token: j.token, seq: j.seq || 0, code: j.code, paired: false, last: "" });
+    return true;
+  } catch (e) { return false; }
+}
+function remoteSave() { if (RM.token) sessionStorage.setItem(RMK, JSON.stringify({ base: RM.base, token: RM.token, seq: RM.seq })); }
+function remoteDrop() { Object.assign(RM, { token: null, seq: 0, code: null, paired: false, last: "" }); sessionStorage.removeItem(RMK); phoneLabel(); }
+async function remoteLoop() {
+  RM.base = await remoteBase();
+  if (!RM.base) { RM.running = false; return; }
+  new MutationObserver(remoteState).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ["data-item"] });
+  while (true) {
+    if (!isTeacher()) { await nap(REMOTE_RETRY_MS); continue; }
+    if (!RM.token && !(await remoteOpen())) { await nap(REMOTE_RETRY_MS); continue; }
+    remoteSave(); phoneLabel(); remoteState();
+    let r;
+    try { r = await fetch(`${RM.base}/api/screens/${RM.token}/cmds?after=${RM.seq}`, { cache: "no-store", signal: AbortSignal.timeout(REMOTE_ABORT_MS) }); }
+    catch (e) { await nap(REMOTE_RETRY_MS); continue; }
+    if (r.status === 404) { remoteDrop(); continue; }
+    const j = r.ok ? await r.json().catch(() => null) : null;
+    if (!j) { await nap(REMOTE_RETRY_MS); continue; }
+    RM.paired = !!j.paired; RM.code = j.code || null;
+    for (const c of j.cmds || []) if (c.seq > RM.seq) { RM.seq = c.seq; if (isTeacher()) remoteCmd(c); }
+    RM.seq = Math.max(RM.seq, j.seq || 0);
+    remoteSave(); phoneLabel();
+  }
+}
+function remoteStart() { if (!RM.running) { RM.running = true; remoteLoop(); } }
+// What the projector shows, sent after every change from keys, clicks or the phone (once per change: a burst of
+// DOM changes in one task is sent as one report).
+let remoteTick = 0;
+function remoteState() {
+  if (remoteTick || !RM.token || !isTeacher()) return;
+  remoteTick = setTimeout(() => {
+    remoteTick = 0;
+    const t = $(".tscreen", app); if (!t || !RM.token) return;
+    const st = LESSON.stages[cur];
+    const body = JSON.stringify({ stage: cur + 1, of: LESSON.stages.length, name: st.name, item: t.dataset.item || "", qr: !!$(".qrfull") });
+    if (body === RM.last) return;
+    RM.last = body;
+    fetch(`${RM.base}/api/screens/${RM.token}/state`, { method: "POST", headers: { "Content-Type": "application/json" }, body, cache: "no-store", signal: AbortSignal.timeout(REMOTE_FETCH_MS) })
+      .then(r => { if (!r.ok) RM.last = ""; }).catch(() => { RM.last = ""; });
+  });
+}
 
 /* ---------- routes: the one Classroom link opens the start quiz; #level-1, #level-2 and #level-3 open River, Forest and
    Mountain directly (the teacher moves a kid with them); #teacher-N is the projector ---------- */

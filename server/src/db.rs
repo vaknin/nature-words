@@ -36,7 +36,7 @@ pub fn random_hex(bytes: usize) -> String {
     b.iter().map(|x| format!("{x:02x}")).collect()
 }
 
-fn random_code() -> String {
+pub fn random_code() -> String {
     // Each byte maps to a digit with a bias under 3% (256 = 25*10 + 6); fine for a code that only finds a roster.
     let hex = random_hex(CLASS_CODE_DIGITS);
     (0..CLASS_CODE_DIGITS).map(|i| char::from(b'0' + (u8::from_str_radix(&hex[2 * i..2 * i + 2], 16).unwrap() % 10))).collect()
