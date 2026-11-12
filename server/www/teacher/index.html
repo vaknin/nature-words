@@ -61,6 +61,9 @@ td.act .btn{margin-left:8px;font-size:17px}
 .badge.waiting{background:var(--sun);color:var(--ink)}
 .badge.new{background:var(--line);color:var(--muted)}
 .badge.ready{background:var(--forest-t);color:var(--forest-d)}
+.badge.asks{background:var(--river);color:#fff}
+tr.asks td{background:var(--river-t)}
+.link{font-family:var(--head);font-weight:600;color:var(--river-d);word-break:break-all}
 /* The projector view: design A step 1, dark, the code huge. */
 #projector{position:fixed;inset:0;z-index:10;background:#16213a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;font-family:var(--head);cursor:pointer}
 #projector h2{font-size:64px;text-align:center;line-height:1.1}
@@ -126,7 +129,7 @@ td.act .btn{margin-left:8px;font-size:17px}
   <form class="card" id="new-form" autocomplete="off">
     <label for="new-name">Class name</label>
     <input id="new-name" maxlength="15" placeholder="5A">
-    <label for="new-kids">Kids' names, one per line (first name and family initial, at most 15 letters each)</label>
+    <label for="new-kids">Kids' names, one per line (first name and family initial, at most 15 letters each). Or leave it empty: kids join themselves and you approve each name.</label>
     <textarea id="new-kids" placeholder="Noa K.&#10;Omer&#10;Yael B."></textarea>
     <p class="muted" id="new-count"></p>
     <p class="msg" id="new-msg"></p>
@@ -138,7 +141,15 @@ td.act .btn{margin-left:8px;font-size:17px}
   <div class="top"><h1 id="class-name"></h1><button class="btn soft" id="class-back" type="button">← Classes</button></div>
   <div class="card row">
     <div style="flex:1">Class code: <span class="code-tag" id="class-code"></span><br><span class="muted">Kids type it on the sign-in page.</span></div>
-    <button class="btn blue" id="show-proj" type="button">Show on projector</button>
+    <button class="btn blue" id="show-proj" type="button">Show code on projector</button>
+  </div>
+  <div class="card row">
+    <div style="flex:1">New names: <b id="join-state"></b><br><span class="muted">While open, a kid taps "I am new" and types a name; you approve it below.</span></div>
+    <button class="btn main" id="join-toggle" type="button">Open joining</button>
+  </div>
+  <div class="card row">
+    <div style="flex:1">Home link: <span class="link" id="class-link"></span><br><span class="muted">Post it in Classroom: kids sign in from home with their secret animal.</span></div>
+    <button class="btn soft" id="copy-link" type="button">Copy</button>
   </div>
   <p class="msg" id="class-msg"></p>
   <div class="card"><table><tbody id="kids"></tbody></table></div>
@@ -289,7 +300,6 @@ $('new-form').onsubmit = async e => {
   const name = $('new-name').value.trim(), kids = newKids();
   if (!checkNew()) return;
   if (!name) { $('new-msg').textContent = 'Give the class a name, like 5A.'; return; }
-  if (!kids.length) { $('new-msg').textContent = 'Add the kids\' names, one per line.'; return; }
   $('new-make').disabled = true;
   const r = await api('POST', '/api/classes', { name, students: kids });
   $('new-make').disabled = false;
@@ -304,6 +314,9 @@ async function openClass(code) {
   $('class-code').textContent = code;
   $('class-name').textContent = '';
   $('kids').innerHTML = '';
+  joinS = 0; showJoin();
+  $('class-link').textContent = homeLink();
+  $('copy-link').textContent = 'Copy';
   await refresh();
   if (current === code && !$('v-class').hidden) timer = setInterval(refresh, REFRESH_MS);
 }
@@ -316,7 +329,12 @@ async function refresh() {
   if (r.status !== 200) { $('class-msg').textContent = r.status === 401 ? '' : NO_NET; return; }
   $('class-msg').textContent = '';
   $('class-name').textContent = r.data.class;
+  joinS = r.data.join_s || 0; showJoin();
   $('kids').innerHTML = r.data.students.map(k => {
+    // A name waiting for approval: the server lists these first.
+    if (k.status === 'pending') {
+      return `<tr class="asks" data-kid="${k.id}"><td class="name">${esc(k.name)}</td><td><span class="badge asks">New: waiting for OK</span></td><td class="act"><button class="btn main" type="button" data-approve="${k.id}">Approve</button><button class="btn danger" type="button" data-reject="${k.id}" data-name="${esc(k.name)}">Reject</button></td></tr>`;
+    }
     const badge = k.locked ? '<span class="badge locked">Locked</span>'
       : k.wait_s > 0 ? `<span class="badge waiting">Waiting ${clock(k.wait_s)}</span>`
       : k.picked ? '<span class="badge ready">Ready</span>' : '<span class="badge new">No animal yet</span>';
@@ -327,7 +345,12 @@ async function refresh() {
 }
 $('kids').onclick = async e => {
   const u = e.target.closest('[data-unlock]'), n = e.target.closest('[data-reset]');
+  const ap = e.target.closest('[data-approve]'), rj = e.target.closest('[data-reject]');
   if (u) { u.disabled = true; await api('POST', `/api/students/${u.dataset.unlock}/unlock`); refresh(); }
+  if (ap) { ap.disabled = true; await api('POST', `/api/students/${ap.dataset.approve}/approve`); refresh(); }
+  if (rj && await ask(`Reject the name ${rj.dataset.name}?`, 'The kid sees "Your teacher said no" and types a name again.')) {
+    await api('POST', `/api/students/${rj.dataset.reject}/reject`); refresh();
+  }
   if (n && await ask(`Give ${n.dataset.name} a new animal?`, 'Their secret animal is cleared; next time they sign in, they pick a new one. Their words and scores stay.')) {
     await api('POST', `/api/students/${n.dataset.reset}/reset`); refresh();
   }
@@ -339,8 +362,36 @@ function ask(q, more) {
   return new Promise(res => { $('dialog-yes').onclick = () => { $('dialog').hidden = true; res(true); }; $('dialog-no').onclick = () => { $('dialog').hidden = true; res(false); }; });
 }
 
+// ---------- Joining: open for one lesson (the server's JOIN_OPEN_S), like a Kahoot PIN ----------
+let joinS = 0, joinTick = 0;
+function showJoin() {
+  $('join-state').textContent = joinS > 0 ? `open, ${clock(joinS)} left` : 'closed';
+  $('join-toggle').textContent = joinS > 0 ? 'Close joining' : 'Open joining';
+  $('join-toggle').className = joinS > 0 ? 'btn danger' : 'btn main';
+}
+// The time left counts down each second between the 5 s refreshes, which set it from the server again.
+clearInterval(joinTick);
+joinTick = setInterval(() => { if (joinS > 0 && !$('v-class').hidden) { joinS--; showJoin(); } }, 1000);
+async function setJoin(open) {
+  const r = await api('POST', `/api/classes/${current}/join`, { open });
+  if (r.status === 200) { joinS = r.data.join_s; showJoin(); }
+  else if (r.status !== 401) $('class-msg').textContent = NO_NET;
+}
+$('join-toggle').onclick = async () => { $('join-toggle').disabled = true; await setJoin(!(joinS > 0)); $('join-toggle').disabled = false; };
+
+// ---------- Home link: the sign-in page with the class already chosen ----------
+const homeLink = () => `${location.origin}/?class=${current}`;
+$('copy-link').onclick = async () => {
+  let done = false;
+  try { await navigator.clipboard.writeText(homeLink()); done = true; } catch {}
+  if (!done) { const r = document.createRange(); r.selectNodeContents($('class-link')); getSelection().removeAllRanges(); getSelection().addRange(r); }
+  $('copy-link').textContent = done ? 'Copied ✓' : 'Press Ctrl+C';
+};
+
 // ---------- Projector ----------
 $('show-proj').onclick = () => {
+  // Showing the code opens joining too, so new kids can type their names right away.
+  if (!(joinS > 0)) setJoin(true);
   $('proj-digits').innerHTML = [...current].map(d => `<span>${esc(d)}</span>`).join('');
   $('proj-addr').textContent = location.host;
   $('projector').hidden = false;

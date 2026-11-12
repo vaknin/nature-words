@@ -1,24 +1,33 @@
 //! Our lesson server, general for every lesson (not one lesson's page): it serves the lesson pages from a folder,
 //! keeps each kid's own record, signs kids in without a password, and runs the race boards.
 //!
-//! Kid sign-in (research/student-signin.md): the teacher shows the class code on the projector; the kid types it,
-//! taps their own name, then their own secret picture from a grid. The first time, the kid picks the picture.
-//!   GET  /api/roster/CODE           the class's names (A-Z) and whether each has picked; never a picture
+//! Kid sign-in (research/student-signin.md): the kid types the class code (or opens the class's home link), taps
+//! their own name, then their own secret picture from a grid; this works from home too, at any time, because the
+//! secret picture guards it. A new name joins Kahoot style: while the teacher has joining open (one lesson), the
+//! kid types a first name or first name and family initial, and the teacher approves or rejects it. The approved
+//! name is the kid's name from then on and the only one the race boards show; there are no free-text names.
+//!   GET  /api/roster/CODE           the class's approved names (A-Z), whether each has picked, join_open
+//!   POST /api/join   {code,name}    a new name asks to join; returns a ticket (403 closed, 409 taken or full)
+//!   GET  /api/join/TICKET           pending, or approved {id,name,picked}; 404 once rejected
 //!   POST /api/pick   {code,student,picture}  first sign-in: sets the picture once, returns a session token
 //!   POST /api/signin {code,student,picture}  returns a session token; wrong tries pause, then lock
 //!   GET  /api/me, POST /api/me      the kid's own record (Authorization: Bearer TOKEN); POST /api/signout
+//!   POST /api/race {topic,place,score}  (Bearer TOKEN) posts the score to the board under the approved name
 //! Teacher: with ~/.config/lesson-server/access.json (LESSON_ACCESS overrides the path), only a Cloudflare Access
 //! token for his one email (access.rs), from the Cf-Access-Jwt-Assertion header, or the CF_Authorization cookie
 //! together with X-Kitah-App; the teacher key is then refused. Without that file, header X-Teacher-Key, the key in
 //! ~/.config/lesson-server/teacher.key (made on first run, mode 600). GET /api/auth {access, teacher} says which.
 //! Teacher routes:
-//!   GET/POST /api/classes, DELETE /api/classes/CODE, POST /api/classes/CODE/students,
-//!   GET /api/classes/CODE/students (each kid's id, name, picked, locked, wait_s; never the picture),
+//!   GET/POST /api/classes (the student list may be empty), DELETE /api/classes/CODE,
+//!   POST /api/classes/CODE/students, POST /api/classes/CODE/join {open},
+//!   GET /api/classes/CODE/students (join_s, and each kid's id, name, status, picked, locked, wait_s; never the
+//!   picture), POST /api/students/ID/approve, POST /api/students/ID/reject (a waiting name only),
 //!   POST /api/students/ID/reset (new picture), POST /api/students/ID/unlock, DELETE /api/students/ID
 //! Phone remote for the projector (remote.rs): POST /api/screens, GET /api/screens/TOKEN/cmds?after=SEQ (a long
 //!   poll), POST /api/screens/TOKEN/state, all without a key; with the key POST /api/screens/pair {code},
 //!   POST /api/screens/ID/cmd {cmd, stage?}, GET /api/screens/ID.
 //! Race boards: POST /TOPIC and GET /TOPIC/json?poll=1&since=12h, ntfy-shaped (see board.rs). Polling only.
+//! POST /TOPIC refuses a JSON body carrying a name (n): names come from sign-in, through POST /api/race.
 //! GET anything else: a file from the pages folder. Listens on 127.0.0.1 only; the world reaches it through the
 //! Cloudflare tunnel (the server is behind CGNAT, no open ports).
 
@@ -29,7 +38,7 @@ mod publish;
 mod remote;
 
 use board::{json_escape, now_s, parse_since, valid_topic, Store, BODY_MAX};
-use db::{Db, SignIn};
+use db::{Db, JoinErr, JoinStatus, SignIn};
 use serde_json::{json, Value};
 use std::collections::HashMap;
 use std::io::{self, BufRead, BufReader, Read, Write};
@@ -72,6 +81,10 @@ pub const ROSTER_WINDOW_S: u64 = PAUSES_S[0].1;
 /// A name: one first word of at most 12 letters (the lesson skill's race-name rule), plus " K." for a family
 /// initial: 15 characters. Class names and levels take the same cap.
 pub const NAME_MAX_CHARS: usize = 12 + 3;
+/// A kid's own name: one word of at most 12 letters, the lesson skill's race-name rule (the 12 in NAME_MAX_CHARS).
+pub const KID_WORD_MAX: usize = NAME_MAX_CHARS - 3;
+/// Joining with a new name stays open one lesson, like a Kahoot PIN: the same 45 minutes as a session.
+pub const JOIN_OPEN_S: u64 = SESSION_S;
 /// The teacher key: 32 random bytes (256 bits), far above NIST SP 800-63B's 112-bit floor for a secret.
 const TEACHER_KEY_BYTES: usize = 32;
 /// A request's line and headers: the page's and curl's are under 1 KB, cloudflared adds about 1 KB of its own.
@@ -182,6 +195,36 @@ fn clean_name(v: Option<&Value>) -> Option<String> {
     (n >= 1 && n <= NAME_MAX_CHARS && !s.chars().any(char::is_control)).then(|| s.to_string())
 }
 
+/// A name a kid types to join: one word of 1 to KID_WORD_MAX letters (Hebrew or English), optionally a space and
+/// one letter for the family initial, with or without a dot. No digits, symbols or second word. Returned tidy:
+/// the first letter of each part upper case where the script has one, and the initial always with its dot.
+pub fn kid_name(raw: &str) -> Option<String> {
+    let parts: Vec<&str> = raw.split_whitespace().collect();
+    let (word, initial) = match parts.as_slice() {
+        [w] => (*w, None),
+        [w, i] => (*w, Some(*i)),
+        _ => return None,
+    };
+    let n = word.chars().count();
+    if n == 0 || n > KID_WORD_MAX || !word.chars().all(char::is_alphabetic) {
+        return None;
+    }
+    let cap = |s: &str| {
+        let mut c = s.chars();
+        c.next().map(|f| f.to_uppercase().chain(c).collect::<String>()).unwrap_or_default()
+    };
+    let mut out = cap(word);
+    if let Some(i) = initial {
+        let letter = i.strip_suffix('.').unwrap_or(i);
+        let mut cs = letter.chars();
+        match (cs.next(), cs.next()) {
+            (Some(c), None) if c.is_alphabetic() => out = format!("{out} {}.", cap(letter)),
+            _ => return None,
+        }
+    }
+    Some(out)
+}
+
 fn same(a: &str, b: &str) -> bool {
     // Every byte compared, so the time taken says nothing about how much matched.
     a.len() == b.len() && a.bytes().zip(b.bytes()).fold(0u8, |d, (x, y)| d | (x ^ y)) == 0
@@ -198,6 +241,10 @@ pub fn route(app: &App, rq: &Req, now: u64) -> Resp {
         ("POST" | "PUT", [topic]) if valid_topic(topic) => {
             if rq.body.is_empty() {
                 return err(400, "empty message");
+            }
+            // Names on a board come only from sign-in (POST /api/race); a reset marker still comes this way.
+            if serde_json::from_slice::<Value>(rq.body).is_ok_and(|v| v.get("n").is_some()) {
+                return err(403, "names come from sign-in: post with /api/race");
             }
             let text = String::from_utf8_lossy(rq.body);
             let mut s = app.board.lock().unwrap_or_else(|e| e.into_inner());
@@ -227,9 +274,36 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
         Some((b.get("code")?.as_str()?.to_string(), b.get("student")?.as_i64()?, u32::try_from(b.get("picture")?.as_u64()?).ok()?))
     };
     match (rq.method, parts) {
-        ("GET", ["roster", code]) => roster(app, rq, code, now),
+        ("GET", ["roster", code]) => match by_code(app, rq, code, now, |db| db.roster(code, now)) {
+            Ok(r) => ok(r),
+            Err(e) => e,
+        },
         // The teacher page asks for the key only while Access is off.
         ("GET", ["auth"]) => ok(json!({"access": app.access.is_some(), "teacher": teacher})),
+        ("POST", ["join"]) => {
+            let code = body.get("code").and_then(Value::as_str).unwrap_or("");
+            let name = body.get("name").and_then(Value::as_str).unwrap_or("");
+            let tidy = kid_name(name);
+            // An unknown code is a miss even when the name is bad too, so codes can't be walked with bad names.
+            let res = by_code(app, rq, code, now, |db| match tidy.as_deref().map(|n| db.join(code, n, now)) {
+                Some(Err(JoinErr::NoClass)) => None,
+                None => db.class_id(code).map(|_| None),
+                other => Some(other),
+            });
+            match res {
+                Err(e) => e,
+                Ok(None) => err(400, "one first name, or a first name and family initial: letters only"),
+                Ok(Some(Ok((_, ticket)))) => ok(json!({"ticket": ticket, "name": tidy})),
+                Ok(Some(Err(JoinErr::Closed))) => err(403, "joining is closed: ask your teacher"),
+                Ok(Some(Err(JoinErr::Taken))) => err(409, "this name is taken: add your family initial"),
+                Ok(Some(Err(_))) => err(409, "the class is full: ask your teacher"),
+            }
+        }
+        ("GET", ["join", ticket]) => match app.db().join_status(ticket) {
+            Some(JoinStatus::Pending) => ok(json!({"status": "pending"})),
+            Some(JoinStatus::Approved { id, name, picked }) => ok(json!({"status": "approved", "id": id, "name": name, "picked": picked})),
+            None => err(404, "no such name waiting: type it again"),
+        },
         ("POST", ["pick"]) => {
             let Some((code, kid, pic)) = pick(&body) else { return err(400, "needs code, student and picture") };
             match app.db().first_pick(&code, kid, pic, now) {
@@ -282,6 +356,29 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
             screen(app.remote.poll(token, after, now))
         }
         ("POST", ["screens", token, "state"]) => screen(app.remote.report(token, &body, now)),
+        ("POST", ["race"]) => {
+            let Some(kid) = kid_session() else { return err(401, "sign in first") };
+            let (Some(topic), Some(place), Some(score)) =
+                (body.get("topic").and_then(Value::as_str), body.get("place").and_then(Value::as_i64), body.get("score").and_then(Value::as_i64))
+            else {
+                return err(400, "needs topic, place and score");
+            };
+            if !valid_topic(topic) || score < 0 {
+                return err(400, "bad topic or score");
+            }
+            let Some(name) = ({
+                let db = app.db();
+                db.race_score(kid, topic, score);
+                db.name(kid)
+            }) else {
+                return err(401, "sign in first");
+            };
+            // The page's own board line: name, score, place, and the time in ms, which breaks ties.
+            let line = json!({"n": name, "s": score, "p": place, "t": now * 1000});
+            let mut s = app.board.lock().unwrap_or_else(|e| e.into_inner());
+            s.post(topic, &line.to_string(), now);
+            ok(line)
+        }
         ("POST", ["signout"]) => {
             if let Some(t) = rq.header("authorization").and_then(|v| v.strip_prefix("Bearer ")) {
                 let _ = app.db().conn.execute("DELETE FROM sessions WHERE token=?1", [t.trim()]);
@@ -315,6 +412,20 @@ fn api(app: &App, rq: &Req, parts: &[&str], now: u64) -> Resp {
                 Ok((_, code)) => ok(json!({"code": code, "name": name})),
                 Err(_) => err(500, "could not save"),
             }
+        }
+        ("POST", ["classes", code, "join"]) => {
+            let Some(open) = body.get("open").and_then(Value::as_bool) else { return err(400, "needs open: true or false") };
+            let db = app.db();
+            if !db.open_join(code, open, now) {
+                return err(404, "no such class");
+            }
+            ok(json!({"join_s": if open { JOIN_OPEN_S } else { 0 }}))
+        }
+        ("POST", ["students", id, action @ ("approve" | "reject")]) => {
+            let Ok(id) = id.parse::<i64>() else { return err(400, "bad id") };
+            let db = app.db();
+            let done = if *action == "approve" { db.approve(id) } else { db.reject(id) };
+            if done { ok(json!({"ok": true})) } else { err(404, "no such name waiting") }
         }
         ("GET", ["classes", code, "students"]) => match app.db().students(code, now) {
             Some(v) => ok(v),
@@ -368,23 +479,24 @@ fn screen(o: remote::Out) -> Resp {
     }
 }
 
-/// The roster, only for a class code; an address that misses too many codes waits, so codes can't be walked.
-fn roster(app: &App, rq: &Req, code: &str, now: u64) -> Resp {
+/// Something found only by a class code (the roster, a join): `f` gives None when there is no such class. An
+/// address that misses too many codes waits, so codes can't be walked.
+fn by_code<T>(app: &App, rq: &Req, code: &str, now: u64, f: impl FnOnce(&Db) -> Option<T>) -> Result<T, Resp> {
     // Behind the tunnel every request comes from cloudflared; Cloudflare puts the real address in this header.
     let who = rq.header("cf-connecting-ip").unwrap_or("-").to_string();
     let mut misses = app.misses.lock().unwrap_or_else(|e| e.into_inner());
     misses.retain(|_, (_, start)| now < *start + ROSTER_WINDOW_S);
     if let Some((n, start)) = misses.get(&who) {
         if *n >= ROSTER_MISSES_PER_WINDOW {
-            return jresp(429, json!({"code": 429, "error": "wait", "wait_s": start + ROSTER_WINDOW_S - now}));
+            return Err(jresp(429, json!({"code": 429, "error": "wait", "wait_s": start + ROSTER_WINDOW_S - now})));
         }
     }
     let found = code.len() == CLASS_CODE_DIGITS && code.bytes().all(|b| b.is_ascii_digit());
-    match found.then(|| app.db().roster(code)).flatten() {
-        Some(r) => ok(r),
+    match found.then(|| f(&app.db())).flatten() {
+        Some(r) => Ok(r),
         None => {
             misses.entry(who).or_insert((0, now)).0 += 1;
-            err(404, "no class with this code")
+            Err(err(404, "no class with this code"))
         }
     }
 }
@@ -581,5 +693,7 @@ pub fn run(listener: TcpListener, app: Arc<App>) {
     }
 }
 
+// The tests sit at the crate root (not in a tests module), so each runs by its bare name with --exact, as the task
+// checks call them.
 #[cfg(test)]
-mod tests;
+include!("tests.rs");

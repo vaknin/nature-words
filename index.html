@@ -276,12 +276,9 @@ input{user-select:text;-webkit-user-select:text}
 .board li.none{justify-content:center;color:var(--muted)}
 .board .off{margin:0;font-size:14px;color:var(--muted)}
 .board .off .he{display:block;text-align:right}
-.nameform{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%}
-.nameform label b{display:block;font-family:var(--head);font-weight:600;font-size:22px}
-.nameform label .he{display:block;font-size:16px;color:var(--muted)}
-.nameform input{width:100%;height:64px;border:0;border-radius:18px;padding:0 18px;font:600 32px var(--head);color:var(--ink);text-align:center;background:#fff;box-shadow:inset 0 0 0 3px var(--c,var(--river))}
-.nameform input:focus{outline:none;box-shadow:inset 0 0 0 4px var(--sun)}
-.nameform .row{display:flex;gap:12px;align-items:center}
+.re-left .signin{display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:10px 22px;border-radius:999px;background:var(--sun);color:var(--ink);box-shadow:0 5px 0 #d9a21a;font:600 22px var(--head);text-decoration:none}
+.re-left .asname{margin:0;font-size:18px;color:var(--muted)}
+.re-left .asname b{color:var(--ink)}
 .re-left .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
 .tbar .ib.wide{width:auto;padding:0 16px;gap:8px;display:inline-flex;font-family:var(--head);font-weight:600;font-size:17px;color:var(--muted)}
 
@@ -445,7 +442,9 @@ const LESSON = {
   },
   // The race boards (his word: race only, one shared top 5 per place, River, Forest and Mountain). Stored on ntfy.sh:
   // free, no account or key, HTTPS with CORS (checked: health 200, a post read back by a poll). It keeps messages
-  // 12 hours, one school day, so the boards start empty each morning even without a reset.
+  // 12 hours, one school day, so the boards start empty each morning even without a reset. A signed-in kid (the
+  // sign-in page on our own lesson server stores lesson-session on its origin) reads and posts the boards on that same
+  // server instead, which writes the name the teacher approved: no name is ever typed here.
   board: {
     url: "https://ntfy.sh/", topic: "nw-29c62d00ebb25cdd", since: "12h", size: 5,
     // ntfy.sh gives each internet address 60 requests at once, then one per 5 s, and a class shares the school's one
@@ -454,7 +453,8 @@ const LESSON = {
     freshMs: 120000,
     // 4 s: a slow school network still answers; longer and the kid waits at a frozen end screen.
     timeoutMs: 4000,
-    // First name only, 12 letters at most (his plan's cap; the longest name fits the board row at 1280 px).
+    // A name read from a board: one word of 12 letters at most (his plan's cap, the same as the sign-in server's
+    // NAME_MAX_CHARS; the longest fits the board row at 1280 px), plus a family initial.
     nameMax: 12,
     // A 30 s race at one press per 0.3 s cannot pass 100: a posted score above it is not a real race and is dropped.
     maxScore: 100
@@ -474,8 +474,7 @@ const LESSON = {
     race: "RACE!", raceWin: "Can you win?", heRace: s => `מרוץ! ${s} שניות. תצליחו לנצח?`,
     top: "Top score", best: "Your best", go: "GO!",
     raceOf: t => `${t.name} race`, board: t => `${t.name} race · Top 5`, heBoard: t => `5 המובילים במרוץ ה${t.heName}`,
-    top5: "Top 5! Write your first name:", heTop5: "נכנסתם ל-5 הראשונים! כתבו את השם הפרטי:",
-    save: "Save ▶", skip: "Skip", badName: "Try another name", heBadName: "כתבו שם פרטי באותיות",
+    signIn: "Sign in to get on the board ▶", heSignIn: "נכנסתם ל-5 הראשונים! היכנסו כדי להופיע בלוח", asName: n => `On the board as ${n}`,
     offline: "No internet: this laptop's board", heOffline: "אין אינטרנט: הלוח של המחשב הזה בלבד",
     empty: "Be the first!", locked: "Race opens after the last check",
     heLocked: "המרוץ נפתח אחרי הבדיקה האחרונה 🏁",
@@ -899,18 +898,27 @@ function lastCheck(t) {
   ask();
 }
 const best = () => store.get().best || 0;
-/* ---------- race boards: one shared top 5 per place on ntfy.sh, this laptop's own board when it cannot reach it ---------- */
+/* ---------- race boards: one shared top 5 per place (on our server when signed in, else ntfy.sh), this laptop's own board when it cannot reach it ---------- */
 const B = LESSON.board;
+// The kid's sign-in, stored by the sign-in page on this same origin: {token, name, id, expires}. None on another origin.
+const SESSION_KEY = "lesson-session";
+function session() {
+  try { const s = JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); return s && s.token && s.expires > Date.now() ? s : null; } catch (_) { return null; }
+}
 // The smoke test points the boards at a test topic of its own (never the class one) before the page loads.
-const boardTopic = () => window.NW_BOARD_TOPIC || B.topic, boardUrl = () => (window.NW_BOARD_URL || B.url) + boardTopic();
+const boardTopic = () => window.NW_BOARD_TOPIC || B.topic;
+const boardBase = () => window.NW_BOARD_URL || (session() ? location.origin + "/" : B.url);
+const boardUrl = () => boardBase() + boardTopic();
 const LBK = () => "nature-board-" + boardTopic();
 const lb = { get: () => JSON.parse(localStorage.getItem(LBK()) || "{}"), set: o => localStorage.setItem(LBK(), JSON.stringify({ ...lb.get(), ...o })) };
 const esc = x => String(x).replace(/[&<>"']/g, c => `&#${c.charCodeAt(0)};`);
-// Words a kid may try as a name: long ones anywhere in the name, short ones only as the whole name.
+// Names read from a board are filtered (a board can hold old lines or another page's posts): one word of letters,
+// plus a family initial ("Noa B."), and no rude words: long ones anywhere in the name, short ones only as the whole name.
 const BAD_IN = ["fuck", "shit", "bitch", "porn", "nigg", "שרמוט", "מניאק", "זונה"], BAD_IS = ["ass", "sex", "dick", "poop", "pee", "זין", "כוס", "חרא", "קקי", "פיפי", "טמבל", "מטומטם"];
 function cleanName(raw) {
-  const n = String(raw || "").replace(/[^A-Za-zא-ת\s'-]/g, "").trim().split(/\s+/)[0].slice(0, B.nameMax);
-  const low = n.toLowerCase();
+  const w = String(raw || "").replace(/[^A-Za-zא-ת\s.'-]/g, "").trim().split(/\s+/);
+  const first = w[0].replace(/\./g, "").slice(0, B.nameMax), init = /^[A-Za-zא-ת]\.?$/.test(w[1] || "") ? w[1] : "";
+  const n = init ? `${first} ${init}` : first, low = first.toLowerCase();
   if (!/[A-Za-zא-ת]/.test(n) || BAD_IN.some(w => low.includes(w)) || BAD_IS.includes(low)) return "";
   return n;
 }
@@ -948,15 +956,25 @@ function top5(place) {
   return [...by.values()].sort((x, y) => y.s - x.s || x.t - y.t).slice(0, B.size);
 }
 const makesTop = (place, sc) => { const b = top5(place); return sc > 0 && (b.length < B.size || sc > b[b.length - 1].s); };
-async function boardPost(entry) {
-  lb.set({ own: [...(lb.get().own || []), { ...entry, at: Date.now() / 1000 }], name: entry.n });
+// A signed-in kid's score: our server puts it on the board under the kid's approved name and answers the line it
+// wrote. 401: the sign-in ended (dropped, so the card offers Sign in). Offline or refused: null.
+async function boardPost(place, score) {
+  const me = session(); if (!me) return { signin: true };
   try {
     const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), B.timeoutMs);
-    const r = await fetch(boardUrl(), { method: "POST", body: JSON.stringify(entry), signal: ctl.signal });
-    clearTimeout(to); if (!r.ok) throw new Error("post " + r.status);
-    return true;
-  } catch (e) { boardLive = false; return false; }
+    const r = await fetch(location.origin + "/api/race", { method: "POST", signal: ctl.signal,
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + me.token },
+      body: JSON.stringify({ topic: boardTopic(), place, score }) });
+    clearTimeout(to);
+    if (r.status === 401) { localStorage.removeItem(SESSION_KEY); return { signin: true }; }
+    if (!r.ok) throw new Error("post " + r.status);
+    const line = await r.json();
+    lb.set({ own: [...(lb.get().own || []), { ...line, at: line.t / 1000 }] });
+    return { entry: line };
+  } catch (e) { boardLive = false; return null; }
 }
+// The sign-in page (this server's root), coming back to this page and place after.
+const signInHref = () => "/?next=" + encodeURIComponent(location.pathname + location.search + location.hash);
 function boardHtml(t, me) {
   const rows = top5(t.id), rank = ["🥇", "🥈", "🥉", "4", "5"];
   return `<div class="board" data-board="${t.id}"><div class="bhead"><b class="head">🏆 ${T.board(t)}</b>${heLine(T.heBoard(t))}</div>
@@ -1025,13 +1043,14 @@ function race(t) {
     alive = false; SFX.horn();
     const isBest = score > best();
     if (isBest) { store.set({ best: score }); addPoints(RC.newBest); confetti(200); }
-    // The end card: the score on the left; the place's top 5 on the right. A top-5 score first asks for a first
-    // name, then shows the board with his row lit up, then Try again.
+    // The end card: the score on the left; the place's top 5 on the right. A signed-in kid's top-5 score goes on the
+    // board under the name the teacher approved (nothing to type), his row lit; with no sign-in, a top-5 score offers
+    // Sign in instead.
     box.innerHTML = `<div class="cheer card pop raceend" data-raceend><div class="re-left"><span class="trophy big-t">🏆</span>
       <h2>${isBest ? T.newBest(score) : T.timeUp(score)}</h2>${heLine(isBest ? T.heNewBest : T.heTimeUp)}<div class="re-act"></div></div><div class="re-board"></div></div>`;
     const act = $(".re-act", box), side = $(".re-board", box);
-    const buttons = () => {
-      act.innerHTML = `<div class="row"><button class="primary btn" data-again>${T.again}</button><button class="ghost btn" data-back>${T.back}</button></div>${heLine(T.heAgain)}`;
+    const buttons = (extra = "") => {
+      act.innerHTML = `${extra}<div class="row"><button class="primary btn" data-again>${T.again}</button><button class="ghost btn" data-back>${T.back}</button></div>${heLine(T.heAgain)}`;
       $("[data-again]", act).onclick = () => race(t);
       $("[data-back]", act).onclick = () => trailEnd(t);
       app.dataset.ended = "1";
@@ -1041,25 +1060,16 @@ function race(t) {
     if (!box.isConnected || !$("[data-raceend]", box)) return;
     side.innerHTML = boardHtml(t);
     if (!makesTop(t.id, score)) return buttons();
-    act.innerHTML = `<form class="nameform" data-nameform><label for="nw-name"><b>${T.top5}</b>${heLine(T.heTop5)}</label>
-      <input id="nw-name" data-name maxlength="${B.nameMax}" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="done" value="${esc(lb.get().name || "")}">
-      <div class="row"><button class="primary btn" data-save type="submit">${T.save}</button><button class="ghost btn" data-skip type="button">${T.skip}</button></div></form>`;
-    const form = $("[data-nameform]", act), input = $("[data-name]", act);
-    setTimeout(() => input.focus({ preventScroll: true }), 50);
-    $("[data-skip]", act).onclick = buttons;
-    form.onsubmit = async e => {
-      e.preventDefault();
-      const n = cleanName(input.value);
-      if (!n) { SFX.no(); input.value = ""; input.placeholder = T.badName; form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake"); return; }
-      $("[data-save]", form).disabled = true;
-      const me = { n, s: score, p: t.id, t: Date.now() };
-      const sent = await boardPost(me);
-      // Read again so the board holds everyone's latest, his own row lit whether or not the post got through.
-      if (sent) await boardFetch(true);
-      if (!box.isConnected) return;
-      side.innerHTML = boardHtml(t, me); SFX.gold(); confetti(120);
-      buttons();
-    };
+    const sent = await boardPost(t.id, score);
+    if (sent && sent.entry) await boardFetch(true);
+    if (!box.isConnected || !$("[data-raceend]", box)) return;
+    if (!sent || sent.signin) {
+      side.innerHTML = boardHtml(t);
+      return buttons(sent ? `<a class="signin" data-signin href="${esc(signInHref())}">${T.signIn}</a>${heLine(T.heSignIn)}` : "");
+    }
+    const me = sent.entry;
+    side.innerHTML = boardHtml(t, me); SFX.gold(); confetti(120);
+    buttons(`<p class="asname" data-asname>${T.asName(`<b dir="auto">${esc(me.n)}</b>`)}</p>`);
   };
   // Countdown: three beeps, then GO.
   let c = RC.countdown;

@@ -3,7 +3,7 @@
 //! number, a level, word results and race scores. No email, birth date, full name or address of any kind
 //! (research/student-signin.md, section 5).
 
-use crate::{CLASS_CODE_DIGITS, GRID_SIZE, LOCK_AFTER_WRONG, PAUSES_S, SESSION_S};
+use crate::{CLASS_CODE_DIGITS, CLASS_MAX_KIDS, GRID_SIZE, JOIN_OPEN_S, LOCK_AFTER_WRONG, PAUSES_S, SESSION_S};
 use rusqlite::{params, Connection, OptionalExtension};
 use serde_json::{json, Value};
 use std::path::Path;
@@ -26,6 +26,25 @@ pub enum SignIn {
     /// No picture chosen yet: the kid picks one first.
     NoPicture,
     NoSuchKid,
+}
+
+/// Why a new name could not join a class.
+#[derive(Debug, PartialEq)]
+pub enum JoinErr {
+    NoClass,
+    /// The teacher has not opened joining, or its time ran out.
+    Closed,
+    /// The name is in the class already (any case).
+    Taken,
+    /// The class holds CLASS_MAX_KIDS, waiting names counted.
+    Full,
+}
+
+/// Where a joining laptop's ticket stands.
+#[derive(Debug, PartialEq)]
+pub enum JoinStatus {
+    Pending,
+    Approved { id: i64, name: String, picked: bool },
 }
 
 /// A fresh random hex string of `bytes` bytes, from the kernel's random source.
@@ -86,6 +105,21 @@ impl Db {
                token TEXT PRIMARY KEY, student_id INTEGER NOT NULL REFERENCES students(id) ON DELETE CASCADE,
                expires INTEGER NOT NULL);",
         )?;
+        // A database made before kids could join themselves gains the new columns; its kids stay approved.
+        let has = |table: &str, col: &str| -> rusqlite::Result<bool> {
+            let mut st = conn.prepare(&format!("PRAGMA table_info({table})"))?;
+            let cols: Vec<String> = st.query_map([], |r| r.get::<_, String>(1))?.collect::<Result<_, _>>()?;
+            Ok(cols.iter().any(|c| c == col))
+        };
+        for (table, col, def) in [
+            ("students", "approved", "INTEGER NOT NULL DEFAULT 1"),
+            ("students", "ticket", "TEXT"),
+            ("classes", "join_until", "INTEGER NOT NULL DEFAULT 0"),
+        ] {
+            if !has(table, col)? {
+                conn.execute_batch(&format!("ALTER TABLE {table} ADD COLUMN {col} {def}"))?;
+            }
+        }
         Ok(Db { conn })
     }
 
@@ -121,44 +155,110 @@ impl Db {
     }
 
     pub fn classes(&self) -> Value {
-        let mut st = self.conn.prepare("SELECT c.code, c.name, (SELECT COUNT(*) FROM students s WHERE s.class_id=c.id) FROM classes c ORDER BY c.id").unwrap();
+        let mut st = self.conn.prepare("SELECT c.code, c.name, (SELECT COUNT(*) FROM students s WHERE s.class_id=c.id AND s.approved=1) FROM classes c ORDER BY c.id").unwrap();
         let rows = st.query_map([], |r| Ok(json!({"code": r.get::<_, String>(0)?, "name": r.get::<_, String>(1)?, "kids": r.get::<_, i64>(2)?})));
         Value::Array(rows.map(|it| it.filter_map(Result::ok).collect()).unwrap_or_default())
     }
 
-    /// The class's names only, A-Z, and whether each kid has picked a picture yet. Never the picture.
-    pub fn roster(&self, code: &str) -> Option<Value> {
-        let (id, name): (i64, String) = self.conn.query_row("SELECT id, name FROM classes WHERE code=?1", [code], |r| Ok((r.get(0)?, r.get(1)?))).optional().ok()??;
-        let mut st = self.conn.prepare("SELECT id, name, picture IS NOT NULL FROM students WHERE class_id=?1 ORDER BY name COLLATE NOCASE").ok()?;
+    /// The class's approved names only, A-Z, whether each kid has picked a picture yet, and whether joining is
+    /// open. Never the picture; never a name still waiting for the teacher.
+    pub fn roster(&self, code: &str, now: u64) -> Option<Value> {
+        let (id, name, until): (i64, String, i64) =
+            self.conn.query_row("SELECT id, name, join_until FROM classes WHERE code=?1", [code], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?))).optional().ok()??;
+        let mut st = self.conn.prepare("SELECT id, name, picture IS NOT NULL FROM students WHERE class_id=?1 AND approved=1 ORDER BY name COLLATE NOCASE").ok()?;
         let kids: Vec<Value> = st
             .query_map([id], |r| Ok(json!({"id": r.get::<_, i64>(0)?, "name": r.get::<_, String>(1)?, "picked": r.get::<_, bool>(2)?})))
             .ok()?
             .filter_map(Result::ok)
             .collect();
-        Some(json!({"class": name, "grid": GRID_SIZE, "students": kids}))
+        Some(json!({"class": name, "grid": GRID_SIZE, "students": kids, "join_open": until.max(0) as u64 > now}))
     }
 
-    /// Teacher: the class's name and, per kid A-Z, id, name, picked, locked and wait_s (seconds left of a pause,
-    /// 0 when none). Never the picture.
+    /// Teacher: the class's name, join_s (seconds of joining left, 0 when closed) and, per kid (names waiting for
+    /// approval first, then A-Z), id, name, status (pending or approved), picked, locked and wait_s (seconds left of
+    /// a pause, 0 when none). Never the picture.
     pub fn students(&self, code: &str, now: u64) -> Option<Value> {
-        let (id, name): (i64, String) = self.conn.query_row("SELECT id, name FROM classes WHERE code=?1", [code], |r| Ok((r.get(0)?, r.get(1)?))).optional().ok()??;
-        let mut st = self.conn.prepare("SELECT id, name, picture IS NOT NULL, locked, paused_until FROM students WHERE class_id=?1 ORDER BY name COLLATE NOCASE").ok()?;
+        let (id, name, join_until): (i64, String, i64) =
+            self.conn.query_row("SELECT id, name, join_until FROM classes WHERE code=?1", [code], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?))).optional().ok()??;
+        let mut st = self
+            .conn
+            .prepare("SELECT id, name, picture IS NOT NULL, locked, paused_until, approved FROM students WHERE class_id=?1 ORDER BY approved, name COLLATE NOCASE")
+            .ok()?;
         let kids: Vec<Value> = st
             .query_map([id], |r| {
                 let until = r.get::<_, i64>(4)?.max(0) as u64;
-                Ok(json!({"id": r.get::<_, i64>(0)?, "name": r.get::<_, String>(1)?, "picked": r.get::<_, bool>(2)?,
+                let status = if r.get::<_, bool>(5)? { "approved" } else { "pending" };
+                Ok(json!({"id": r.get::<_, i64>(0)?, "name": r.get::<_, String>(1)?, "status": status, "picked": r.get::<_, bool>(2)?,
                           "locked": r.get::<_, bool>(3)?, "wait_s": until.saturating_sub(now)}))
             })
             .ok()?
             .filter_map(Result::ok)
             .collect();
-        Some(json!({"code": code, "class": name, "students": kids}))
+        Some(json!({"code": code, "class": name, "join_s": (join_until.max(0) as u64).saturating_sub(now), "students": kids}))
     }
 
-    /// The kid's id, only when they are in the class with this code.
+    /// Teacher: opens joining for JOIN_OPEN_S from now, or closes it. False when there is no such class.
+    pub fn open_join(&self, code: &str, open: bool, now: u64) -> bool {
+        let until = if open { now + JOIN_OPEN_S } else { 0 };
+        self.conn.execute("UPDATE classes SET join_until=?1 WHERE code=?2", params![until as i64, code]).unwrap_or(0) > 0
+    }
+
+    /// A new name asks to join: it waits for the teacher, and the laptop polls with the ticket it gets back.
+    pub fn join(&self, code: &str, name: &str, now: u64) -> Result<(i64, String), JoinErr> {
+        let (cid, until): (i64, i64) = self
+            .conn
+            .query_row("SELECT id, join_until FROM classes WHERE code=?1", [code], |r| Ok((r.get(0)?, r.get(1)?)))
+            .optional()
+            .ok()
+            .flatten()
+            .ok_or(JoinErr::NoClass)?;
+        if until.max(0) as u64 <= now {
+            return Err(JoinErr::Closed);
+        }
+        let names: Vec<String> = {
+            let mut st = self.conn.prepare("SELECT name FROM students WHERE class_id=?1").map_err(|_| JoinErr::NoClass)?;
+            let rows = st.query_map([cid], |r| r.get::<_, String>(0)).map_err(|_| JoinErr::NoClass)?;
+            rows.filter_map(Result::ok).collect()
+        };
+        // Case-insensitive for Hebrew and English alike (SQLite's NOCASE folds ASCII only).
+        if names.iter().any(|n| n.to_lowercase() == name.to_lowercase()) {
+            return Err(JoinErr::Taken);
+        }
+        if names.len() >= CLASS_MAX_KIDS as usize {
+            return Err(JoinErr::Full);
+        }
+        // 16 bytes, like a session token: the ticket is what a laptop shows to learn it was approved.
+        let ticket = random_hex(16);
+        self.conn
+            .execute("INSERT INTO students(class_id, name, approved, ticket) VALUES(?1, ?2, 0, ?3)", params![cid, name, ticket])
+            .map_err(|_| JoinErr::Taken)?;
+        Ok((self.conn.last_insert_rowid(), ticket))
+    }
+
+    /// Where a ticket stands; None once the teacher rejected it (the row is gone) or for an unknown ticket.
+    pub fn join_status(&self, ticket: &str) -> Option<JoinStatus> {
+        let (id, name, picked, approved): (i64, String, bool, bool) = self
+            .conn
+            .query_row("SELECT id, name, picture IS NOT NULL, approved FROM students WHERE ticket=?1", [ticket], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?, r.get(3)?)))
+            .optional()
+            .ok()??;
+        Some(if approved { JoinStatus::Approved { id, name, picked } } else { JoinStatus::Pending })
+    }
+
+    /// Teacher: the waiting name becomes the kid's name from now on.
+    pub fn approve(&self, kid: i64) -> bool {
+        self.conn.execute("UPDATE students SET approved=1 WHERE id=?1", [kid]).unwrap_or(0) > 0
+    }
+
+    /// Teacher: a waiting name is dropped. Only a waiting one: an approved kid's record is never deleted here.
+    pub fn reject(&self, kid: i64) -> bool {
+        self.conn.execute("DELETE FROM students WHERE id=?1 AND approved=0", [kid]).unwrap_or(0) > 0
+    }
+
+    /// The kid's id, only when they are in the class with this code and the teacher has approved their name.
     fn kid_in(&self, code: &str, kid: i64) -> Option<i64> {
         self.conn
-            .query_row("SELECT s.id FROM students s JOIN classes c ON c.id=s.class_id WHERE c.code=?1 AND s.id=?2", params![code, kid], |r| r.get(0))
+            .query_row("SELECT s.id FROM students s JOIN classes c ON c.id=s.class_id WHERE c.code=?1 AND s.id=?2 AND s.approved=1", params![code, kid], |r| r.get(0))
             .optional()
             .ok()
             .flatten()
@@ -257,6 +357,11 @@ impl Db {
             races.insert(r.0, json!(r.1));
         }
         Some(json!({"id": kid, "name": name, "class": class, "level": level, "words": words, "races": races}))
+    }
+
+    /// The kid's approved name, the only name the race boards show.
+    pub fn name(&self, kid: i64) -> Option<String> {
+        self.conn.query_row("SELECT name FROM students WHERE id=?1 AND approved=1", [kid], |r| r.get(0)).optional().ok().flatten()
     }
 
     pub fn set_level(&self, kid: i64, level: &str) {

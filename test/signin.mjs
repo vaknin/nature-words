@@ -3,15 +3,16 @@
 // The access section checks the teacher sign-in by Cloudflare Access: it starts BIN with an access.json and a key set
 // of its own, mints Cloudflare-shaped tokens itself, and stands in for Cloudflare by adding the token header to every
 // browser request; then it restarts BIN without the config and checks the teacher key works again.
-// all runs kid and teacher; app and access run on their own (access only with --local).
-// Run: cd test && npm ci && node signin.mjs kid|teacher|app|access|all (--local BIN | URL)
+// all runs kid, teacher and race; app and access run on their own (access only with --local).
+// Run: cd test && npm ci && node signin.mjs kid|teacher|race|app|access|all (--local BIN | URL)
 //   --local BIN  starts BIN on a free port with a throwaway database, board log, teacher key and pages from server/www
+//                (for race: a temp copy of server/www plus this lesson's index.html as nature-words/)
 //   URL          uses that server (the live one: the address in ~/.local/state/lesson-server/url) and the teacher key
 //                in ~/.config/lesson-server/teacher.key
 // Every class it makes is a throwaway one, deleted at the end whether the test passed or not. Exits non-zero on any miss.
 import puppeteer from 'puppeteer-core';
 import { spawn, execFileSync } from 'child_process';
-import { mkdtempSync, readFileSync, rmSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { mkdtempSync, readFileSync, rmSync, existsSync, mkdirSync, writeFileSync, cpSync, copyFileSync } from 'fs';
 import { generateKeyPairSync, sign as rsaSign } from 'crypto';
 import { createServer } from 'net';
 import { fileURLToPath } from 'url';
@@ -40,7 +41,8 @@ const LAND_MS = 15000;
 // 2.64 s live (one run); 15 s is 5 times the slowest.
 const LOAD_MS = 15000;
 // The teacher page refreshes its kids every 5 s (its REFRESH_MS); a badge shows within one refresh plus one answer.
-// Slowest seen locally 4.96 s (one refresh, as expected); 15 s is three refreshes.
+// Slowest seen locally 4.96 s (one refresh, as expected); 15 s is three refreshes. A waiting kid's page asks at the
+// same pace (its POLL_MS), so the same wait covers an approval or a no reaching the kid.
 const REFRESH_WAIT_MS = 15000;
 // The teacher app's service worker, from page load to installed, active and in control of the page: slowest seen
 // 28 ms locally (3 runs). Through the tunnel it is one more small fetch (sw.js, under 2 KB), like a screen change
@@ -49,7 +51,7 @@ const SW_MS = SCREEN_MS;
 // His phone: 412x915 is the common Android phone viewport (Chrome DevTools' Galaxy and Pixel presets), touch on.
 const PHONE = { width: 412, height: 915, isMobile: true, hasTouch: true };
 const section = process.argv[2];
-if (!['kid', 'teacher', 'app', 'access', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|app|access|all (--local BIN | URL)'); process.exit(2); }
+if (!['kid', 'teacher', 'race', 'app', 'access', 'all'].includes(section)) { console.log('usage: node signin.mjs kid|teacher|race|app|access|all (--local BIN | URL)'); process.exit(2); }
 let base, key, child = null, tmp = null, startLog = '';
 let failures = 0;
 const fail = m => { failures++; console.log('  FAIL', m); };
@@ -63,10 +65,19 @@ const freePort = () => new Promise((res, rej) => { const s = createServer(); s.l
 // server's own access.json: Access is off unless the access section turns it on.
 async function startLocal(bin, access) {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'signin-test-'));
+  let www = path.join(here, '..', 'server', 'www');
+  if (section === 'race' || section === 'all') {
+    // The lesson page served beside the sign-in page, as on our server: the same origin holds the kid's sign-in.
+    const pages = path.join(tmp, 'www');
+    cpSync(www, pages, { recursive: true });
+    mkdirSync(path.join(pages, 'nature-words'), { recursive: true });
+    copyFileSync(path.join(here, '..', 'index.html'), path.join(pages, 'nature-words', 'index.html'));
+    www = pages;
+  }
   const port = await freePort();
   child = spawn(path.resolve(bin), [], {
     stdio: ['ignore', 'ignore', 'pipe'],
-    env: { ...process.env, LESSON_PORT: String(port), LESSON_DB: path.join(tmp, 'lesson.db'), LESSON_BOARD: path.join(tmp, 'board.log'), LESSON_TEACHER_KEY: path.join(tmp, 'teacher.key'), LESSON_WWW: path.join(here, '..', 'server', 'www'), LESSON_ACCESS: access || path.join(tmp, 'no-access.json') },
+    env: { ...process.env, LESSON_PORT: String(port), LESSON_DB: path.join(tmp, 'lesson.db'), LESSON_BOARD: path.join(tmp, 'board.log'), LESSON_TEACHER_KEY: path.join(tmp, 'teacher.key'), LESSON_WWW: www, LESSON_ACCESS: access || path.join(tmp, 'no-access.json') },
   });
   let log = '';
   child.stderr.on('data', d => { log += d; startLog = log; });
@@ -94,10 +105,25 @@ const NAMES = ['Adam S.', 'Noa K.', 'Omer', 'Yael B.', 'Itay', 'Maya L.', 'Ori',
   'Roni B.', 'Noam', 'Lia', 'Ben', 'Avigail T.', 'Hila', 'Amit D.', 'Yarden', 'Ella', 'Tomer G.', 'Michal', 'Daniel H.', 'Agam', 'Ariel N.',
   'Romi', 'Neta P.', 'Uri', 'Inbar', 'Matan Z.', 'Sapir', 'Elad', 'Hadar W.', 'Lior', 'Yuval C.', 'Maximiliano B.', 'Shoshanna A.'];
 
-async function makeClass(name) {
-  const r = await teach('POST', '/api/classes', { name, students: NAMES.slice(0, CLASS_MAX_KIDS) });
+// An empty class with joining open: kids join themselves.
+async function makeEmptyClass(name) {
+  const r = await teach('POST', '/api/classes', { name, students: [] });
   if (r.status !== 200) throw new Error(`could not make a class: ${r.status} ${JSON.stringify(r.data)}`);
+  const o = await teach('POST', `/api/classes/${r.data.code}/join`, { open: true });
+  if (o.status !== 200) throw new Error(`could not open joining: ${o.status}`);
   return r.data.code;
+}
+// A name waiting for the teacher in CODE: its id, or undefined.
+async function pendingId(code, name) {
+  const r = await teach('GET', `/api/classes/${code}/students`);
+  return (r.data?.students || []).find(k => k.status === 'pending' && k.name === name)?.id;
+}
+// NAME joins by the API and the teacher approves it.
+async function joinApproved(code, name) {
+  const j = await api('POST', '/api/join', { code, name });
+  if (j.status !== 200) throw new Error(`${name} could not join: ${j.status} ${JSON.stringify(j.data)}`);
+  const a = await teach('POST', `/api/students/${await pendingId(code, j.data.name)}/approve`);
+  if (a.status !== 200) throw new Error(`${name} was not approved: ${a.status}`);
 }
 async function kidsOf(code) {
   const r = await api('GET', '/api/roster/' + code);
@@ -150,24 +176,40 @@ const tapTile = (page, animal) => page.$eval(`#grid .tile svg[aria-label="${anim
 const tapName = (page, name) => page.$$eval('#names button', (bs, n) => bs.findIndex(b => b.textContent === n), name).then(i => page.tap(`#names button[data-i="${i}"]`));
 
 // ---------- Kid ----------
+// The names the kids type through the page, one per laptop size: the second typed small, so the server's tidying
+// (capital, the initial's dot) shows on the page.
+const TYPED = [['Zohar', 'Zohar'], ['rotem g', 'Rotem G.']];
 async function kidSection() {
   console.log('\n== kid sign-in');
-  const code = await makeClass('signin test');
+  const code = await makeEmptyClass('signin test');
   try {
+    // The rest of a full class joins by the API, so the names screen is checked at 40 with the new kids.
+    for (const n of NAMES.slice(0, CLASS_MAX_KIDS - SIZES.length)) await joinApproved(code, n);
     const kids = await kidsOf(code);
-    ok(kids.length === CLASS_MAX_KIDS, `a ${CLASS_MAX_KIDS}-kid class made through the API`);
-    for (const [n, vp] of SIZES.entries()) await kidRun(code, kids[n * 7], vp, n);
+    ok(kids.length === CLASS_MAX_KIDS - SIZES.length, `an empty class, joining open, ${kids.length} kids joined and approved through the API`);
+    const signed = [];
+    for (const [n, vp] of SIZES.entries()) signed.push(await kidRun(code, TYPED[n], vp, n));
+    await homeRun(code, signed[0], SIZES[0]);
   } finally {
     const r = await teach('DELETE', '/api/classes/' + code);
     ok(r.status === 200, 'the throwaway class is deleted');
   }
 }
 
-async function kidRun(code, kid, vp, n) {
+// Types NAME on the shown join screen and sends it.
+async function typeName(page, name) {
+  await page.$eval('#join-name', i => { i.value = ''; });
+  await page.tap('#join-name');
+  await page.keyboard.type(name);
+  await page.tap('#join-send');
+}
+
+async function kidRun(code, [typed, tidy], vp, n) {
   const at = `${vp.width}x${vp.height}`;
-  console.log(`-- ${at}, ${kid.name}`);
+  console.log(`-- ${at}, a new kid types "${typed}"`);
   const errors = [];
   const { browser, page } = await browserPage(vp, errors);
+  const mine = ORDER[(5 * n + 4) % 16];
   try {
     await timed('page load', page.goto(base + '/', { waitUntil: 'load', timeout: LOAD_MS }));
     ok(await page.$eval('html', h => h.getAttribute('translate') === 'no' && h.classList.contains('notranslate')), `${at}: html has translate=no and notranslate`);
@@ -188,19 +230,51 @@ async function kidRun(code, kid, vp, n) {
     ok(await page.$$eval('#code input', b => b.map(x => x.value).join('')) === code, `${at}: digits only, each box advances to the next`);
     await page.tap('#go');
     await shown(page, 's-names', 'screen');
+    const before = CLASS_MAX_KIDS - SIZES.length + n;
     const chips = await page.$$eval('#names button', bs => bs.map(b => { const r = b.getBoundingClientRect(); return { w: r.width, h: r.height, b: r.bottom, t: r.top }; }));
-    ok(chips.length === CLASS_MAX_KIDS, `${at}: ${chips.length} name chips`);
+    ok(chips.length === before, `${at}: ${chips.length} name chips, approved kids only`);
     ok(chips.every(c => c.w >= 47.5 && c.h >= 47.5), `${at}: every name chip at least 48x48 (smallest ${Math.round(Math.min(...chips.map(c => c.w)))}x${Math.round(Math.min(...chips.map(c => c.h)))})`);
-    ok(chips.every(c => c.t >= 0 && c.b <= vp.height), `${at}: all ${CLASS_MAX_KIDS} names fit with no scroll`);
+    ok(chips.every(c => c.t >= 0 && c.b <= vp.height), `${at}: all ${before} names fit with no scroll`);
+    ok(await page.$eval('#i-am-new', b => !b.hidden), `${at}: joining is open, so "I am new" shows`);
     await checkLayout(page, `${at} names`);
-    await tapName(page, kid.name);
-    await shown(page, 's-grid', 'screen');
+    await page.tap('#i-am-new');
+    await shown(page, 's-join', 'screen');
+    await checkLayout(page, `${at} join`);
+    if (n === 0) {
+      // Two words: caught on the page before anything is sent.
+      await typeName(page, 'Noa Ben');
+      await timed('screen', page.waitForFunction(() => /Only your first name/.test(document.getElementById('join-msg').innerText), { timeout: SCREEN_MS }));
+      ok(!(await teach('GET', `/api/classes/${code}/students`)).data.students.some(k => k.status === 'pending'), `${at}: a two-word name is refused on the page, nothing sent`);
+      // A name the teacher says no to: back to typing, with the message.
+      await typeName(page, 'Bobo');
+      await shown(page, 's-pending', 'screen');
+      const no = await pendingId(code, 'Bobo');
+      ok((await teach('POST', `/api/students/${no}/reject`)).status === 200, 'the teacher rejects Bobo (API)');
+      await timed('poll', page.waitForFunction(() => !document.getElementById('s-join').hidden && /Your teacher said no\. Type your name again\./.test(document.getElementById('join-msg').innerText), { timeout: REFRESH_WAIT_MS }));
+      ok(true, `${at}: a rejected name sees "Your teacher said no. Type your name again."`);
+      ok(await page.evaluate(() => localStorage.getItem('lesson-join') === null), `${at}: the rejected ticket is dropped`);
+      await checkLayout(page, `${at} join after no`);
+    }
+    await typeName(page, typed);
+    await shown(page, 's-pending', 'screen');
+    ok(/Waiting for your teacher to say OK/.test(await textOf(page, '#s-pending')) && (await textOf(page, '#pending-name')) === tidy, `${at}: waits for the teacher as ${tidy}`);
+    await checkLayout(page, `${at} pending`);
+    const j = await page.evaluate(() => JSON.parse(localStorage.getItem('lesson-join') || 'null'));
+    ok(j && j.code === code && /^[0-9a-f]{32}$/.test(j.ticket), `${at}: the ticket is kept on the laptop`);
+    if (n === 0) {
+      await timed('page load', page.goto(base + '/', { waitUntil: 'load', timeout: LOAD_MS }));
+      await shown(page, 's-pending');
+      ok(true, `${at}: a reload keeps waiting`);
+    }
+    ok((await kidsOf(code)).every(k => k.name !== tidy), `${at}: the roster does not list ${tidy} while waiting`);
+    const id = await pendingId(code, tidy);
+    ok((await teach('POST', `/api/students/${id}/approve`)).status === 200, `the teacher approves ${tidy} (API)`);
+    await timed('poll', page.waitForFunction(() => !document.getElementById('s-grid').hidden, { timeout: REFRESH_WAIT_MS }));
+    ok((await textOf(page, '#grid-name')) === tidy && /Pick your secret animal/.test(await textOf(page, '#grid-hint')), `${at}: approved, straight to picking an animal as ${tidy}`);
     const tiles = await page.$$eval('#grid .tile', ts => ts.map(t => { const r = t.getBoundingClientRect(); return [r.width, r.height]; }));
     ok(tiles.length === 16 && tiles.every(([w, h]) => w >= 119.5 && h >= 119.5), `${at}: 16 animal tiles, each at least 120 px`);
-    ok(/Pick your secret animal/.test(await textOf(page, '#grid-hint')), `${at}: first visit asks to pick an animal`);
     await checkLayout(page, `${at} animals`);
     const first = await tileOrder(page);
-    const mine = ORDER[(5 * n + 4) % 16];
     await tapTile(page, mine);
     await shown(page, 's-confirm', 'screen');
     const conf = await textOf(page, '#s-confirm');
@@ -209,16 +283,17 @@ async function kidRun(code, kid, vp, n) {
     await checkLayout(page, `${at} confirm`);
     await page.tap('#pick-yes');
     await shown(page, 's-hi', 'screen');
-    ok((await textOf(page, '#hi')) === `Hi ${kid.name}!`, `${at}: says Hi ${kid.name}!`);
+    ok((await textOf(page, '#hi')) === `Hi ${tidy}!`, `${at}: says Hi ${tidy}!`);
     await timed('land', page.waitForFunction(() => location.pathname === '/nature-words/', { timeout: LAND_MS }));
     const sess = await page.evaluate(() => JSON.parse(localStorage.getItem('lesson-session') || 'null'));
-    ok(sess && /^[0-9a-f]{32}$/.test(sess.token) && sess.name === kid.name && sess.expires > Date.now(), `${at}: lands on the lesson with lesson-session stored`);
+    ok(sess && /^[0-9a-f]{32}$/.test(sess.token) && sess.name === tidy && sess.expires > Date.now(), `${at}: lands on the lesson with lesson-session stored`);
+    ok(await page.evaluate(() => localStorage.getItem('lesson-join') === null), `${at}: no ticket left behind`);
 
     // Again: the laptop remembers the class, so the kid starts at the names; the animals are in a new order.
     await timed('page load', page.goto(base + '/', { waitUntil: 'load', timeout: LOAD_MS }));
     await shown(page, 's-names');
-    ok(true, `${at}: the next visit starts at the names (class remembered)`);
-    await tapName(page, kid.name);
+    ok((await page.$$eval('#names button', bs => bs.length)) === before + 1, `${at}: the next visit starts at the names, ${tidy} among them`);
+    await tapName(page, tidy);
     await shown(page, 's-grid', 'screen');
     ok(/Tap your secret animal/.test(await textOf(page, '#grid-hint')), `${at}: second visit asks for the secret animal`);
     const second = await tileOrder(page);
@@ -230,7 +305,7 @@ async function kidRun(code, kid, vp, n) {
     // Three wrong animals: "Not this one" with a reshuffled grid, then the wait screen.
     await timed('page load', page.goto(base + '/', { waitUntil: 'load', timeout: LOAD_MS }));
     await shown(page, 's-names');
-    await tapName(page, kid.name);
+    await tapName(page, tidy);
     await shown(page, 's-grid', 'screen');
     const wrongs = ORDER.filter(a => a !== mine);
     for (let i = 0; i < FIRST_PAUSE_AT; i++) {
@@ -252,6 +327,39 @@ async function kidRun(code, kid, vp, n) {
     fail(`${at}: ${e.message.split('\n')[0]}`);
     mkdirSync(path.join(here, 'shots'), { recursive: true });
     await page.screenshot({ path: path.join(here, 'shots', `signin-kid-${at}.png`) }).catch(() => {});
+  } finally {
+    await browser.close();
+  }
+  return { name: tidy, animal: mine };
+}
+
+// From home: a fresh browser opens the class's home link, joining closed, and the approved kid signs in with the
+// animal. The wrong tries above paused her, so the teacher's Unlock ends that pause first.
+async function homeRun(code, kid, vp) {
+  const at = `${vp.width}x${vp.height}`;
+  console.log(`-- ${at}, home: ${kid.name} through the class link, joining closed`);
+  ok((await teach('POST', `/api/classes/${code}/join`, { open: false })).status === 200, 'the teacher closes joining (API)');
+  const k = (await kidsOf(code)).find(x => x.name === kid.name);
+  ok((await teach('POST', `/api/students/${k.id}/unlock`)).status === 200, `the teacher unlocks ${kid.name}'s pause (API)`);
+  const errors = [];
+  const { browser, page } = await browserPage(vp, errors);
+  try {
+    await timed('page load', page.goto(`${base}/?class=${code}`, { waitUntil: 'load', timeout: LOAD_MS }));
+    await shown(page, 's-names');
+    ok(true, `${at}: the home link starts at the class's names`);
+    ok(await page.evaluate(c => localStorage.getItem('lesson-class') === c, code), `${at}: the link's class is remembered as this laptop's`);
+    ok(await page.$eval('#i-am-new', b => b.hidden), `${at}: joining closed, so no "I am new"`);
+    await tapName(page, kid.name);
+    await shown(page, 's-grid', 'screen');
+    ok(/Tap your secret animal/.test(await textOf(page, '#grid-hint')), `${at}: asks for the secret animal`);
+    await tapTile(page, kid.animal);
+    await timed('land', page.waitForFunction(() => location.pathname === '/nature-words/', { timeout: LAND_MS }));
+    ok(true, `${at}: ${kid.name} signs in from home with the animal`);
+    ok(errors.length === 0, `${at}: no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+  } catch (e) {
+    fail(`home ${at}: ${e.message.split('\n')[0]}`);
+    mkdirSync(path.join(here, 'shots'), { recursive: true });
+    await page.screenshot({ path: path.join(here, 'shots', `signin-home-${at}.png`) }).catch(() => {});
   } finally {
     await browser.close();
   }
@@ -293,16 +401,35 @@ async function teacherSection() {
     await page.type('#new-name', name);
     await page.type('#new-kids', [...kids, 'Avigailalexandra'].join('\n'));
     ok(/Longer than 15 letters: Avigailalexandra/.test(await textOf(page, '#new-msg')), `${at}: a 16-letter name is caught before sending`);
-    await page.$eval('#new-kids', (t, v) => { t.value = v; t.dispatchEvent(new Event('input')); }, kids.join('\n'));
-    ok((await textOf(page, '#new-msg')) === '', `${at}: the fixed list has no warning`);
+    // Left empty: kids join themselves.
+    await page.$eval('#new-kids', t => { t.value = ''; t.dispatchEvent(new Event('input')); });
+    ok((await textOf(page, '#new-msg')) === '', `${at}: an empty list has no warning`);
     await checkLayout(page, `${at} teacher new class`);
     await page.tap('#new-make');
     await shown(page, 'v-class', 'screen');
     code = await textOf(page, '#class-code');
     const listed = (await teach('GET', '/api/classes')).data.find(c => c.code === code);
-    ok(listed && listed.name === name && listed.kids === kids.length, `${at}: the class made through the page is on the server (${code}, ${kids.length} kids)`);
-    await timed('screen', page.waitForFunction(n => document.querySelectorAll('#kids tr').length === n, { timeout: SCREEN_MS }, kids.length));
+    ok(listed && listed.name === name && listed.kids === 0, `${at}: the empty class made through the page is on the server (${code})`);
+    ok((await textOf(page, '#class-link')) === `${base}/?class=${code}`, `${at}: the home link holds ?class=${code}`);
+    ok(/closed/.test(await textOf(page, '#join-state')), `${at}: joining starts closed`);
+    await page.tap('#join-toggle');
+    await timed('screen', page.waitForFunction(() => /open, .* left/.test(document.getElementById('join-state').innerText), { timeout: SCREEN_MS }));
+    ok((await api('GET', '/api/roster/' + code)).data.join_open === true, `${at}: Open joining opens it on the server`);
+    // Two kids join by the API; both rows show waiting without a reload.
+    const tickets = {};
+    for (const n of ['Noa K.', 'Bobo']) tickets[n] = (await api('POST', '/api/join', { code, name: n })).data.ticket;
+    await timed('refresh', page.waitForFunction(() => [...document.querySelectorAll('#kids tr')].filter(r => /waiting for OK/.test(r.innerText)).length === 2, { timeout: REFRESH_WAIT_MS }));
+    ok(true, `${at}: two new names show waiting for OK without a reload`);
     await checkLayout(page, `${at} teacher class`);
+    const noaId = await pendingId(code, 'Noa K.'), boboId = await pendingId(code, 'Bobo');
+    await page.tap(`#kids button[data-approve="${noaId}"]`);
+    await timed('screen', page.waitForFunction(id => /No animal yet/.test(document.querySelector(`#kids tr[data-kid="${id}"]`)?.innerText || ''), { timeout: SCREEN_MS }, noaId));
+    ok((await api('GET', '/api/join/' + tickets['Noa K.'])).data.status === 'approved', `${at}: Approve turns Noa K. into No animal yet`);
+    await page.tap(`#kids button[data-reject="${boboId}"]`);
+    await shown(page, 'dialog', 'screen');
+    await page.tap('#dialog-yes');
+    await timed('screen', page.waitForFunction(id => !document.querySelector(`#kids tr[data-kid="${id}"]`), { timeout: SCREEN_MS }, boboId));
+    ok((await api('GET', '/api/join/' + tickets['Bobo'])).status === 404, `${at}: Reject removes Bobo and its ticket answers 404`);
 
     await page.tap('#show-proj');
     await shown(page, 'projector', 'screen');
@@ -314,7 +441,7 @@ async function teacherSection() {
     await timed('screen', page.waitForFunction(() => document.getElementById('projector').hidden, { timeout: SCREEN_MS }));
 
     // One kid picks an animal, then gets it wrong through the API.
-    const kid = (await kidsOf(code)).find(k => k.name === 'Omer');
+    const kid = (await kidsOf(code)).find(k => k.name === 'Noa K.');
     const right = 3, wrong = 4;
     ok((await api('POST', '/api/pick', { code, student: kid.id, picture: right })).status === 200, 'the kid picks an animal (API)');
     const signin = pic => api('POST', '/api/signin', { code, student: kid.id, picture: pic });
@@ -526,6 +653,87 @@ async function accessSection(bin) {
   }
 }
 
+// ---------- Race board: names come only from sign-in ----------
+// A short race (6 s, as the design screenshots use) on a test topic of its own, never the class board.
+const RACE_S = 6;
+// The race's 3 s countdown, its 6 s, then the end card's two board reads (the page's own 4 s timeout each): 25 s.
+const RACE_END_MS = 25000;
+async function playRace(page, topic) {
+  await page.evaluateOnNewDocument(t => { window.NW_BOARD_TOPIC = t; }, topic);
+  await timed('page load', page.goto(`${base}/nature-words/`, { waitUntil: 'load', timeout: LOAD_MS }));
+  // A kid who has done River's Last check, so River's race is open.
+  await page.evaluate(() => localStorage.setItem('nature-trails-' + new Date().toISOString().slice(0, 10), JSON.stringify({ trail: 1, game: 4, checked: 4, revealAt: Date.now() })));
+  await page.goto(`${base}/nature-words/#level-1`, { waitUntil: 'load', timeout: LOAD_MS });
+  await page.evaluate(s => { LESSON.race.seconds = s; race(trailOf(1)); }, RACE_S);
+  const t0 = Date.now();
+  while (Date.now() - t0 < RACE_END_MS && !(await page.$('[data-again]'))) {
+    const ans = await page.$eval('.stage', e => e.dataset.type === 'race' ? e.dataset.answer : '').catch(() => '');
+    const h = ans && await page.$(`.choice[data-w="${ans}"]:not(.ok)`);
+    if (h) await h.tap().catch(() => {});
+    await new Promise(r => setTimeout(r, 200));
+  }
+  ok(await page.$('[data-raceend]'), 'the race ends');
+  ok(!(await page.$('[data-raceend] input')), 'the race end has no name box');
+}
+
+async function raceSection() {
+  console.log('-- race: an approved, signed-in kid and a kid with no sign-in');
+  const code = await makeEmptyClass('race test ' + Math.random().toString(16).slice(2, 6));
+  const topic = 'nw-signin-' + Math.random().toString(16).slice(2, 14), name = 'Noa B.';
+  try {
+    await joinApproved(code, name);
+    const kid = (await kidsOf(code)).find(k => k.name === name);
+    const t = await api('POST', '/api/pick', { code, student: kid.id, picture: 3 });
+    ok(t.status === 200, `${name} is approved and picks an animal (API)`);
+    const sess = { token: t.data.token, name, id: kid.id, expires: Date.now() + t.data.expires_s * 1000 };
+    {
+      const errors = [];
+      const { browser, page } = await browserPage(SIZES[0], errors);
+      try {
+        // The sign-in page stores the sign-in on its origin before the lesson opens; here it is stored the same way.
+        await page.goto(`${base}/`, { waitUntil: 'load', timeout: LOAD_MS });
+        await page.evaluate(v => localStorage.setItem('lesson-session', JSON.stringify(v)), sess);
+        await playRace(page, topic);
+        await page.waitForSelector('.board li.me', { timeout: SCREEN_MS }).catch(() => {});
+        ok((await page.$eval('.board li.me', e => e.innerText).catch(() => '')).includes(name), `his approved name ${name} is lit on the board`);
+        ok((await page.$eval('[data-asname]', e => e.innerText).catch(() => '')).includes(name), `the card says he is on the board as ${name}`);
+        ok(!(await page.$('[data-signin]')), 'a signed-in kid is not asked to sign in');
+        const r = await fetch(`${base}/${topic}/json?poll=1&since=12h`, { signal: AbortSignal.timeout(SCREEN_MS) });
+        const lines = (await r.text()).split('\n').filter(Boolean).map(l => { try { return JSON.parse(JSON.parse(l).message); } catch { return {}; } });
+        ok(lines.some(m => m.n === name && m.s > 0 && m.p === 1), `the board read through the API carries ${name} (${JSON.stringify(lines)})`);
+        ok(errors.length === 0, `no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+      } catch (e) {
+        fail(`race signed in: ${e.message.split('\n')[0]}`);
+      } finally {
+        mkdirSync(path.join(here, 'shots'), { recursive: true });
+        await page.screenshot({ path: path.join(here, 'shots', 'signin-race-signed-in.png') }).catch(() => {});
+        await browser.close();
+      }
+    }
+    {
+      const errors = [];
+      const { browser, page } = await browserPage(SIZES[1], errors);
+      try {
+        // No sign-in: the boards are read as on any other copy of the page (pointed at this server, never ntfy.sh).
+        await page.evaluateOnNewDocument(u => { window.NW_BOARD_URL = u; }, base + '/');
+        await playRace(page, topic + 'x');
+        await page.waitForSelector('[data-signin]', { timeout: SCREEN_MS }).catch(() => {});
+        const href = await page.$eval('[data-signin]', a => a.getAttribute('href')).catch(() => '');
+        ok(href.startsWith('/?next=') && decodeURIComponent(href).includes('/nature-words/'), `no sign-in: a Sign in button back to this page (${href})`);
+        ok(!(await page.$('.board li.me')), 'no sign-in: no row of his on the board');
+        ok(errors.length === 0, `no page errors${errors.length ? ': ' + errors.slice(0, 3).join(' | ') : ''}`);
+      } catch (e) {
+        fail(`race no sign-in: ${e.message.split('\n')[0]}`);
+      } finally {
+        await page.screenshot({ path: path.join(here, 'shots', 'signin-race-no-signin.png') }).catch(() => {});
+        await browser.close();
+      }
+    }
+  } finally {
+    ok((await teach('DELETE', '/api/classes/' + code)).status === 200, 'the throwaway class is deleted');
+  }
+}
+
 // ---------- Main ----------
 try {
   const local = process.argv.indexOf('--local');
@@ -541,6 +749,7 @@ try {
   if (section !== 'access') console.log('server', base);
   if (section === 'kid' || section === 'all') await kidSection();
   if (section === 'teacher' || section === 'all') await teacherSection();
+  if (section === 'race' || section === 'all') await raceSection();
   if (section === 'app') await appSection();
 } catch (e) {
   fail(e.message);

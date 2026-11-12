@@ -1,6 +1,5 @@
-use super::*;
+// Included into main.rs at the crate root (see there), so main's own names and imports are already in scope.
 use std::fs;
-use std::path::PathBuf;
 
 const NOW: u64 = 1_800_000_000;
 const KEY: &str = "teacher-secret";
@@ -35,6 +34,39 @@ fn class(a: &App) -> (String, i64) {
     let r = body_of(&http(a, &req("GET", &format!("/api/roster/{code}"), "", ""), NOW));
     let noa = r["students"].as_array().unwrap().iter().find(|s| s["name"] == "Noa K.").unwrap()["id"].as_i64().unwrap();
     (code, noa)
+}
+fn race(token: &str, topic: &str, place: u32, score: i64) -> String {
+    req("POST", "/api/race", &format!("Authorization: Bearer {token}\r\n"), &format!(r#"{{"topic":"{topic}","place":{place},"score":{score}}}"#))
+}
+/// An empty class with joining open; returns its code.
+fn empty_class(a: &App) -> String {
+    let out = http(a, &teacher("POST", "/api/classes", r#"{"name":"5B","students":[]}"#), NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let code = body_of(&out)["code"].as_str().unwrap().to_string();
+    let out = http(a, &teacher("POST", &format!("/api/classes/{code}/join"), r#"{"open":true}"#), NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    code
+}
+fn join(a: &App, code: &str, name: &str, now: u64) -> String {
+    http(a, &req("POST", "/api/join", "", &json!({"code": code, "name": name}).to_string()), now)
+}
+fn ticket(a: &App, t: &str, now: u64) -> String {
+    http(a, &req("GET", &format!("/api/join/{t}"), "", ""), now)
+}
+fn roster_names(a: &App, code: &str, now: u64) -> Vec<String> {
+    let r = body_of(&http(a, &req("GET", &format!("/api/roster/{code}"), "", ""), now));
+    r["students"].as_array().unwrap().iter().map(|s| s["name"].as_str().unwrap().to_string()).collect()
+}
+/// Joins NAME, the teacher approves it; returns the kid's id.
+fn join_approved(a: &App, code: &str, name: &str) -> i64 {
+    let out = join(a, code, name, NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let t = body_of(&out)["ticket"].as_str().unwrap().to_string();
+    let r = body_of(&http(a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    let id = r["students"].as_array().unwrap().iter().find(|s| s["status"] == "pending").unwrap()["id"].as_i64().unwrap();
+    assert!(http(a, &teacher("POST", &format!("/api/students/{id}/approve"), ""), NOW).starts_with("HTTP/1.1 200"));
+    assert_eq!(body_of(&ticket(a, &t, NOW))["id"], id);
+    id
 }
 fn try_pic(a: &App, code: &str, kid: i64, pic: u32, now: u64, path: &str) -> String {
     http(a, &req("POST", path, "", &format!(r#"{{"code":"{code}","student":{kid},"picture":{pic}}}"#)), now)
@@ -154,7 +186,8 @@ fn race_board_post_and_read() {
     let addr = l.local_addr().unwrap();
     let a = Arc::new(App::new(Db::memory(), Store::open(None, now_s()), KEY.into(), None));
     std::thread::spawn(move || run(l, a));
-    let score = r#"{"n":"Noa","s":12,"p":1,"t":1}"#;
+    // No name: names come only from sign-in (see kahoot_race_uses_approved_name).
+    let score = r#"{"s":12,"p":1,"t":1}"#;
     // Laptop A posts its score.
     let mut laptop_a = std::net::TcpStream::connect(addr).unwrap();
     laptop_a.write_all(post("nw-a", score).as_bytes()).unwrap();
@@ -227,13 +260,14 @@ fn survives_restart() {
     let (code, noa) = {
         let a = App::new(Db::open(&d.join("lesson.db")).unwrap(), Store::open(Some(d.join("board.log")), NOW), KEY.into(), None);
         let (code, noa) = class(&a);
-        try_pic(&a, &code, noa, 3, NOW, "/api/pick");
-        http(&a, &post("nw-a", "{\"n\":\"Omer\",\"s\":9}"), NOW - 10);
+        let token = body_of(&try_pic(&a, &code, noa, 3, NOW - 10, "/api/pick"))["token"].as_str().unwrap().to_string();
+        let out = http(&a, &race(&token, "nw-a", 1, 9), NOW - 10);
+        assert!(out.starts_with("HTTP/1.1 200"), "{out}");
         (code, noa)
     };
     let a = App::new(Db::open(&d.join("lesson.db")).unwrap(), Store::open(Some(d.join("board.log")), NOW), KEY.into(), None);
     assert!(try_pic(&a, &code, noa, 3, NOW, "/api/signin").starts_with("HTTP/1.1 200"));
-    assert!(http(&a, &get("nw-a", "12h"), NOW).contains("Omer"));
+    assert!(http(&a, &get("nw-a", "12h"), NOW).contains("Noa K."));
     let _ = fs::remove_dir_all(&d);
 }
 
@@ -627,6 +661,185 @@ fn access_token_refuses_bad() {
 }
 
 #[test]
+fn kahoot_join_approve() {
+    let a = app();
+    let code = empty_class(&a);
+    let r = body_of(&http(&a, &req("GET", &format!("/api/roster/{code}"), "", ""), NOW));
+    assert_eq!(r["join_open"], true);
+    assert!(r["students"].as_array().unwrap().is_empty());
+    let out = join(&a, &code, "noa b", NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    let b = body_of(&out);
+    assert_eq!(b["name"], "Noa B.", "tidied: capital and the initial's dot");
+    let t = b["ticket"].as_str().unwrap().to_string();
+    assert_eq!(t.len(), 32);
+    assert_eq!(body_of(&ticket(&a, &t, NOW))["status"], "pending");
+    // Waiting: the kids' roster does not show her, the teacher's list does, first.
+    assert!(roster_names(&a, &code, NOW).is_empty());
+    http(&a, &teacher("POST", &format!("/api/classes/{code}/students"), r#"{"name":"Avi"}"#), NOW);
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    assert_eq!(r["join_s"], JOIN_OPEN_S);
+    let first = &r["students"][0];
+    assert_eq!((first["name"].clone(), first["status"].clone()), (json!("Noa B."), json!("pending")));
+    assert_eq!(r["students"][1]["status"], "approved");
+    let id = first["id"].as_i64().unwrap();
+    // Approving needs the teacher key.
+    assert!(http(&a, &req("POST", &format!("/api/students/{id}/approve"), "", ""), NOW).starts_with("HTTP/1.1 401"));
+    assert!(http(&a, &teacher("POST", &format!("/api/students/{id}/approve"), ""), NOW).starts_with("HTTP/1.1 200"));
+    let s = body_of(&ticket(&a, &t, NOW));
+    assert_eq!((s["status"].clone(), s["id"].clone(), s["name"].clone(), s["picked"].clone()), (json!("approved"), json!(id), json!("Noa B."), json!(false)));
+    assert_eq!(roster_names(&a, &code, NOW), ["Avi", "Noa B."]);
+    // Rejecting an approved kid does nothing: her record stays.
+    assert!(http(&a, &teacher("POST", &format!("/api/students/{id}/reject"), ""), NOW).starts_with("HTTP/1.1 404"));
+    assert!(try_pic(&a, &code, id, 4, NOW, "/api/pick").starts_with("HTTP/1.1 200"));
+    let out = try_pic(&a, &code, id, 4, NOW, "/api/signin");
+    let token = body_of(&out)["token"].as_str().unwrap().to_string();
+    let me = body_of(&http(&a, &req("GET", "/api/me", &format!("Authorization: Bearer {token}\r\n"), ""), NOW));
+    assert_eq!(me["name"], "Noa B.");
+}
+
+#[test]
+fn kahoot_join_reject() {
+    let a = app();
+    let code = empty_class(&a);
+    let t = body_of(&join(&a, &code, "Dana", NOW))["ticket"].as_str().unwrap().to_string();
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    let id = r["students"][0]["id"].as_i64().unwrap();
+    assert!(http(&a, &req("POST", &format!("/api/students/{id}/reject"), "", ""), NOW).starts_with("HTTP/1.1 401"));
+    assert!(http(&a, &teacher("POST", &format!("/api/students/{id}/reject"), ""), NOW).starts_with("HTTP/1.1 200"));
+    assert!(ticket(&a, &t, NOW).starts_with("HTTP/1.1 404"));
+    assert!(ticket(&a, "00000000000000000000000000000000", NOW).starts_with("HTTP/1.1 404"));
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    assert!(r["students"].as_array().unwrap().is_empty());
+    // The name is free again: the kid types it again.
+    assert!(join(&a, &code, "Dana", NOW).starts_with("HTTP/1.1 200"));
+}
+
+#[test]
+fn kahoot_join_closed_and_full() {
+    let a = app();
+    let code = empty_class(&a);
+    // Taken, any case, waiting names too; the hint says to add the family initial.
+    assert!(join(&a, &code, "Omer", NOW).starts_with("HTTP/1.1 200"));
+    let out = join(&a, &code, "OMER", NOW);
+    assert!(out.starts_with("HTTP/1.1 409") && out.contains("family initial"), "{out}");
+    assert!(join(&a, &code, "Omer K.", NOW).starts_with("HTTP/1.1 200"));
+    let he = join(&a, &code, "נועה", NOW);
+    assert!(he.starts_with("HTTP/1.1 200"), "{he}");
+    assert!(join(&a, &code, "נועה", NOW).starts_with("HTTP/1.1 409"));
+    // Full, counting the waiting names.
+    let letters: Vec<char> = ('A'..='Z').collect();
+    let mut n = 3;
+    'fill: for x in &letters {
+        for y in &letters {
+            if n >= CLASS_MAX_KIDS {
+                break 'fill;
+            }
+            let out = join(&a, &code, &format!("Kid {x}{y}").replace(' ', ""), NOW);
+            assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+            n += 1;
+        }
+    }
+    let out = join(&a, &code, "Last", NOW);
+    assert!(out.starts_with("HTTP/1.1 409") && out.contains("full"), "{out}");
+    // Closed by the teacher, or by the clock after one lesson.
+    let code2 = empty_class(&a);
+    assert!(join(&a, &code2, "Tal", NOW + JOIN_OPEN_S - 1).starts_with("HTTP/1.1 200"));
+    assert!(join(&a, &code2, "Gil", NOW + JOIN_OPEN_S).starts_with("HTTP/1.1 403"));
+    let r = body_of(&http(&a, &req("GET", &format!("/api/roster/{code2}"), "", ""), NOW + JOIN_OPEN_S));
+    assert_eq!(r["join_open"], false);
+    http(&a, &teacher("POST", &format!("/api/classes/{code2}/join"), r#"{"open":true}"#), NOW);
+    assert!(http(&a, &teacher("POST", &format!("/api/classes/{code2}/join"), r#"{"open":false}"#), NOW).starts_with("HTTP/1.1 200"));
+    assert!(join(&a, &code2, "Gil", NOW).starts_with("HTTP/1.1 403"));
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code2}/students"), ""), NOW));
+    assert_eq!(r["join_s"], 0);
+    // Opening joining needs the key; a class made with no names is fine.
+    assert!(http(&a, &req("POST", &format!("/api/classes/{code2}/join"), "", r#"{"open":true}"#), NOW).starts_with("HTTP/1.1 401"));
+    assert!(http(&a, &teacher("POST", "/api/classes", r#"{"name":"5C"}"#), NOW).starts_with("HTTP/1.1 200"));
+    // An unknown code counts against the same miss limit as the roster.
+    let wrong = if code == "000000" || code2 == "000000" { "000002" } else { "000000" };
+    let ip = "CF-Connecting-IP: 203.0.113.7\r\n";
+    for _ in 0..ROSTER_MISSES_PER_WINDOW {
+        let out = http(&a, &req("POST", "/api/join", ip, &json!({"code": wrong, "name": "x1"}).to_string()), NOW);
+        assert!(out.starts_with("HTTP/1.1 404"), "{out}");
+    }
+    assert!(http(&a, &req("GET", &format!("/api/roster/{code}"), ip, ""), NOW).starts_with("HTTP/1.1 429"));
+    assert!(http(&a, &req("POST", "/api/join", ip, &json!({"code": code, "name": "Zed"}).to_string()), NOW).starts_with("HTTP/1.1 429"));
+}
+
+#[test]
+fn kahoot_name_rule() {
+    for (raw, want) in [
+        ("Noa", Some("Noa")),
+        ("noa b.", Some("Noa B.")),
+        ("  Noa   B  ", Some("Noa B.")),
+        ("נועה", Some("נועה")),
+        ("נועה ב.", Some("נועה ב.")),
+        ("Abcdefghijkl", Some("Abcdefghijkl")),
+        ("Abcdefghijklm", None),
+        ("", None),
+        ("   ", None),
+        ("Noa Ben", None),
+        ("Noa B. C", None),
+        ("Noa2", None),
+        ("Noa 2", None),
+        ("No-a", None),
+        ("Noa!", None),
+        ("Noa ..", None),
+        ("<b>", None),
+    ] {
+        assert_eq!(kid_name(raw).as_deref(), want, "{raw:?}");
+    }
+    assert_eq!(KID_WORD_MAX + " K.".len(), NAME_MAX_CHARS);
+    let a = app();
+    let code = empty_class(&a);
+    let out = join(&a, &code, "Noa Ben", NOW);
+    assert!(out.starts_with("HTTP/1.1 400"), "{out}");
+    assert!(join(&a, &code, "Noa7", NOW).starts_with("HTTP/1.1 400"));
+}
+
+#[test]
+fn kahoot_pending_cannot_sign_in() {
+    let a = app();
+    let code = empty_class(&a);
+    join(&a, &code, "Noa", NOW);
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    let id = r["students"][0]["id"].as_i64().unwrap();
+    assert!(try_pic(&a, &code, id, 2, NOW, "/api/pick").starts_with("HTTP/1.1 404"));
+    assert!(try_pic(&a, &code, id, 2, NOW, "/api/signin").starts_with("HTTP/1.1 404"));
+    http(&a, &teacher("POST", &format!("/api/students/{id}/approve"), ""), NOW);
+    assert!(try_pic(&a, &code, id, 2, NOW, "/api/pick").starts_with("HTTP/1.1 200"));
+}
+
+#[test]
+fn kahoot_old_db_migrates() {
+    // The schema as it was before kids could join themselves, with one kid who already picked.
+    let d = std::env::temp_dir().join(format!("lesson-migrate-{}", std::process::id()));
+    let _ = fs::remove_dir_all(&d);
+    fs::create_dir_all(&d).unwrap();
+    {
+        let c = rusqlite::Connection::open(d.join("lesson.db")).unwrap();
+        c.execute_batch(
+            "CREATE TABLE classes (id INTEGER PRIMARY KEY, code TEXT NOT NULL UNIQUE, name TEXT NOT NULL, created INTEGER NOT NULL);
+             CREATE TABLE students (id INTEGER PRIMARY KEY, class_id INTEGER NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+               name TEXT NOT NULL, picture INTEGER, level TEXT, wrong INTEGER NOT NULL DEFAULT 0, paused_until INTEGER NOT NULL DEFAULT 0,
+               locked INTEGER NOT NULL DEFAULT 0, UNIQUE(class_id, name));
+             INSERT INTO classes(id, code, name, created) VALUES(1, '123456', '5A', 1);
+             INSERT INTO students(id, class_id, name, picture) VALUES(7, 1, 'Omer', 9);",
+        )
+        .unwrap();
+    }
+    for _ in 0..2 {
+        // Twice: a second open finds the columns there and adds nothing.
+        let a = App::new(Db::open(&d.join("lesson.db")).unwrap(), Store::open(None, NOW), KEY.into(), None);
+        assert_eq!(roster_names(&a, "123456", NOW), ["Omer"]);
+        assert!(try_pic(&a, "123456", 7, 9, NOW, "/api/signin").starts_with("HTTP/1.1 200"));
+        assert!(join(&a, "123456", "Dana", NOW).starts_with("HTTP/1.1 403"), "joining starts closed");
+    }
+    let _ = fs::remove_dir_all(&d);
+}
+
+#[test]
 fn access_off_uses_key() {
     // No access.json: Access is off and the teacher key works as before.
     let d = std::env::temp_dir().join(format!("lesson-access-off-{}", std::process::id()));
@@ -725,4 +938,79 @@ fn teacher_gate_auth_reports() {
     assert_eq!(auth(&off, ""), json!({"access": false, "teacher": false}));
     assert_eq!(auth(&off, &format!("Cf-Access-Jwt-Assertion: {t}\r\n")), json!({"access": false, "teacher": false}));
     let _ = fs::remove_dir_all(&d);
+}
+
+#[test]
+fn kahoot_home_signin_any_time() {
+    let a = app();
+    let code = empty_class(&a);
+    let id = join_approved(&a, &code, "Noa B.");
+    assert!(try_pic(&a, &code, id, 11, NOW, "/api/pick").starts_with("HTTP/1.1 200"));
+    http(&a, &teacher("POST", &format!("/api/classes/{code}/join"), r#"{"open":false}"#), NOW);
+    // Days later, from home, joining closed: the roster still lists her and her animal signs her in.
+    let later = NOW + 3 * 86400 + 7 * 3600;
+    assert_eq!(roster_names(&a, &code, later), ["Noa B."]);
+    assert!(join(&a, &code, "Stranger", later).starts_with("HTTP/1.1 403"));
+    assert!(try_pic(&a, &code, id, 11, later, "/api/signin").starts_with("HTTP/1.1 200"));
+    assert!(try_pic(&a, &code, id, 12, later, "/api/signin").starts_with("HTTP/1.1 401"));
+}
+
+#[test]
+fn kahoot_race_uses_approved_name() {
+    let a = app();
+    let code = empty_class(&a);
+    let id = join_approved(&a, &code, "noa b");
+    let token = body_of(&try_pic(&a, &code, id, 3, NOW, "/api/pick"))["token"].as_str().unwrap().to_string();
+    let out = http(&a, &race(&token, "nw-k", 2, 17), NOW);
+    assert!(out.starts_with("HTTP/1.1 200"), "{out}");
+    assert_eq!(body_of(&out)["n"], "Noa B.");
+    let line = http(&a, &get("nw-k", "12h"), NOW);
+    let msg: Value = serde_json::from_str(body_of(&line)["message"].as_str().unwrap()).unwrap();
+    assert_eq!(msg, json!({"n": "Noa B.", "s": 17, "p": 2, "t": NOW * 1000}));
+    // The best stays in her record.
+    http(&a, &race(&token, "nw-k", 2, 5), NOW);
+    let me = body_of(&http(&a, &req("GET", "/api/me", &format!("Authorization: Bearer {token}\r\n"), ""), NOW));
+    assert_eq!(me["races"]["nw-k"], 17);
+    // No sign-in, no score; a free name through the open board is refused; a reset marker and a plain message pass.
+    assert!(http(&a, &race("nope", "nw-k", 2, 99), NOW).starts_with("HTTP/1.1 401"));
+    let out = http(&a, &post("nw-k", r#"{"n":"Hacker","s":99,"p":2,"t":1}"#), NOW);
+    assert!(out.starts_with("HTTP/1.1 403"), "{out}");
+    assert!(!http(&a, &get("nw-k", "12h"), NOW).contains("Hacker"));
+    assert!(http(&a, &post("nw-k", r#"{"reset":1,"t":1}"#), NOW).starts_with("HTTP/1.1 200"));
+    assert!(http(&a, &race(&token, "bad topic!", 2, 5), NOW).starts_with("HTTP/1.1 400"));
+}
+
+#[test]
+fn kahoot_duplicate_refused() {
+    let a = app();
+    let code = empty_class(&a);
+    // A name waiting for the teacher: the same name again (any case, with or without the dot) is taken.
+    assert!(join(&a, &code, "Noa B.", NOW).starts_with("HTTP/1.1 200"));
+    for again in ["Noa B.", "noa b", "NOA B"] {
+        let out = join(&a, &code, again, NOW);
+        assert!(out.starts_with("HTTP/1.1 409"), "{again} while pending: {out}");
+    }
+    // Approved: still taken.
+    let r = body_of(&http(&a, &teacher("GET", &format!("/api/classes/{code}/students"), ""), NOW));
+    let id = r["students"][0]["id"].as_i64().unwrap();
+    assert!(http(&a, &teacher("POST", &format!("/api/students/{id}/approve"), ""), NOW).starts_with("HTTP/1.1 200"));
+    let out = join(&a, &code, "Noa B.", NOW);
+    assert!(out.starts_with("HTTP/1.1 409"), "after approval: {out}");
+    // Only one Noa B. in the class, and another class may have its own.
+    assert_eq!(roster_names(&a, &code, NOW), ["Noa B."]);
+    let other = empty_class(&a);
+    assert!(join(&a, &other, "Noa B.", NOW).starts_with("HTTP/1.1 200"));
+}
+
+#[test]
+fn race_anonymous_entry_refused() {
+    let a = app();
+    // A board line with a free-typed name, posted straight to the open board, is refused and never shown.
+    for body in [r#"{"n":"Anyone","s":12,"p":1,"t":1}"#, r#"{"n":"","s":1}"#, r#"{"s":3,"n":"X"}"#] {
+        let out = http(&a, &post("nw-anon", body), NOW);
+        assert!(out.starts_with("HTTP/1.1 403"), "{body}: {out}");
+    }
+    assert!(!http(&a, &get("nw-anon", "12h"), NOW).contains("Anyone"));
+    // The teacher's reset marker still goes through.
+    assert!(http(&a, &post("nw-anon", r#"{"reset":1,"t":1}"#), NOW).starts_with("HTTP/1.1 200"));
 }
