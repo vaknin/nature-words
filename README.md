@@ -14,5 +14,6 @@ every kid on his own laptop through Google Classroom, with three trails of diffe
   [#level-2](https://vaknin.github.io/nature-words/#level-2) Forest ·
   [#level-3](https://vaknin.github.io/nature-words/#level-3) Mountain
 - Research behind it: [research/](research/) · design mockup: https://vaknin.github.io/nature-words/mockup/
+- **Design notes:** [design/](design/) (the lesson design, the design review and its screenshots; the shared screen rules are in [DESIGN.md](DESIGN.md))
 
 Test: `cd test && npm install && timeout 400 node smoke.mjs [URL]` (touch emulated, both laptop sizes and the two-laptop race board at once; never the class board). Design screens: `node design.mjs all [URL]`.
